@@ -33,7 +33,9 @@ This project contains stable contracts that both HTTP hosts may reference.
 - `Identity/TokenResponse.cs` — models the access token and its explicit UTC expiry.
 - `Results/ErrorType.cs` — classifies failures without introducing HTTP concerns into lower layers.
 - `Results/Error.cs` — carries stable machine and human-readable failure information.
-- `Results/Result.cs` — makes success/failure explicit and prevents exception-driven expected control flow.
+- `Results/Errors.cs` — centralizes consistently coded validation, common, authentication, and authorization errors.
+- `Results/Result.cs` — represents value-free success/failure without exception-driven business control flow.
+- `Results/ResultT.cs` — represents generic success values or explicit failures in a separate immutable type.
 
 ## LearningPortal.Application
 

@@ -25,7 +25,7 @@ public sealed class CreateCourseCommandHandler(
 
         logger.LogInformation("Created course {CourseId} with title {CourseTitle}.", course.Id, course.Title);
 
-        return Result.Success(new CourseDto(
+        return Result<CourseDto>.Success(new CourseDto(
             course.Id,
             course.Title,
             course.Description,

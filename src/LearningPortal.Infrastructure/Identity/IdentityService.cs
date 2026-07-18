@@ -32,9 +32,7 @@ public sealed class IdentityService(
 
         if (user is null || signInResult?.Succeeded != true)
         {
-            return Result.Failure<TokenResponse>(Error.Unauthorized(
-                "Identity.InvalidCredentials",
-                "The email address or password is incorrect."));
+            return Result<TokenResponse>.Failure(Errors.Authentication.InvalidCredentials());
         }
 
         var jwtOptions = options.Value;
@@ -61,7 +59,7 @@ public sealed class IdentityService(
             expires: expiresAt.UtcDateTime,
             signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
 
-        return Result.Success(new TokenResponse(
+        return Result<TokenResponse>.Success(new TokenResponse(
             new JwtSecurityTokenHandler().WriteToken(token),
             expiresAt));
     }

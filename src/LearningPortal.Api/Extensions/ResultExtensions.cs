@@ -12,13 +12,14 @@ public static class ResultExtensions
     /// <summary>Converts an error into an RFC 7807 response.</summary>
     public static IResult ToProblem(this Error error)
     {
-        var statusCode = error.Type switch
+        var statusCode = error.ErrorType switch
         {
             ErrorType.Validation => StatusCodes.Status400BadRequest,
             ErrorType.NotFound => StatusCodes.Status404NotFound,
             ErrorType.Conflict => StatusCodes.Status409Conflict,
             ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
             ErrorType.Forbidden => StatusCodes.Status403Forbidden,
+            ErrorType.Unexpected => StatusCodes.Status500InternalServerError,
             _ => StatusCodes.Status500InternalServerError
         };
 

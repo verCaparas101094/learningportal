@@ -1,18 +1,28 @@
 namespace LearningPortal.Shared.Results;
 
-/// <summary>Describes the HTTP-neutral category of an application error.</summary>
+/// <summary>
+/// Defines transport-independent categories for application errors.
+/// </summary>
 public enum ErrorType
 {
-    /// <summary>A validation rule was violated.</summary>
+    /// <summary>Indicates that one or more input values are invalid.</summary>
     Validation,
-    /// <summary>The requested resource was not found.</summary>
+
+    /// <summary>Indicates that a requested resource does not exist.</summary>
     NotFound,
-    /// <summary>The operation conflicts with current state.</summary>
+
+    /// <summary>Indicates that the operation conflicts with existing state.</summary>
     Conflict,
-    /// <summary>The caller is not authenticated.</summary>
+
+    /// <summary>Indicates that authentication is required or has failed.</summary>
     Unauthorized,
-    /// <summary>The caller lacks permission.</summary>
+
+    /// <summary>Indicates that the authenticated caller is not permitted to perform the operation.</summary>
     Forbidden,
-    /// <summary>An unexpected failure occurred.</summary>
-    Failure
+
+    /// <summary>Indicates an expected application or business operation failure.</summary>
+    Failure,
+
+    /// <summary>Indicates an unexpected technical failure.</summary>
+    Unexpected
 }

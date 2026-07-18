@@ -20,6 +20,6 @@ public sealed class GetCoursesQueryHandler(IRepository<Course> repository)
             .Select(course => new CourseDto(course.Id, course.Title, course.Description, course.CreatedAtUtc))
             .ToArray();
 
-        return Result.Success<IReadOnlyList<CourseDto>>(models);
+        return Result<IReadOnlyList<CourseDto>>.Success(models);
     }
 }
