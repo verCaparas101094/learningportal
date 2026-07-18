@@ -1,5 +1,6 @@
 using System.Reflection;
-using LearningPortal.Api.ErrorHandling;
+using LearningPortal.Api.Extensions;
+using LearningPortal.Api.ProblemDetails;
 using Microsoft.OpenApi;
 
 namespace LearningPortal.Api;
@@ -23,8 +24,7 @@ public static class DependencyInjection
                 .AllowAnyHeader()
                 .AllowAnyMethod()));
 
-        services.AddProblemDetails();
-        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddSingleton<IApiProblemDetailsFactory, ApiProblemDetailsFactory>();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(options =>
         {
@@ -53,7 +53,8 @@ public static class DependencyInjection
     /// <summary>Configures the ordered API middleware pipeline.</summary>
     public static WebApplication UseApiPipeline(this WebApplication app)
     {
-        app.UseExceptionHandler();
+        app.UseCorrelationId();
+        app.UseExceptionHandling();
 
         if (app.Environment.IsDevelopment())
         {

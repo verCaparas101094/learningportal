@@ -74,11 +74,20 @@ This project is the Minimal API host and composition root.
 
 - `LearningPortal.Api.csproj` — references Application, Infrastructure, and Shared while hosting ASP.NET Core and Swagger.
 - `Program.cs` — builds logging/DI, orders middleware, maps endpoints, and exposes an integration-test entry point.
-- `DependencyInjection.cs` — centralizes API CORS, Problem Details, exception handling, Swagger, and pipeline registration.
+- `DependencyInjection.cs` — centralizes API CORS, Problem Details factory registration, Swagger, and ordered pipeline registration.
 - `Endpoints/IdentityEndpoints.cs` — maps the anonymous token endpoint to validation and the identity port.
 - `Endpoints/CourseEndpoints.cs` — maps protected course HTTP routes to CQRS handlers and Result responses.
 - `Endpoints/HealthEndpoints.cs` — exposes distinct liveness and SQL-backed readiness probes.
-- `ErrorHandling/GlobalExceptionHandler.cs` — logs unexpected failures and returns safe RFC 7807 responses with trace identifiers.
+- `Constants/CorrelationIdConstants.cs` — defines the shared request header and context-item keys used for correlation.
+- `Constants/ExceptionErrorCodes.cs` — defines stable machine-readable codes for exception mappings.
+- `Exceptions/NotFoundException.cs` — represents expected missing-resource failures at the API boundary.
+- `Exceptions/ConflictException.cs` — represents expected state-conflict failures at the API boundary.
+- `Exceptions/ForbiddenAccessException.cs` — represents expected authorization failures at the API boundary.
+- `Middleware/CorrelationIdMiddleware.cs` — accepts or creates a UUIDv7 correlation identifier and returns it on every response.
+- `Middleware/ExceptionHandlingMiddleware.cs` — maps unhandled exceptions to safe Result errors and RFC 7807 responses.
+- `ProblemDetails/IApiProblemDetailsFactory.cs` — abstracts consistent problem document creation for testability.
+- `ProblemDetails/ApiProblemDetailsFactory.cs` — centralizes status, title, type, trace, correlation, and error-code output.
+- `Extensions/MiddlewareExtensions.cs` — exposes explicit correlation and exception pipeline registration methods.
 - `Extensions/ResultExtensions.cs` — translates transport-neutral Result errors into appropriate HTTP status codes.
 - `Health/HealthResponseWriter.cs` — emits compact JSON health output for operators and orchestrators.
 - `appsettings.json` — contains safe defaults for SQL Server, JWT metadata, CORS, logging, and host filtering; its JWT secret is intentionally blank.
