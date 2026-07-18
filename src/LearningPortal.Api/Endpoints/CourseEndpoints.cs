@@ -1,4 +1,3 @@
-using FluentValidation;
 using LearningPortal.Api.Extensions;
 using LearningPortal.Application.Abstractions.Messaging;
 using LearningPortal.Application.Courses.Commands.CreateCourse;
@@ -27,7 +26,7 @@ public static class CourseEndpoints
             .WithName("CreateCourse")
             .WithSummary("Creates a course.")
             .Produces<CourseDto>(StatusCodes.Status201Created)
-            .ProducesValidationProblem();
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         return endpoints;
     }
@@ -42,18 +41,13 @@ public static class CourseEndpoints
 
     private static async Task<IResult> CreateCourseAsync(
         CreateCourseRequest request,
-        IValidator<CreateCourseCommand> validator,
-        ICommandHandler<CreateCourseCommand, Result<CourseDto>> handler,
+        ICommandDispatcher commandDispatcher,
         CancellationToken cancellationToken)
     {
         var command = new CreateCourseCommand(request.Title, request.Description);
-        var validation = await validator.ValidateAsync(command, cancellationToken);
-        if (!validation.IsValid)
-        {
-            return Results.ValidationProblem(validation.ToDictionary());
-        }
-
-        var result = await handler.HandleAsync(command, cancellationToken);
+        var result = await commandDispatcher.SendAsync<CreateCourseCommand, CourseDto>(
+            command,
+            cancellationToken);
         return result.IsSuccess
             ? Results.Created($"/api/courses/{result.Value.Id}", result.Value)
             : result.Error!.ToProblem();

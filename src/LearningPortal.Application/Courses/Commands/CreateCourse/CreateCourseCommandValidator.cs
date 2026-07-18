@@ -8,7 +8,12 @@ public sealed class CreateCourseCommandValidator : AbstractValidator<CreateCours
     /// <summary>Initializes course creation rules.</summary>
     public CreateCourseCommandValidator()
     {
-        RuleFor(command => command.Title).NotEmpty().MaximumLength(200);
-        RuleFor(command => command.Description).NotNull().MaximumLength(4_000);
+        RuleFor(command => command.Title)
+            .NotEmpty()
+            .MaximumLength(200);
+
+        RuleFor(command => command.Description)
+            .NotNull()
+            .MaximumLength(2_000);
     }
 }

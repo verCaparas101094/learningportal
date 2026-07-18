@@ -13,6 +13,21 @@ public static class Errors
     public static class Validation
     {
         /// <summary>
+        /// Creates an error containing one or more validation failure messages.
+        /// </summary>
+        /// <param name="message">The safe, aggregated validation message.</param>
+        /// <returns>A validation failure error.</returns>
+        public static Error Failed(string message)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(message);
+
+            return new Error(
+                "Validation.Failed",
+                message,
+                ErrorType.Validation);
+        }
+
+        /// <summary>
         /// Creates an error indicating that a required field has no value.
         /// </summary>
         /// <param name="field">The field name used in the error code and message.</param>

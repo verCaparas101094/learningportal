@@ -45,7 +45,9 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 - `DependencyInjection.cs` — is the Application composition extension for handlers and FluentValidation validators.
 - `Abstractions/Identity/IIdentityService.cs` — keeps authentication use cases independent from ASP.NET Identity implementation types.
 - `Abstractions/Messaging/ICommand.cs` — marks state-changing CQRS messages.
+- `Abstractions/Messaging/ICommandDispatcher.cs` — dispatches Result-based commands through custom pipeline components without MediatR.
 - `Abstractions/Messaging/ICommandHandler.cs` — defines asynchronous command execution for dependency injection and testing.
+- `Abstractions/Messaging/ICommandPipelineBehavior.cs` — defines composable pre/post-handler behavior and its asynchronous continuation delegate.
 - `Abstractions/Messaging/IQuery.cs` — marks read-only CQRS messages.
 - `Abstractions/Messaging/IQueryHandler.cs` — defines asynchronous query execution for dependency injection and testing.
 - `Courses/Commands/CreateCourse/CreateCourseCommand.cs` — is the Application-layer request to create a course.
@@ -54,6 +56,8 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 - `Courses/Queries/GetCourses/GetCoursesQuery.cs` — represents the read-side request for the course catalog.
 - `Courses/Queries/GetCourses/GetCoursesQueryHandler.cs` — loads aggregates and projects them to shared DTOs without leaking EF entities.
 - `Identity/LoginRequestValidator.cs` — validates login transport input before accessing the Identity store.
+- `Behaviors/ValidationBehavior.cs` — runs all command validators before handlers and returns failed Results instead of throwing.
+- `Messaging/CommandDispatcher.cs` — resolves handlers and composes the registered custom command pipeline in deterministic order.
 
 ## LearningPortal.Infrastructure
 
