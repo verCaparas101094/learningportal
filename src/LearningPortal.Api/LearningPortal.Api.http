@@ -1,0 +1,14 @@
+@LearningPortal_Api_HostAddress = https://localhost:7081
+
+GET {{LearningPortal_Api_HostAddress}}/health/live
+Accept: application/json
+
+###
+
+POST {{LearningPortal_Api_HostAddress}}/api/auth/token
+Content-Type: application/json
+
+{
+  "email": "administrator@example.com",
+  "password": "replace-this-password"
+}

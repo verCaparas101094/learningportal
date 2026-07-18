@@ -1,0 +1,40 @@
+@page "/"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+@inject ILogger<Home> Logger
+
+<PageTitle>Learning Portal</PageTitle>
+
+<main class="portal-home">
+    <p class="eyebrow">ENTERPRISE LEARNING</p>
+    <h1>Learning Portal</h1>
+    <p class="lead">A secure foundation for courses, people, and measurable learning outcomes.</p>
+
+    <section class="status-card" aria-live="polite">
+        <span class="status-dot @(_apiAvailable ? "available" : string.Empty)"></span>
+        <div>
+            <strong>Platform API</strong>
+            <p>@_status</p>
+        </div>
+    </section>
+</main>
+
+@code {
+    private string _status = "Checking connectivity…";
+    private bool _apiAvailable;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var health = await ApiClient.GetHealthAsync();
+            _apiAvailable = string.Equals(health.Status, "Healthy", StringComparison.OrdinalIgnoreCase);
+            _status = _apiAvailable ? "Available" : health.Status;
+        }
+        catch (HttpRequestException exception)
+        {
+            _status = "Unavailable";
+            Logger.LogWarning(exception, "The Learning Portal API health endpoint is unavailable.");
+        }
+    }
+}

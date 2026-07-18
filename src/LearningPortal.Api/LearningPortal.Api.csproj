@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\LearningPortal.Application\LearningPortal.Application.csproj" />
+    <ProjectReference Include="..\LearningPortal.Infrastructure\LearningPortal.Infrastructure.csproj" />
+    <ProjectReference Include="..\LearningPortal.Shared\LearningPortal.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <UserSecretsId>LearningPortal.Api-8b39db59-fd9e-4be0-a5f4-a57a0985b971</UserSecretsId>
+  </PropertyGroup>
+
+</Project>
