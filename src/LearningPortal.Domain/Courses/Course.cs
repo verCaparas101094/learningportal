@@ -1,4 +1,5 @@
 using LearningPortal.Domain.Common;
+using LearningPortal.Domain.Courses.Events;
 
 namespace LearningPortal.Domain.Courses;
 
@@ -36,6 +37,9 @@ public sealed class Course : AuditableEntity, ISoftDelete
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
         ArgumentNullException.ThrowIfNull(description);
 
-        return new Course(title.Trim(), description.Trim());
+        var course = new Course(title.Trim(), description.Trim());
+        course.AddDomainEvent(new CourseCreatedDomainEvent(course.Id, course.Title));
+
+        return course;
     }
 }

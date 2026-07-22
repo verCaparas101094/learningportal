@@ -24,6 +24,11 @@ public static class ModelBuilderExtensions
 
         foreach (var entityType in rootEntityTypes)
         {
+            if (typeof(Entity).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder.Entity(entityType.ClrType).Ignore(nameof(Entity.DomainEvents));
+            }
+
             if (typeof(AuditableEntity).IsAssignableFrom(entityType.ClrType))
             {
                 var entity = modelBuilder.Entity(entityType.ClrType);

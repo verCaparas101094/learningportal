@@ -17,10 +17,13 @@ This catalog explains why every source/configuration file in the generated solut
 This project is the dependency-free business core.
 
 - `LearningPortal.Domain.csproj` — declares the Domain assembly without framework or infrastructure dependencies.
-- `Common/Entity.cs` — provides the GUID identity shared by persisted domain entities.
+- `Common/Entity.cs` — provides GUID identity and an encapsulated in-memory domain-event collection for persisted entities.
+- `Common/Events/IDomainEvent.cs` — defines immutable identity and UTC occurrence metadata required by every domain event.
+- `Common/Events/DomainEvent.cs` — generates UUIDv7 event identifiers and UTC timestamps for derived domain facts.
 - `Common/AuditableEntity.cs` — provides interceptor-managed creation/update metadata and SQL Server rowversion state.
 - `Common/ISoftDelete.cs` — marks entities whose deletes must be retained with deletion audit metadata.
 - `Courses/Course.cs` — owns course state and construction invariants; it belongs under the course aggregate feature.
+- `Courses/Events/CourseCreatedDomainEvent.cs` — captures the course identifier and normalized title when a course is created.
 - `Repositories/IRepository.cs` — defines persistence behavior required by use cases without coupling Domain to EF Core.
 - `Repositories/IUnitOfWork.cs` — defines the transaction boundary used to commit aggregate changes atomically.
 
@@ -76,7 +79,7 @@ This project contains replaceable external-system implementations.
 - `Time/SystemClock.cs` — implements application time through the platform TimeProvider.
 - `Persistence/ApplicationDbContext.cs` — is the single EF Core unit of work for business aggregates and Identity tables.
 - `Persistence/Configurations/CourseConfiguration.cs` — keeps course SQL mapping, lengths, precision, and indexes outside the domain entity.
-- `Persistence/Extensions/ModelBuilderExtensions.cs` — applies audit, rowversion, soft-delete column, index, and global filter conventions.
+- `Persistence/Extensions/ModelBuilderExtensions.cs` — ignores in-memory domain events and applies audit, rowversion, soft-delete, index, and global-filter conventions.
 - `Persistence/Interceptors/AuditSaveChangesInterceptor.cs` — owns audit-field population and converts tracked deletes into soft deletes.
 - `Persistence/Repositories/Repository.cs` — implements the Domain repository contract with async EF Core operations and no-tracking reads.
 - `Migrations/20260722082720_DomainFoundation.cs` — deploys audit-user, soft-delete, rowversion, and soft-delete index columns.
