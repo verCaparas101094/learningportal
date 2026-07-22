@@ -17,7 +17,9 @@ This catalog explains why every source/configuration file in the generated solut
 This project is the dependency-free business core.
 
 - `LearningPortal.Domain.csproj` — declares the Domain assembly without framework or infrastructure dependencies.
-- `Common/Entity.cs` — centralizes entity identity and audit timestamps shared by domain aggregates.
+- `Common/Entity.cs` — provides the GUID identity shared by persisted domain entities.
+- `Common/AuditableEntity.cs` — provides interceptor-managed creation/update metadata and SQL Server rowversion state.
+- `Common/ISoftDelete.cs` — marks entities whose deletes must be retained with deletion audit metadata.
 - `Courses/Course.cs` — owns course state and construction invariants; it belongs under the course aggregate feature.
 - `Repositories/IRepository.cs` — defines persistence behavior required by use cases without coupling Domain to EF Core.
 - `Repositories/IUnitOfWork.cs` — defines the transaction boundary used to commit aggregate changes atomically.
@@ -44,6 +46,8 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 - `LearningPortal.Application.csproj` — references only Domain/Shared and application-level validation/logging abstractions.
 - `DependencyInjection.cs` — is the Application composition extension for handlers and FluentValidation validators.
 - `Abstractions/Identity/IIdentityService.cs` — keeps authentication use cases independent from ASP.NET Identity implementation types.
+- `Abstractions/Identity/ICurrentUserService.cs` — exposes authenticated user identity without coupling Application or Domain to HTTP.
+- `Abstractions/Time/ISystemClock.cs` — abstracts UTC time for deterministic auditing and tests.
 - `Abstractions/Messaging/ICommand.cs` — marks state-changing CQRS messages.
 - `Abstractions/Messaging/ICommandDispatcher.cs` — dispatches Result-based commands through custom pipeline components without MediatR.
 - `Abstractions/Messaging/ICommandHandler.cs` — defines asynchronous command execution for dependency injection and testing.
@@ -68,9 +72,16 @@ This project contains replaceable external-system implementations.
 - `Identity/ApplicationUser.cs` — extends the Identity persistence model with portal-specific user profile data.
 - `Identity/JwtOptions.cs` — provides strongly typed, startup-validated token settings.
 - `Identity/IdentityService.cs` — implements credential verification, lockout accounting, claims/role creation, and signed JWT issuance.
+- `Identity/CurrentUserService.cs` — resolves the GUID user identifier from the current authenticated HTTP principal.
+- `Time/SystemClock.cs` — implements application time through the platform TimeProvider.
 - `Persistence/ApplicationDbContext.cs` — is the single EF Core unit of work for business aggregates and Identity tables.
 - `Persistence/Configurations/CourseConfiguration.cs` — keeps course SQL mapping, lengths, precision, and indexes outside the domain entity.
+- `Persistence/Extensions/ModelBuilderExtensions.cs` — applies audit, rowversion, soft-delete column, index, and global filter conventions.
+- `Persistence/Interceptors/AuditSaveChangesInterceptor.cs` — owns audit-field population and converts tracked deletes into soft deletes.
 - `Persistence/Repositories/Repository.cs` — implements the Domain repository contract with async EF Core operations and no-tracking reads.
+- `Migrations/20260722082720_DomainFoundation.cs` — deploys audit-user, soft-delete, rowversion, and soft-delete index columns.
+- `Migrations/20260722082720_DomainFoundation.Designer.cs` — records EF Core metadata for the Domain Foundation migration.
+- `Migrations/ApplicationDbContextModelSnapshot.cs` — tracks the current database model used to calculate future migrations.
 
 ## LearningPortal.Api
 

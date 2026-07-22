@@ -1,9 +1,12 @@
 using System.Text;
 using LearningPortal.Application.Abstractions.Identity;
+using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
 using LearningPortal.Infrastructure.Persistence;
+using LearningPortal.Infrastructure.Persistence.Interceptors;
 using LearningPortal.Infrastructure.Persistence.Repositories;
+using LearningPortal.Infrastructure.Time;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,12 +27,20 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
-        services.AddDbContext<ApplicationDbContext>(options =>
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddSingleton<ISystemClock, SystemClock>();
+        services.AddScoped<AuditSaveChangesInterceptor>();
+
+        services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+        {
             options.UseSqlServer(connectionString, sqlServer =>
             {
                 sqlServer.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
                 sqlServer.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
-            }));
+            });
+            options.AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>());
+        });
 
         services.AddIdentityCore<ApplicationUser>(options =>
             {

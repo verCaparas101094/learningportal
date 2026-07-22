@@ -14,8 +14,6 @@ public sealed class CourseConfiguration : IEntityTypeConfiguration<Course>
         builder.HasKey(course => course.Id);
         builder.Property(course => course.Title).HasMaxLength(200).IsRequired();
         builder.Property(course => course.Description).HasMaxLength(4_000).IsRequired();
-        builder.Property(course => course.CreatedAtUtc).HasPrecision(0).IsRequired();
-        builder.Property(course => course.UpdatedAtUtc).HasPrecision(0);
         builder.HasIndex(course => course.Title);
     }
 }

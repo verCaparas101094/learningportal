@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using LearningPortal.Application.Abstractions.Identity;
+using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Shared.Identity;
 using LearningPortal.Shared.Results;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +16,7 @@ public sealed class IdentityService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     IOptions<JwtOptions> options,
-    TimeProvider timeProvider)
+    ISystemClock systemClock)
     : IIdentityService
 {
     /// <inheritdoc />
@@ -36,7 +37,7 @@ public sealed class IdentityService(
         }
 
         var jwtOptions = options.Value;
-        var now = timeProvider.GetUtcNow();
+        var now = systemClock.UtcNow;
         var expiresAt = now.AddMinutes(jwtOptions.ExpirationMinutes);
         var claims = new List<Claim>
         {

@@ -3,7 +3,7 @@ using LearningPortal.Domain.Common;
 namespace LearningPortal.Domain.Courses;
 
 /// <summary>Represents a learning course and protects its core invariants.</summary>
-public sealed class Course : Entity
+public sealed class Course : AuditableEntity, ISoftDelete
 {
     private Course()
     {
@@ -20,6 +20,15 @@ public sealed class Course : Entity
 
     /// <summary>Gets the course description.</summary>
     public string Description { get; private set; } = string.Empty;
+
+    /// <inheritdoc />
+    public bool IsDeleted { get; private set; }
+
+    /// <inheritdoc />
+    public DateTimeOffset? DeletedAtUtc { get; private set; }
+
+    /// <inheritdoc />
+    public Guid? DeletedBy { get; private set; }
 
     /// <summary>Creates a course after enforcing domain-level invariants.</summary>
     public static Course Create(string title, string description)

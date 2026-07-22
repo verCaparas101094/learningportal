@@ -1,6 +1,7 @@
 using LearningPortal.Domain.Courses;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
+using LearningPortal.Infrastructure.Persistence.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -19,5 +20,6 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        builder.ConfigureDomainFoundation();
     }
 }
