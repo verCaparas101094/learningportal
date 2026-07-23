@@ -162,14 +162,14 @@ This project is the interactive Blazor Web App host.
 - `Program.cs` — configures logging, middleware, static assets, server interactivity, and the host health endpoint.
 - `DependencyInjection.cs` — validates the API URL and registers Razor components, component authorization state, a typed HTTP client, and health checks.
 - `Models/ApiHealthResponse.cs` — models only the health payload consumed by the UI.
-- `Services/LearningPortalApiClient.cs` — encapsulates asynchronous HTTP access so components remain testable and presentation-focused.
+- `Services/LearningPortalApiClient.cs` — encapsulates health plus paginated user listing, enable/disable, and additive role-assignment API calls.
 - `Components/App.razor` — defines the HTML document shell, asset links, router output, and Blazor reconnect script.
 - `Components/Routes.razor` — owns authorization-aware route discovery, focus behavior, and the default layout.
 - `Components/RedirectToAccessDenied.razor` — redirects unauthenticated or unauthorized component navigation safely.
 - `Components/_Imports.razor` — centralizes authorization, layout, design-component, and framework namespaces.
 - `Components/Pages/Dashboard.razor` and `.css` — demonstrate the authenticated design system with static learning and course samples.
 - `Components/Pages/MyCourses.razor` — provides the scoped learner placeholder.
-- `Components/Pages/Users.razor` — provides the administrator-only user-management placeholder.
+- `Components/Pages/Users.razor` and `.css` — provide the administrator-only responsive user table, debounced search, pagination, account-state actions, and additive role panel.
 - `Components/Pages/AccessDenied.razor` and `.css` — explain unauthenticated and role-denied navigation.
 - `Components/Pages/Error.razor` — provides a safe host-level error page with a request identifier.
 - `Components/Pages/NotFound.razor` — provides the route-not-found experience.
