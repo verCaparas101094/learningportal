@@ -14,7 +14,9 @@ public sealed class CreateCourseCommandHandler(
     IUnitOfWork unitOfWork,
     ICurrentUserService currentUser,
     IUserManagementService userManagementService,
-    ILogger<CreateCourseCommandHandler> logger)
+    ILogger<CreateCourseCommandHandler> logger,
+    ISkillRepository? skillRepository = null,
+    IInstructorEligibilityRepository? eligibilityRepository = null)
     : ICommandHandler<CreateCourseCommand, Result<CourseResponse>>
 {
     /// <inheritdoc />
@@ -47,6 +49,23 @@ public sealed class CreateCourseCommandHandler(
             command.Category,
             command.ThumbnailUrl,
             instructorId.Value);
+        if (skillRepository is not null)
+        {
+            var skillSlug = SlugNormalizer.Normalize(command.Category);
+            var skill = await skillRepository.GetBySlugAsync(skillSlug, cancellationToken)
+                ?? await skillRepository.GetByNameAsync(command.Category, cancellationToken);
+            if (skill is null)
+            {
+                skill = Domain.Skills.Skill.Create(command.Category);
+                await skillRepository.AddAsync(skill, cancellationToken);
+            }
+            course.TrySetSkill(skill.Id);
+            if (eligibilityRepository is not null
+                && !await eligibilityRepository.IsEligibleAsync(instructorId.Value, skill.Id, cancellationToken))
+                return Result<CourseResponse>.Failure(Errors.Common.Failure(
+                    "InstructorEligibility.Required",
+                    "The assigned instructor is not eligible for the course skill."));
+        }
 
         await repository.AddAsync(course, cancellationToken);
         var persistenceError = await CoursePersistence.SaveAsync(unitOfWork, cancellationToken);

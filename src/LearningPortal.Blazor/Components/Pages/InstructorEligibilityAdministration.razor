@@ -1,0 +1,38 @@
+@page "/admin/instructor-eligibility"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Instructor eligibility administration | Learning Portal</PageTitle>
+<AuthenticatedContent Roles="Administrator">
+    <PageHeader Eyebrow="Administration" Title="Instructor eligibility"
+                Description="Review qualifications, recalculate results, and assign eligible instructors." />
+    @if (_message is not null) { <div class="feedback success">@_message</div> }
+    @if (_error is not null) { <div class="feedback error" role="alert">@_error</div> }
+    <section class="app-card">
+        <h2>Recalculate user</h2>
+        <input placeholder="User ID" @bind="_userIdText" />
+        <button disabled="@_saving" @onclick="RecalculateAsync">Recalculate</button>
+    </section>
+    <section class="app-card">
+        <h2>Eligible instructors by skill</h2>
+        <select @bind="_skillIdText" @bind:after="LoadEligibleAsync"><option value="">Select skill</option>@foreach(var skill in _skills){<option value="@skill.Id">@skill.Name</option>}</select>
+        @if (_eligible.Count == 0) { <EmptyState Title="No eligible instructors" Description="No enabled user currently qualifies for this skill." /> }
+        else { <table><thead><tr><th>Name</th><th>Best score</th><th>Qualified</th></tr></thead><tbody>@foreach(var item in _eligible){<tr><td>@item.DisplayName</td><td>@item.BestPercentage%</td><td>@item.QualifiedAtUtc.ToLocalTime().ToString("d")</td></tr>}</tbody></table> }
+    </section>
+    <section class="app-card">
+        <h2>Assign course instructor</h2>
+        <input placeholder="Course ID" @bind="_courseIdText" />
+        <select @bind="_instructorIdText"><option value="">Select eligible instructor</option>@foreach(var item in _eligible){<option value="@item.UserId">@item.DisplayName</option>}</select>
+        <button disabled="@_saving" @onclick="AssignAsync">Assign</button>
+    </section>
+</AuthenticatedContent>
+
+@code {
+    private IReadOnlyList<SkillResponse> _skills=[]; private IReadOnlyList<EligibleInstructorResponse> _eligible=[];
+    private string _userIdText="",_skillIdText="",_courseIdText="",_instructorIdText=""; private bool _saving;
+    private string? _error,_message;
+    protected override async Task OnInitializedAsync(){try{_skills=await ApiClient.GetSkillsAsync();}catch(ApiProblemException e){_error=e.Message;}}
+    private async Task LoadEligibleAsync(){_eligible=[];if(Guid.TryParse(_skillIdText,out var id)){try{_eligible=await ApiClient.GetEligibleInstructorsAsync(id);}catch(ApiProblemException e){_error=e.Message;}}}
+    private async Task RecalculateAsync(){if(!Guid.TryParse(_userIdText,out var id)){_error="Enter a valid user ID.";return;}_saving=true;try{await ApiClient.RecalculateInstructorEligibilityAsync(id);_message="Eligibility recalculated.";_error=null;}catch(ApiProblemException e){_error=e.Message;}finally{_saving=false;}}
+    private async Task AssignAsync(){if(!Guid.TryParse(_courseIdText,out var course)||!Guid.TryParse(_instructorIdText,out var instructor)){_error="Select a valid course and instructor.";return;}_saving=true;try{await ApiClient.AssignCourseInstructorAsync(course,new(instructor));_message="Instructor assigned.";_error=null;}catch(ApiProblemException e){_error=e.Message;}finally{_saving=false;}}
+}

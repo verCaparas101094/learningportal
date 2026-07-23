@@ -14,4 +14,5 @@ public sealed record CourseResponse(
     Guid? CreatedBy,
     DateTimeOffset? UpdatedAtUtc,
     Guid? UpdatedBy,
-    string RowVersion);
+    string RowVersion,
+    Guid? SkillId = null);

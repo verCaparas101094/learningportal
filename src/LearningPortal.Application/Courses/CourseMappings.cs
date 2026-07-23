@@ -18,7 +18,8 @@ internal static class CourseMappings
         course.CreatedBy,
         course.UpdatedAtUtc,
         course.UpdatedBy,
-        Convert.ToBase64String(course.RowVersion));
+        Convert.ToBase64String(course.RowVersion),
+        course.SkillId);
 
     public static CourseListItemResponse ToListItem(this Course course) => new(
         course.Id,
@@ -28,5 +29,6 @@ internal static class CourseMappings
         course.ThumbnailUrl,
         course.Status.ToString(),
         course.InstructorId,
-        course.CreatedAtUtc);
+        course.CreatedAtUtc,
+        course.SkillId);
 }

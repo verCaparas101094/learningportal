@@ -47,6 +47,8 @@ public sealed class Course : AuditableEntity, ISoftDelete
 
     /// <summary>Gets the assigned instructor identifier.</summary>
     public Guid InstructorId { get; private set; }
+    /// <summary>Gets the stable skill identifier used for instructor qualification.</summary>
+    public Guid? SkillId { get; private set; }
 
     /// <inheritdoc />
     public bool IsDeleted { get; private set; }
@@ -161,6 +163,22 @@ public sealed class Course : AuditableEntity, ISoftDelete
 
         Status = CourseStatus.Archived;
         AddDomainEvent(new CourseArchivedDomainEvent(Id));
+        return true;
+    }
+
+    /// <summary>Associates the course with a stable skill.</summary>
+    public bool TrySetSkill(Guid skillId)
+    {
+        if (skillId == Guid.Empty || Status != CourseStatus.Draft) return false;
+        SkillId = skillId;
+        return true;
+    }
+
+    /// <summary>Assigns an eligible instructor.</summary>
+    public bool TryAssignInstructor(Guid instructorId)
+    {
+        if (instructorId == Guid.Empty || Status == CourseStatus.Archived) return false;
+        InstructorId = instructorId;
         return true;
     }
 

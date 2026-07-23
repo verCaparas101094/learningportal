@@ -13,7 +13,8 @@ public sealed class UpdateCourseCommandHandler(
     ICourseRepository repository,
     IUnitOfWork unitOfWork,
     ICurrentUserService currentUser,
-    ILogger<UpdateCourseCommandHandler> logger)
+    ILogger<UpdateCourseCommandHandler> logger,
+    ISkillRepository? skillRepository = null)
     : ICommandHandler<UpdateCourseCommand, Result<CourseResponse>>
 {
     /// <inheritdoc />
@@ -58,6 +59,18 @@ public sealed class UpdateCourseCommandHandler(
                 command.ThumbnailUrl))
         {
             return Result<CourseResponse>.Failure(Errors.CourseManagement.InvalidState("edited"));
+        }
+        if (skillRepository is not null)
+        {
+            var skillSlug = SlugNormalizer.Normalize(command.Category);
+            var skill = await skillRepository.GetBySlugAsync(skillSlug, cancellationToken)
+                ?? await skillRepository.GetByNameAsync(command.Category, cancellationToken);
+            if (skill is null)
+            {
+                skill = Domain.Skills.Skill.Create(command.Category);
+                await skillRepository.AddAsync(skill, cancellationToken);
+            }
+            course.TrySetSkill(skill.Id);
         }
 
         var persistenceError = await CoursePersistence.SaveAsync(unitOfWork, cancellationToken);

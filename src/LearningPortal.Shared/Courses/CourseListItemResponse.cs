@@ -9,4 +9,5 @@ public sealed record CourseListItemResponse(
     string? ThumbnailUrl,
     string Status,
     Guid InstructorId,
-    DateTimeOffset CreatedAtUtc);
+    DateTimeOffset CreatedAtUtc,
+    Guid? SkillId = null);

@@ -1,4 +1,5 @@
 using LearningPortal.Domain.Courses;
+using LearningPortal.Domain.Skills;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -34,6 +35,8 @@ public sealed class CourseConfiguration : IEntityTypeConfiguration<Course>
         builder.HasIndex(course => course.Status);
         builder.HasIndex(course => course.InstructorId);
         builder.HasIndex(course => course.Category);
+        builder.HasOne<Skill>().WithMany().HasForeignKey(course => course.SkillId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(course => course.SkillId);
         builder.HasIndex(course => course.CreatedAtUtc);
     }
 }

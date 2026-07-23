@@ -23,6 +23,10 @@ public sealed class Quiz : AuditableEntity
     public int? MaximumAttempts { get; private set; }
     /// <summary>Gets whether passing blocks course completion.</summary>
     public bool IsRequiredForCourseCompletion { get; private set; }
+    /// <summary>Gets whether this quiz can qualify instructors.</summary>
+    public bool IsInstructorAssessment { get; private set; }
+    /// <summary>Gets the skill qualified by this assessment.</summary>
+    public Guid? SkillId { get; private set; }
     /// <summary>Gets the lifecycle state.</summary>
     public QuizStatus Status { get; private set; } = QuizStatus.Draft;
     /// <summary>Gets ordered quiz questions.</summary>
@@ -67,4 +71,13 @@ public sealed class Quiz : AuditableEntity
     }
     /// <summary>Archives a published quiz.</summary>
     public bool TryArchive() { if (Status == QuizStatus.Archived) return true; if (Status != QuizStatus.Published) return false; Status = QuizStatus.Archived; return true; }
+
+    /// <summary>Configures a draft as an instructor assessment for one skill.</summary>
+    public bool TryConfigureInstructorAssessment(bool isAssessment, Guid? skillId)
+    {
+        if (Status != QuizStatus.Draft || (isAssessment && (skillId is null || skillId == Guid.Empty))) return false;
+        IsInstructorAssessment = isAssessment;
+        SkillId = isAssessment ? skillId : null;
+        return true;
+    }
 }

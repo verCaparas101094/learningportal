@@ -13,6 +13,7 @@
         <label>Passing percentage <input type="number" min="1" max="100" @bind="_passing" /></label>
         <label>Maximum attempts <input type="number" min="1" @bind="_maximumAttempts" /></label>
         <label><input type="checkbox" @bind="_required" /> Required for completion</label>
+        <label><input type="checkbox" @bind="_instructorAssessment" /> Qualifying instructor assessment</label>
         <button class="button button-primary" @onclick="SaveQuizAsync">Save draft</button>
     </section>
     @foreach (var quiz in _quizzes)
@@ -59,13 +60,15 @@
     private decimal _passing = 80, _points = 1;
     private int? _maximumAttempts;
     private bool _required;
+    private bool _instructorAssessment;
+    private CourseResponse? _course;
     private Guid? _questionQuizId, _editingQuestionId;
     private string? _error;
     private readonly List<ChoiceModel> _choices = [new(), new()];
     protected override Task OnParametersSetAsync() => LoadAsync();
-    private async Task LoadAsync() { try { _quizzes = await ApiClient.GetCourseQuizzesAsync(CourseId); } catch (ApiProblemException e) { _error = e.Message; } }
-    private void Edit(QuizAdministrationResponse quiz) { _editing=quiz; _title=quiz.Title; _description=quiz.Description; _passing=quiz.PassingPercentage; _maximumAttempts=quiz.MaximumAttempts; _required=quiz.IsRequired; }
-    private async Task SaveQuizAsync() { try { var request=new SaveQuizRequest(null,_title,_description,_passing,_maximumAttempts,_required); if(_editing is null) await ApiClient.CreateQuizAsync(CourseId,request); else await ApiClient.UpdateQuizAsync(_editing.Id,request); _editing=null; await LoadAsync(); } catch(ApiProblemException e){_error=e.Message;} }
+    private async Task LoadAsync() { try { _course=await ApiClient.GetCourseByIdAsync(CourseId); _quizzes = await ApiClient.GetCourseQuizzesAsync(CourseId); } catch (ApiProblemException e) { _error = e.Message; } }
+    private void Edit(QuizAdministrationResponse quiz) { _editing=quiz; _title=quiz.Title; _description=quiz.Description; _passing=quiz.PassingPercentage; _maximumAttempts=quiz.MaximumAttempts; _required=quiz.IsRequired; _instructorAssessment=quiz.IsInstructorAssessment; }
+    private async Task SaveQuizAsync() { try { var request=new SaveQuizRequest(null,_title,_description,_passing,_maximumAttempts,_required,_instructorAssessment,_instructorAssessment?_course?.SkillId:null); if(_editing is null) await ApiClient.CreateQuizAsync(CourseId,request); else await ApiClient.UpdateQuizAsync(_editing.Id,request); _editing=null; await LoadAsync(); } catch(ApiProblemException e){_error=e.Message;} }
     private void SelectQuestionEditor(QuizAdministrationResponse quiz) { _questionQuizId=quiz.Id; _editingQuestionId=null; _questionText=string.Empty; _questionType="SingleChoice"; _points=1; _choices.Clear(); _choices.Add(new()); _choices.Add(new()); }
     private void EditQuestion(QuizAdministrationResponse quiz, QuizAdminQuestionResponse question) { _questionQuizId=quiz.Id; _editingQuestionId=question.Id; _questionText=question.Text; _questionType=question.QuestionType; _points=question.Points; _choices.Clear(); _choices.AddRange(question.Choices.Select(x=>new ChoiceModel{Text=x.Text,IsCorrect=x.IsCorrect})); }
     private void AddChoice() => _choices.Add(new());
