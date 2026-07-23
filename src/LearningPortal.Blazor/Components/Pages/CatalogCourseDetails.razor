@@ -1,6 +1,7 @@
 @page "/catalog/{Slug}"
 @rendermode InteractiveServer
 @inject LearningPortalApiClient ApiClient
+@inject NavigationManager Navigation
 
 <PageTitle>Course Details | Learning Portal</PageTitle>
 @if (_loading) { <LoadingState Message="Loading course details…" /> }
@@ -12,8 +13,7 @@ else if (_course is not null)
             @if (_course.CanEnroll) { <button class="button button-primary" disabled="@_mutating" @onclick="EnrollAsync">Enroll</button> }
             else if (_course.CanContinue)
             {
-                <button class="button button-primary" disabled
-                        title="Course content is not available yet">Continue learning</button>
+                <button class="button button-primary" disabled="@_mutating" @onclick="ContinueAsync">Continue learning</button>
                 <button class="button button-danger" disabled="@_mutating" @onclick="OpenWithdraw">Withdraw</button>
             }
         </Actions>
@@ -76,5 +76,11 @@ else if (_course is not null)
         }
         catch (ApiProblemException exception) { _error = exception.Message; }
         finally { _mutating = false; }
+    }
+    private async Task ContinueAsync()
+    {
+        if (_course?.EnrollmentId is not Guid id) return; _mutating = true;
+        try { var destination = await ApiClient.GetContinueLearningAsync(id); if (destination is null) _error = "This course has no published lessons yet."; else Navigation.NavigateTo($"/learn/{destination.CourseSlug}/lessons/{destination.LessonId}"); }
+        catch (ApiProblemException exception) { _error = exception.Message; } finally { _mutating = false; }
     }
 }
