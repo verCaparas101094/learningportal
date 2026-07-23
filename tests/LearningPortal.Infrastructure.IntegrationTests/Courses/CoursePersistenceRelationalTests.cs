@@ -15,7 +15,7 @@ public sealed class CoursePersistenceRelationalTests(
 {
     /// <summary>Verifies filtered slug uniqueness and exclusion of deleted courses.</summary>
     [SqlServerFact]
-    public async Task FilteredSlugIndex_AllowsReuseOnlyAfterSoftDelete()
+    public async Task SlugUniqueIndexViolation_IsTranslatedAndAllowsReuseAfterSoftDelete()
     {
         await fixture.EnsureInitializedAsync();
         var instructorId = Guid.CreateVersion7();
@@ -35,8 +35,9 @@ public sealed class CoursePersistenceRelationalTests(
         {
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             await context.Courses.AddAsync(CreateCourse(instructorId, slug));
-            await Assert.ThrowsAsync<DuplicateCourseSlugException>(
+            var exception = await Assert.ThrowsAsync<DuplicateCourseSlugException>(
                 () => context.SaveChangesAsync());
+            Assert.IsType<DbUpdateException>(exception.InnerException);
         }
 
         await using (var scope = fixture.CreateScope())

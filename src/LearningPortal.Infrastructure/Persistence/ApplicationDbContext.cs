@@ -2,6 +2,7 @@ using LearningPortal.Domain.Courses;
 using LearningPortal.Domain.Courses.Exceptions;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
+using LearningPortal.Infrastructure.Persistence.Configurations;
 using LearningPortal.Infrastructure.Persistence.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -43,10 +44,16 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             throw new CourseConcurrencyException(exception);
         }
         catch (DbUpdateException exception)
-            when (exception.Entries.Any(entry => entry.Entity is Course)
-                  && exception.InnerException is SqlException { Number: 2601 or 2627 })
+            when (IsCourseSlugUniqueIndexViolation(exception))
         {
             throw new DuplicateCourseSlugException(exception);
         }
     }
+
+    private static bool IsCourseSlugUniqueIndexViolation(DbUpdateException exception) =>
+        exception.Entries.Any(entry => entry.Entity is Course)
+        && exception.InnerException is SqlException { Number: 2601 or 2627 } sqlException
+        && sqlException.Message.Contains(
+            CourseConfiguration.SlugUniqueIndexName,
+            StringComparison.OrdinalIgnoreCase);
 }

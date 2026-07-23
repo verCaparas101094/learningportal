@@ -7,6 +7,8 @@ namespace LearningPortal.Infrastructure.Persistence.Configurations;
 /// <summary>Defines SQL Server course mapping.</summary>
 public sealed class CourseConfiguration : IEntityTypeConfiguration<Course>
 {
+    internal const string SlugUniqueIndexName = "IX_Courses_Slug";
+
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Course> builder)
     {
@@ -26,6 +28,7 @@ public sealed class CourseConfiguration : IEntityTypeConfiguration<Course>
         builder.Property(course => course.RowVersion).IsRowVersion().IsConcurrencyToken();
 
         builder.HasIndex(course => course.Slug)
+            .HasDatabaseName(SlugUniqueIndexName)
             .IsUnique()
             .HasFilter("[IsDeleted] = 0");
         builder.HasIndex(course => course.Status);
