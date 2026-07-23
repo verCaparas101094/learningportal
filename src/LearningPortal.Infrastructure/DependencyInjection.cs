@@ -35,15 +35,12 @@ public static class DependencyInjection
         services.AddSingleton<ISystemClock, SystemClock>();
         services.AddScoped<AuditSaveChangesInterceptor>();
 
+        services.AddDbContextFactory<ApplicationDbContext>(
+            (serviceProvider, options) =>
+                ConfigureApplicationDbContext(serviceProvider, options, connectionString),
+            ServiceLifetime.Scoped);
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
-        {
-            options.UseSqlServer(connectionString, sqlServer =>
-            {
-                sqlServer.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-                sqlServer.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
-            });
-            options.AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>());
-        });
+            ConfigureApplicationDbContext(serviceProvider, options, connectionString));
 
         services.AddIdentityCore<ApplicationUser>(options =>
             {
@@ -104,5 +101,18 @@ public static class DependencyInjection
         services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("sql-server", tags: ["ready"]);
 
         return services;
+    }
+
+    private static void ConfigureApplicationDbContext(
+        IServiceProvider serviceProvider,
+        DbContextOptionsBuilder options,
+        string connectionString)
+    {
+        options.UseSqlServer(connectionString, sqlServer =>
+        {
+            sqlServer.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            sqlServer.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+        });
+        options.AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>());
     }
 }

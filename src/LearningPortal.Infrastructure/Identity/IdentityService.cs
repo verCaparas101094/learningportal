@@ -20,6 +20,7 @@ public sealed class IdentityService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     ApplicationDbContext dbContext,
+    IDbContextFactory<ApplicationDbContext> dbContextFactory,
     IAccessTokenGenerator accessTokenGenerator,
     IRefreshTokenProtector refreshTokenProtector,
     IClientIpAddressProvider clientIpAddressProvider,
@@ -83,127 +84,18 @@ public sealed class IdentityService(
         }
 
         var tokenHash = refreshTokenProtector.Hash(refreshToken);
-        IDbContextTransaction? transaction = null;
+        var executionStrategy = dbContext.Database.CreateExecutionStrategy();
 
         try
         {
-            if (dbContext.Database.IsRelational())
-            {
-                transaction = await dbContext.Database.BeginTransactionAsync(
-                    IsolationLevel.ReadCommitted,
-                    cancellationToken);
-            }
-
-            var storedToken = await dbContext.RefreshTokens
-                .SingleOrDefaultAsync(token => token.TokenHash == tokenHash, cancellationToken);
-
-            if (storedToken is null)
-            {
-                return Result<AuthenticationResponse>.Failure(Errors.Authentication.InvalidRefreshToken());
-            }
-
-            var utcNow = systemClock.UtcNow;
-            var clientIpAddress = clientIpAddressProvider.IpAddress;
-
-            if (storedToken.IsRevoked)
-            {
-                await RevokeAllActiveTokensAsync(
-                    storedToken.UserId,
-                    utcNow,
-                    clientIpAddress,
-                    cancellationToken);
-                await CommitAsync(transaction, cancellationToken);
-
-                logger.LogWarning(
-                    "Previously revoked refresh token presented for user {UserId}; active refresh tokens were revoked. Rotated: {WasRotated}.",
-                    storedToken.UserId,
-                    storedToken.ReplacedByTokenHash is not null);
-
-                var error = storedToken.ReplacedByTokenHash is not null
-                    ? Errors.Authentication.RefreshTokenReused()
-                    : Errors.Authentication.RefreshTokenRevoked();
-                return Result<AuthenticationResponse>.Failure(error);
-            }
-
-            if (storedToken.IsExpired(utcNow))
-            {
-                storedToken.Revoke(utcNow, clientIpAddress);
-                await dbContext.SaveChangesAsync(cancellationToken);
-                await CommitAsync(transaction, cancellationToken);
-                return Result<AuthenticationResponse>.Failure(Errors.Authentication.RefreshTokenExpired());
-            }
-
-            var user = await userManager.FindByIdAsync(storedToken.UserId.ToString());
-            var userError = await ValidateRefreshUserAsync(user, storedToken, cancellationToken);
-
-            if (userError is not null)
-            {
-                await RevokeAllActiveTokensAsync(
-                    storedToken.UserId,
-                    utcNow,
-                    clientIpAddress,
-                    cancellationToken);
-                await CommitAsync(transaction, cancellationToken);
-                return Result<AuthenticationResponse>.Failure(userError);
-            }
-
-            var authenticatedUser = user!;
-            var replacementMaterial = refreshTokenProtector.Generate();
-            var replacementExpiresAtUtc = utcNow.AddDays(options.Value.RefreshTokenExpirationDays);
-            var replacement = RefreshToken.Create(
-                authenticatedUser.Id,
-                replacementMaterial.TokenHash,
-                storedToken.SecurityStampHash,
-                clientIpAddress,
-                utcNow,
-                replacementExpiresAtUtc);
-            var accessToken = await accessTokenGenerator.GenerateAsync(authenticatedUser, cancellationToken);
-
-            storedToken.Rotate(replacementMaterial.TokenHash, utcNow, clientIpAddress);
-            await dbContext.RefreshTokens.AddAsync(replacement, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            await CommitAsync(transaction, cancellationToken);
-
-            logger.LogInformation("Rotated refresh token for user {UserId}.", authenticatedUser.Id);
-            return Result<AuthenticationResponse>.Success(new AuthenticationResponse(
-                accessToken.Token,
-                accessToken.ExpiresAtUtc,
-                replacementMaterial.RawToken,
-                replacementExpiresAtUtc));
+            return await executionStrategy.ExecuteAsync(
+                tokenHash,
+                ExecuteRefreshRotationAsync,
+                cancellationToken);
         }
         catch (DbUpdateConcurrencyException exception)
         {
-            if (transaction is not null)
-            {
-                await transaction.RollbackAsync(cancellationToken);
-            }
-
-            dbContext.ChangeTracker.Clear();
-            var replayedToken = await dbContext.RefreshTokens
-                .AsNoTracking()
-                .SingleOrDefaultAsync(token => token.TokenHash == tokenHash, cancellationToken);
-
-            if (replayedToken is not null)
-            {
-                await RevokeAllActiveTokensAsync(
-                    replayedToken.UserId,
-                    systemClock.UtcNow,
-                    clientIpAddressProvider.IpAddress,
-                    cancellationToken);
-                logger.LogWarning(
-                    exception,
-                    "Concurrent refresh-token rotation detected for user {UserId}; active refresh tokens were revoked.",
-                    replayedToken.UserId);
-            }
-
-            return Result<AuthenticationResponse>.Failure(Errors.Authentication.RefreshTokenReused());
-        }
-        finally
-        {
-            if (transaction is not null)
-            {
-                await transaction.DisposeAsync();
-            }
+            return await HandleRefreshReplayAsync(tokenHash, exception, cancellationToken);
         }
     }
 
@@ -311,21 +203,195 @@ public sealed class IdentityService(
     private Task<bool> PasswordMatchesAsync(ApplicationUser user, string password) =>
         userManager.CheckPasswordAsync(user, password);
 
+    private async Task<Result<AuthenticationResponse>> ExecuteRefreshRotationAsync(
+        string tokenHash,
+        CancellationToken cancellationToken)
+    {
+        dbContext.ChangeTracker.Clear();
+        IDbContextTransaction? transaction = null;
+
+        try
+        {
+            if (dbContext.Database.IsRelational())
+            {
+                transaction = await dbContext.Database.BeginTransactionAsync(
+                    IsolationLevel.ReadCommitted,
+                    cancellationToken);
+            }
+
+            var storedToken = await dbContext.RefreshTokens
+                .SingleOrDefaultAsync(token => token.TokenHash == tokenHash, cancellationToken);
+
+            if (storedToken is null)
+            {
+                return Result<AuthenticationResponse>.Failure(Errors.Authentication.InvalidRefreshToken());
+            }
+
+            var utcNow = systemClock.UtcNow;
+            var clientIpAddress = clientIpAddressProvider.IpAddress;
+
+            if (storedToken.IsRevoked)
+            {
+                await RevokeAllActiveTokensAsync(
+                    dbContext,
+                    storedToken.UserId,
+                    utcNow,
+                    clientIpAddress,
+                    cancellationToken);
+                await CommitAsync(transaction, cancellationToken);
+
+                logger.LogWarning(
+                    "Previously revoked refresh token presented for user {UserId}; active refresh tokens were revoked. Rotated: {WasRotated}.",
+                    storedToken.UserId,
+                    storedToken.ReplacedByTokenHash is not null);
+
+                var error = storedToken.ReplacedByTokenHash is not null
+                    ? Errors.Authentication.RefreshTokenReused()
+                    : Errors.Authentication.RefreshTokenRevoked();
+                return Result<AuthenticationResponse>.Failure(error);
+            }
+
+            if (storedToken.IsExpired(utcNow))
+            {
+                storedToken.Revoke(utcNow, clientIpAddress);
+                await dbContext.SaveChangesAsync(cancellationToken);
+                await CommitAsync(transaction, cancellationToken);
+                return Result<AuthenticationResponse>.Failure(Errors.Authentication.RefreshTokenExpired());
+            }
+
+            var user = await userManager.FindByIdAsync(storedToken.UserId.ToString());
+            var userError = await ValidateRefreshUserAsync(user, storedToken, cancellationToken);
+
+            if (userError is not null)
+            {
+                await RevokeAllActiveTokensAsync(
+                    dbContext,
+                    storedToken.UserId,
+                    utcNow,
+                    clientIpAddress,
+                    cancellationToken);
+                await CommitAsync(transaction, cancellationToken);
+                return Result<AuthenticationResponse>.Failure(userError);
+            }
+
+            var authenticatedUser = user!;
+            var replacementMaterial = refreshTokenProtector.Generate();
+            var replacementExpiresAtUtc = utcNow.AddDays(options.Value.RefreshTokenExpirationDays);
+            var replacement = RefreshToken.Create(
+                authenticatedUser.Id,
+                replacementMaterial.TokenHash,
+                storedToken.SecurityStampHash,
+                clientIpAddress,
+                utcNow,
+                replacementExpiresAtUtc);
+            var accessToken = await accessTokenGenerator.GenerateAsync(authenticatedUser, cancellationToken);
+
+            storedToken.Rotate(replacementMaterial.TokenHash, utcNow, clientIpAddress);
+            await dbContext.RefreshTokens.AddAsync(replacement, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await CommitAsync(transaction, cancellationToken);
+
+            logger.LogInformation("Rotated refresh token for user {UserId}.", authenticatedUser.Id);
+            return Result<AuthenticationResponse>.Success(new AuthenticationResponse(
+                accessToken.Token,
+                accessToken.ExpiresAtUtc,
+                replacementMaterial.RawToken,
+                replacementExpiresAtUtc));
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (transaction is not null)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (transaction is not null)
+            {
+                await transaction.DisposeAsync();
+            }
+        }
+    }
+
+    private async Task<Result<AuthenticationResponse>> HandleRefreshReplayAsync(
+        string tokenHash,
+        DbUpdateConcurrencyException exception,
+        CancellationToken cancellationToken)
+    {
+        await using var recoveryContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var executionStrategy = recoveryContext.Database.CreateExecutionStrategy();
+        var replayedUserId = await executionStrategy.ExecuteAsync(
+            async retryCancellationToken =>
+            {
+                recoveryContext.ChangeTracker.Clear();
+                IDbContextTransaction? transaction = null;
+
+                try
+                {
+                    if (recoveryContext.Database.IsRelational())
+                    {
+                        transaction = await recoveryContext.Database.BeginTransactionAsync(
+                            IsolationLevel.ReadCommitted,
+                            retryCancellationToken);
+                    }
+
+                    var replayedToken = await recoveryContext.RefreshTokens
+                        .AsNoTracking()
+                        .SingleOrDefaultAsync(
+                            token => token.TokenHash == tokenHash,
+                            retryCancellationToken);
+
+                    if (replayedToken is not null)
+                    {
+                        await RevokeAllActiveTokensAsync(
+                            recoveryContext,
+                            replayedToken.UserId,
+                            systemClock.UtcNow,
+                            clientIpAddressProvider.IpAddress,
+                            retryCancellationToken);
+                        await recoveryContext.SaveChangesAsync(retryCancellationToken);
+                    }
+
+                    await CommitAsync(transaction, retryCancellationToken);
+                    return replayedToken?.UserId;
+                }
+                finally
+                {
+                    if (transaction is not null)
+                    {
+                        await transaction.DisposeAsync();
+                    }
+                }
+            },
+            cancellationToken);
+
+        logger.LogWarning(
+            exception,
+            "Concurrent refresh-token rotation detected for user {UserId}; active refresh tokens were revoked using a fresh database context.",
+            replayedUserId);
+
+        return Result<AuthenticationResponse>.Failure(Errors.Authentication.RefreshTokenReused());
+    }
+
     private static Task CommitAsync(
         IDbContextTransaction? transaction,
         CancellationToken cancellationToken) =>
         transaction?.CommitAsync(cancellationToken) ?? Task.CompletedTask;
 
-    private async Task RevokeAllActiveTokensAsync(
+    private static async Task RevokeAllActiveTokensAsync(
+        ApplicationDbContext context,
         Guid userId,
         DateTimeOffset revokedAtUtc,
         string revokedByIp,
         CancellationToken cancellationToken)
     {
-        var query = dbContext.RefreshTokens
+        var query = context.RefreshTokens
             .Where(token => token.UserId == userId && token.RevokedAtUtc == null);
 
-        if (dbContext.Database.IsRelational())
+        if (context.Database.IsRelational())
         {
             await query.ExecuteUpdateAsync(
                 setters => setters
@@ -341,7 +407,7 @@ public sealed class IdentityService(
             activeToken.Revoke(revokedAtUtc, revokedByIp);
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<int> RevokeByHashAsync(

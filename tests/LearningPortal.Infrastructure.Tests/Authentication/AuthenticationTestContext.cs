@@ -52,13 +52,17 @@ internal sealed class AuthenticationTestContext : IAsyncDisposable
     {
         var services = new ServiceCollection();
         var clock = new TestSystemClock(new DateTimeOffset(2026, 7, 23, 8, 0, 0, TimeSpan.Zero));
+        var databaseName = $"AuthenticationTests-{Guid.CreateVersion7()}";
 
         services.AddLogging();
         services.AddDataProtection();
         services.AddAuthentication();
         services.AddHttpContextAccessor();
+        services.AddDbContextFactory<ApplicationDbContext>(
+            options => options.UseInMemoryDatabase(databaseName),
+            ServiceLifetime.Scoped);
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseInMemoryDatabase($"AuthenticationTests-{Guid.CreateVersion7()}"));
+            options.UseInMemoryDatabase(databaseName));
         services.AddIdentityCore<ApplicationUser>(options =>
             {
                 options.User.RequireUniqueEmail = true;

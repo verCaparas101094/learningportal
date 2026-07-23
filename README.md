@@ -52,6 +52,23 @@ The full file-by-file placement rationale is in [docs/FILE_CATALOG.md](docs/FILE
 
 Swagger is available at `https://localhost:7081/swagger`, the Blazor host at `https://localhost:7080`, and API health probes at `/health/live` and `/health/ready`.
 
+## Tests
+
+Run the fast authentication service tests without Docker:
+
+```powershell
+dotnet test tests/LearningPortal.Infrastructure.Tests/LearningPortal.Infrastructure.Tests.csproj --configuration Release
+```
+
+The relational authentication suite uses an isolated SQL Server Testcontainer and is opt-in:
+
+```powershell
+$env:LEARNINGPORTAL_RUN_SQL_INTEGRATION_TESTS = "true"
+dotnet test tests/LearningPortal.Infrastructure.IntegrationTests/LearningPortal.Infrastructure.IntegrationTests.csproj --configuration Release
+```
+
+The integration fixture applies migrations only to its disposable container database. It never uses or migrates the configured application database.
+
 ## Production configuration
 
 Set `ConnectionStrings__DefaultConnection`, `Jwt__SigningKey`, `Jwt__Issuer`, `Jwt__Audience`, and `Cors__AllowedOrigins__0` through the deployment platform's secret/configuration provider. The base configuration deliberately contains no production JWT secret. Apply reviewed EF Core migrations during deployment rather than automatically mutating the database at application startup.

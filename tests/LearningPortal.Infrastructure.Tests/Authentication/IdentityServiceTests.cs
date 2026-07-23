@@ -155,7 +155,10 @@ public sealed class IdentityServiceTests
 
         Assert.True(result.IsFailure);
         Assert.Equal("Authentication.RefreshTokenExpired", result.Error?.Code);
-        Assert.True(token.IsRevoked);
+        context.DbContext.ChangeTracker.Clear();
+        var persistedToken = await context.DbContext.RefreshTokens
+            .SingleAsync(storedToken => storedToken.TokenHash == material.TokenHash);
+        Assert.True(persistedToken.IsRevoked);
     }
 
     /// <summary>Verifies that revocation succeeds repeatedly without revealing token existence.</summary>
