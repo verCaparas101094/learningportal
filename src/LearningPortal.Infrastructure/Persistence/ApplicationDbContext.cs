@@ -15,6 +15,9 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     /// <summary>Gets the course data set.</summary>
     public DbSet<Course> Courses => Set<Course>();
 
+    /// <summary>Gets the persisted hashed refresh tokens.</summary>
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {

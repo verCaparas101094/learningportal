@@ -37,10 +37,9 @@ The full file-by-file placement rationale is in [docs/FILE_CATALOG.md](docs/FILE
    dotnet user-secrets set "Jwt:SigningKey" "<at-least-32-random-bytes>" --project src/LearningPortal.Api
    ```
 
-3. Create and apply the first database migration:
+3. Apply the checked-in database migrations:
 
    ```powershell
-   dotnet ef migrations add InitialCreate --project src/LearningPortal.Infrastructure --startup-project src/LearningPortal.Api --output-dir Persistence/Migrations
    dotnet ef database update --project src/LearningPortal.Infrastructure --startup-project src/LearningPortal.Api
    ```
 

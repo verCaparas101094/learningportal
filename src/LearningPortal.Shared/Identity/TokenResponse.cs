@@ -1,6 +1,12 @@
 namespace LearningPortal.Shared.Identity;
 
-/// <summary>Represents a successfully issued bearer token.</summary>
+/// <summary>Represents a successfully issued access and refresh token pair.</summary>
 /// <param name="AccessToken">The signed JWT access token.</param>
-/// <param name="ExpiresAtUtc">The token expiry in UTC.</param>
-public sealed record TokenResponse(string AccessToken, DateTimeOffset ExpiresAtUtc);
+/// <param name="AccessTokenExpiresAtUtc">The access token expiry in UTC.</param>
+/// <param name="RefreshToken">The opaque refresh token returned only to the caller.</param>
+/// <param name="RefreshTokenExpiresAtUtc">The refresh token expiry in UTC.</param>
+public sealed record TokenResponse(
+    string AccessToken,
+    DateTimeOffset AccessTokenExpiresAtUtc,
+    string RefreshToken,
+    DateTimeOffset RefreshTokenExpiresAtUtc);

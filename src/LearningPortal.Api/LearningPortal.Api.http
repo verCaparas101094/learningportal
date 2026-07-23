@@ -5,10 +5,28 @@ Accept: application/json
 
 ###
 
-POST {{LearningPortal_Api_HostAddress}}/api/auth/token
+POST {{LearningPortal_Api_HostAddress}}/api/auth/login
 Content-Type: application/json
 
 {
   "email": "administrator@example.com",
   "password": "replace-this-password"
+}
+
+###
+
+POST {{LearningPortal_Api_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "replace-with-issued-refresh-token"
+}
+
+###
+
+POST {{LearningPortal_Api_HostAddress}}/api/auth/revoke
+Content-Type: application/json
+
+{
+  "refreshToken": "replace-with-issued-refresh-token"
 }

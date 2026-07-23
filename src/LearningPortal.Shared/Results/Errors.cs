@@ -145,6 +145,33 @@ public static class Errors
             "Authentication.InvalidCredentials",
             "The email address or password is incorrect.",
             ErrorType.Unauthorized);
+
+        /// <summary>
+        /// Creates an error for a refresh token that is unknown or malformed.
+        /// </summary>
+        /// <returns>An invalid refresh-token error.</returns>
+        public static Error InvalidRefreshToken() => new(
+            "Authentication.InvalidRefreshToken",
+            "The refresh token is invalid.",
+            ErrorType.Unauthorized);
+
+        /// <summary>
+        /// Creates an error for an expired refresh token.
+        /// </summary>
+        /// <returns>An expired refresh-token error.</returns>
+        public static Error RefreshTokenExpired() => new(
+            "Authentication.RefreshTokenExpired",
+            "The refresh token has expired.",
+            ErrorType.Unauthorized);
+
+        /// <summary>
+        /// Creates an error when a rotated refresh token is presented again.
+        /// </summary>
+        /// <returns>A refresh-token replay error.</returns>
+        public static Error RefreshTokenReused() => new(
+            "Authentication.RefreshTokenReused",
+            "The refresh token is no longer valid.",
+            ErrorType.Unauthorized);
     }
 
     /// <summary>

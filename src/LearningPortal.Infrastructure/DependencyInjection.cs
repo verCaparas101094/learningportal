@@ -65,6 +65,7 @@ public static class DependencyInjection
             .Validate(options => !string.IsNullOrWhiteSpace(options.Audience), "JWT audience is required.")
             .Validate(options => Encoding.UTF8.GetByteCount(options.SigningKey) >= 32, "JWT signing key must be at least 32 bytes.")
             .Validate(options => options.ExpirationMinutes is > 0 and <= 1_440, "JWT expiration must be between 1 and 1440 minutes.")
+            .Validate(options => options.RefreshTokenExpirationDays is > 0 and <= 90, "Refresh token expiration must be between 1 and 90 days.")
             .ValidateOnStart();
 
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
@@ -85,8 +86,8 @@ public static class DependencyInjection
                     IssuerSigningKey = signingKey,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromMinutes(1),
-                    NameClaimType = System.Security.Claims.ClaimTypes.Name,
-                    RoleClaimType = System.Security.Claims.ClaimTypes.Role
+                    NameClaimType = "name",
+                    RoleClaimType = "role"
                 };
             });
 
@@ -95,6 +96,8 @@ public static class DependencyInjection
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IAccessTokenGenerator, JwtAccessTokenGenerator>();
+        services.AddSingleton<IRefreshTokenProtector, RefreshTokenProtector>();
         services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("sql-server", tags: ["ready"]);
 
         return services;

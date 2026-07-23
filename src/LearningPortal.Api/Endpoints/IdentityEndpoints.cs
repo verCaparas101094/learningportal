@@ -1,42 +1,79 @@
-using FluentValidation;
 using LearningPortal.Api.Extensions;
-using LearningPortal.Application.Abstractions.Identity;
+using LearningPortal.Application.Abstractions.Messaging;
+using LearningPortal.Application.Authentication.Commands.Login;
+using LearningPortal.Application.Authentication.Commands.Refresh;
+using LearningPortal.Application.Authentication.Commands.Revoke;
 using LearningPortal.Shared.Identity;
 
 namespace LearningPortal.Api.Endpoints;
 
-/// <summary>Maps authentication endpoints.</summary>
+/// <summary>
+/// Maps authentication commands to anonymous Minimal API endpoints.
+/// </summary>
 public static class IdentityEndpoints
 {
-    /// <summary>Maps endpoints that issue access tokens.</summary>
+    /// <summary>
+    /// Maps login, refresh-token rotation, and refresh-token revocation endpoints.
+    /// </summary>
     public static IEndpointRouteBuilder MapIdentityEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/auth").WithTags("Authentication");
+        var group = endpoints.MapGroup("/api/auth")
+            .WithTags("Authentication")
+            .AllowAnonymous();
 
-        group.MapPost("/token", LoginAsync)
-            .AllowAnonymous()
-            .WithName("IssueAccessToken")
-            .WithSummary("Authenticates a user and returns a JWT access token.")
+        group.MapPost("/login", LoginAsync)
+            .WithName("Login")
+            .WithSummary("Authenticates a user and issues an access and refresh token pair.")
             .Produces<TokenResponse>()
-            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        group.MapPost("/refresh", RefreshAsync)
+            .WithName("RefreshToken")
+            .WithSummary("Rotates an active refresh token and issues a new token pair.")
+            .Produces<TokenResponse>()
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        group.MapPost("/revoke", RevokeAsync)
+            .WithName("RevokeRefreshToken")
+            .WithSummary("Revokes a refresh token.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
 
         return endpoints;
     }
 
     private static async Task<IResult> LoginAsync(
         LoginRequest request,
-        IValidator<LoginRequest> validator,
-        IIdentityService identityService,
+        ICommandDispatcher commandDispatcher,
         CancellationToken cancellationToken)
     {
-        var validation = await validator.ValidateAsync(request, cancellationToken);
-        if (!validation.IsValid)
-        {
-            return Results.ValidationProblem(validation.ToDictionary());
-        }
-
-        var result = await identityService.LoginAsync(request, cancellationToken);
+        var result = await commandDispatcher.SendAsync<LoginCommand, TokenResponse>(
+            new LoginCommand(request.Email, request.Password),
+            cancellationToken);
         return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> RefreshAsync(
+        RefreshTokenRequest request,
+        ICommandDispatcher commandDispatcher,
+        CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.SendAsync<RefreshTokenCommand, TokenResponse>(
+            new RefreshTokenCommand(request.RefreshToken),
+            cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> RevokeAsync(
+        RevokeTokenRequest request,
+        ICommandDispatcher commandDispatcher,
+        CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.SendAsync<RevokeRefreshTokenCommand, bool>(
+            new RevokeRefreshTokenCommand(request.RefreshToken),
+            cancellationToken);
+        return result.IsSuccess ? Results.NoContent() : result.Error!.ToProblem();
     }
 }

@@ -35,7 +35,9 @@ This project contains stable contracts that both HTTP hosts may reference.
 - `Courses/CourseDto.cs` — is the immutable course representation sent across process boundaries.
 - `Courses/CreateCourseRequest.cs` — models course creation input independently of the Application command.
 - `Identity/LoginRequest.cs` — models credentials accepted by the authentication API.
-- `Identity/TokenResponse.cs` — models the access token and its explicit UTC expiry.
+- `Identity/RefreshTokenRequest.cs` — models a raw token submitted for secure rotation.
+- `Identity/RevokeTokenRequest.cs` — models a raw token submitted for idempotent revocation.
+- `Identity/TokenResponse.cs` — returns access and refresh tokens with their independent UTC expirations.
 - `Results/ErrorType.cs` — classifies failures without introducing HTTP concerns into lower layers.
 - `Results/Error.cs` — carries stable machine and human-readable failure information.
 - `Results/Errors.cs` — centralizes consistently coded validation, common, authentication, and authorization errors.
@@ -62,7 +64,15 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 - `Courses/Commands/CreateCourse/CreateCourseCommandHandler.cs` — coordinates aggregate creation, repository persistence, the unit of work, Result output, and structured logging.
 - `Courses/Queries/GetCourses/GetCoursesQuery.cs` — represents the read-side request for the course catalog.
 - `Courses/Queries/GetCourses/GetCoursesQueryHandler.cs` — loads aggregates and projects them to shared DTOs without leaking EF entities.
-- `Identity/LoginRequestValidator.cs` — validates login transport input before accessing the Identity store.
+- `Authentication/Commands/Login/LoginCommand.cs` — represents credential authentication in the existing CQRS pipeline.
+- `Authentication/Commands/Login/LoginCommandValidator.cs` — validates email and password shape before Identity access.
+- `Authentication/Commands/Login/LoginCommandHandler.cs` — delegates validated login requests to the identity abstraction.
+- `Authentication/Commands/Refresh/RefreshTokenCommand.cs` — represents refresh-token rotation in the CQRS pipeline.
+- `Authentication/Commands/Refresh/RefreshTokenCommandValidator.cs` — rejects missing or oversized refresh tokens before hashing.
+- `Authentication/Commands/Refresh/RefreshTokenCommandHandler.cs` — delegates validated rotation requests to the identity abstraction.
+- `Authentication/Commands/Revoke/RevokeRefreshTokenCommand.cs` — represents refresh-token revocation in the CQRS pipeline.
+- `Authentication/Commands/Revoke/RevokeRefreshTokenCommandValidator.cs` — validates revocation input before persistence access.
+- `Authentication/Commands/Revoke/RevokeRefreshTokenCommandHandler.cs` — delegates idempotent revocation to the identity abstraction.
 - `Behaviors/ValidationBehavior.cs` — runs all command validators before handlers and returns failed Results instead of throwing.
 - `Messaging/CommandDispatcher.cs` — resolves handlers and composes the registered custom command pipeline in deterministic order.
 
@@ -74,17 +84,25 @@ This project contains replaceable external-system implementations.
 - `DependencyInjection.cs` — composes SQL Server, Identity, JWT validation, repositories, unit of work, and database readiness checks.
 - `Identity/ApplicationUser.cs` — extends the Identity persistence model with portal-specific user profile data.
 - `Identity/JwtOptions.cs` — provides strongly typed, startup-validated token settings.
-- `Identity/IdentityService.cs` — implements credential verification, lockout accounting, claims/role creation, and signed JWT issuance.
+- `Identity/IdentityService.cs` — implements credential verification, token-pair issuance, rotation, revocation, and replay containment.
+- `Identity/RefreshToken.cs` — encapsulates hashed refresh-token persistence, expiration, rotation, revocation, and rowversion state.
+- `Identity/IRefreshTokenProtector.cs` — abstracts secure opaque-token generation and one-way hashing for unit testing.
+- `Identity/RefreshTokenProtector.cs` — creates 512-bit tokens and SHA-256 hashes while ensuring raw values are never persisted.
+- `Identity/IAccessTokenGenerator.cs` — abstracts signed access-token generation from refresh-token lifecycle logic.
+- `Identity/JwtAccessTokenGenerator.cs` — emits signed JWTs containing sub, name, email, role, jti, and numeric iat claims.
 - `Identity/CurrentUserService.cs` — resolves the GUID user identifier from the current authenticated HTTP principal.
 - `Time/SystemClock.cs` — implements application time through the platform TimeProvider.
 - `Persistence/ApplicationDbContext.cs` — is the single EF Core unit of work for business aggregates and Identity tables.
 - `Persistence/Configurations/CourseConfiguration.cs` — keeps course SQL mapping, lengths, precision, and indexes outside the domain entity.
+- `Persistence/Configurations/RefreshTokenConfiguration.cs` — maps hash-only token storage, indexes, Identity ownership, and rowversion concurrency.
 - `Persistence/Extensions/ModelBuilderExtensions.cs` — ignores in-memory domain events and applies audit, rowversion, soft-delete, index, and global-filter conventions.
 - `Persistence/Interceptors/AuditSaveChangesInterceptor.cs` — owns audit-field population and converts tracked deletes into soft deletes.
 - `Persistence/Repositories/Repository.cs` — implements the Domain repository contract with async EF Core operations and no-tracking reads.
 - `Migrations/20260722082720_DomainFoundation.cs` — deploys audit-user, soft-delete, rowversion, and soft-delete index columns.
 - `Migrations/20260722082720_DomainFoundation.Designer.cs` — records EF Core metadata for the Domain Foundation migration.
 - `Migrations/ApplicationDbContextModelSnapshot.cs` — tracks the current database model used to calculate future migrations.
+- `Migrations/20260722152618_EnterpriseAuthentication.cs` — creates secure refresh-token persistence and supporting indexes.
+- `Migrations/20260722152618_EnterpriseAuthentication.Designer.cs` — records EF metadata for the authentication migration.
 
 ## LearningPortal.Api
 

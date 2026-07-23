@@ -40,7 +40,7 @@ public static class DependencyInjection
                 Type = SecuritySchemeType.Http,
                 Scheme = "bearer",
                 BearerFormat = "JWT",
-                Description = "Enter the access token returned by POST /api/auth/token."
+                Description = "Enter the access token returned by POST /api/auth/login or /api/auth/refresh."
             });
 
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
