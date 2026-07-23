@@ -1,0 +1,48 @@
+@page "/profile"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Profile | Learning Portal</PageTitle>
+
+<AuthenticatedContent>
+    <PageHeader Eyebrow="Account" Title="Profile"
+                Description="Your learning portal identity and assigned roles." />
+    @if (_loading)
+    {
+        <LoadingState Message="Loading your profile…" />
+    }
+    else if (_error is not null)
+    {
+        <div class="feedback error" role="alert">@_error</div>
+    }
+    else if (_profile is not null)
+    {
+        <AppCard>
+            <dl class="profile-details">
+                <dt>Name</dt><dd>@_profile.DisplayName</dd>
+                <dt>Email</dt><dd>@_profile.Email</dd>
+                <dt>Status</dt><dd><StatusBadge Text="@(_profile.IsActive ? "Active" : "Inactive")" /></dd>
+                <dt>Roles</dt>
+                <dd>
+                    @foreach (var role in _profile.Roles)
+                    {
+                        <StatusBadge Text="@role" />
+                    }
+                </dd>
+            </dl>
+        </AppCard>
+    }
+</AuthenticatedContent>
+
+@code {
+    private CurrentUserResponse? _profile;
+    private string? _error;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try { _profile = await ApiClient.GetCurrentUserAsync(); }
+        catch (ApiProblemException exception) { _error = exception.Message; }
+        finally { _loading = false; }
+    }
+}

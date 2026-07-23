@@ -4,6 +4,7 @@ using LearningPortal.Application.Behaviors;
 using LearningPortal.Application.Authentication.Commands.Login;
 using LearningPortal.Application.Authentication.Commands.Refresh;
 using LearningPortal.Application.Authentication.Commands.Revoke;
+using LearningPortal.Application.Authentication.Commands.Register;
 using LearningPortal.Application.Courses.Commands.ArchiveCourse;
 using LearningPortal.Application.Courses.Commands.CreateCourse;
 using LearningPortal.Application.Courses.Commands.DeleteCourse;
@@ -62,6 +63,7 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<LoginCommand, Result<AuthenticationResponse>>, LoginCommandHandler>();
         services.AddScoped<ICommandHandler<RefreshTokenCommand, Result<AuthenticationResponse>>, RefreshTokenCommandHandler>();
         services.AddScoped<ICommandHandler<RevokeRefreshTokenCommand, Result<bool>>, RevokeRefreshTokenCommandHandler>();
+        services.AddScoped<ICommandHandler<RegisterCommand, Result<AuthenticationResponse>>, RegisterCommandHandler>();
         services.AddScoped<ICommandHandler<CreateCourseCommand, Result<CourseResponse>>, CreateCourseCommandHandler>();
         services.AddScoped<ICommandHandler<UpdateCourseCommand, Result<CourseResponse>>, UpdateCourseCommandHandler>();
         services.AddScoped<ICommandHandler<PublishCourseCommand, Result<CourseResponse>>, PublishCourseCommandHandler>();

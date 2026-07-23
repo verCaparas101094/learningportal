@@ -2,6 +2,7 @@ using LearningPortal.Application.Abstractions.Identity;
 using LearningPortal.Application.Abstractions.Networking;
 using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Infrastructure.Identity;
+using LearningPortal.Application.Authorization;
 using LearningPortal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -105,6 +106,8 @@ internal sealed class AuthenticationTestContext : IAsyncDisposable
 
         var roleResult = await roleManager.CreateAsync(new IdentityRole<Guid>(Role));
         EnsureSucceeded(roleResult);
+        EnsureSucceeded(await roleManager.CreateAsync(
+            new IdentityRole<Guid>(ApplicationRoles.Student)));
         var createResult = await userManager.CreateAsync(user, Password);
         EnsureSucceeded(createResult);
         var addRoleResult = await userManager.AddToRoleAsync(user, Role);
@@ -112,7 +115,9 @@ internal sealed class AuthenticationTestContext : IAsyncDisposable
 
         if (isLockedOut)
         {
-            var lockoutResult = await userManager.SetLockoutEndDateAsync(user, clock.UtcNow.AddHours(1));
+            var lockoutResult = await userManager.SetLockoutEndDateAsync(
+                user,
+                DateTimeOffset.UtcNow.AddHours(1));
             EnsureSucceeded(lockoutResult);
         }
 

@@ -1,4 +1,5 @@
 using LearningPortal.Blazor.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace LearningPortal.Blazor;
 
@@ -17,13 +18,30 @@ public static class DependencyInjection
         }
 
         services.AddRazorComponents().AddInteractiveServerComponents();
+        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.LoginPath = AuthenticationNavigation.SignInRoute;
+                options.AccessDeniedPath = "/access-denied?reason=forbidden";
+                options.Cookie.Name = "__Host-LearningPortal.Auth";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.SlidingExpiration = false;
+                options.EventsType = typeof(PortalCookieAuthenticationEvents);
+            });
         services.AddAuthorizationCore();
         services.AddCascadingAuthenticationState();
         services.AddHttpContextAccessor();
+        services.AddScoped<PortalCookieAuthenticationEvents>();
+        services.AddSingleton<PortalSessionRefreshCoordinator>();
         services.AddTransient<CurrentBearerTokenHandler>();
         services
             .AddHttpClient<LearningPortalApiClient>(client => client.BaseAddress = apiUri)
             .AddHttpMessageHandler<CurrentBearerTokenHandler>();
+        services.AddHttpClient(
+            PortalAuthenticationEndpoints.ApiClientName,
+            client => client.BaseAddress = apiUri);
         services.AddHealthChecks();
 
         return services;

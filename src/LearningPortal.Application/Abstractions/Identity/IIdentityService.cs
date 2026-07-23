@@ -12,6 +12,14 @@ public interface IIdentityService
         string password,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Creates a standard student account and signs it in.</summary>
+    Task<Result<AuthenticationResponse>> RegisterAsync(
+        string firstName,
+        string lastName,
+        string email,
+        string password,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Rotates an active refresh token and issues a new token pair.</summary>
     Task<Result<AuthenticationResponse>> RefreshAsync(
         string refreshToken,

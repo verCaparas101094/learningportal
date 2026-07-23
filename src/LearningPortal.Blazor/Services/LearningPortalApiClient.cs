@@ -9,6 +9,7 @@ using LearningPortal.Shared.UserManagement;
 using LearningPortal.Shared.Quizzes;
 using LearningPortal.Shared.InstructorEligibility;
 using LearningPortal.Shared.AiTutor;
+using LearningPortal.Shared.Identity;
 
 namespace LearningPortal.Blazor.Services;
 
@@ -496,6 +497,14 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
         using var response = await httpClient.GetAsync(
             "api/admin/ai-tutor/health", cancellationToken);
         return await ReadResponseAsync<OllamaHealthResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets the safe profile for the authenticated user.</summary>
+    public async Task<CurrentUserResponse> GetCurrentUserAsync(
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync("api/auth/me", cancellationToken);
+        return await ReadResponseAsync<CurrentUserResponse>(response, cancellationToken);
     }
 
     private async Task<TResponse> PutAsync<TResponse>(

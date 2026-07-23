@@ -64,7 +64,35 @@ public sealed class IdentityRoleSeederTests
             () => userManager.AddToRoleAsync(user, "Manager"));
     }
 
-    private static ServiceProvider CreateServiceProvider()
+    /// <summary>Verifies configured bootstrap administration is idempotent.</summary>
+    [Fact]
+    public async Task SeedAsync_WithBootstrapAdministrator_CreatesEnabledAdministratorOnce()
+    {
+        await using var provider = CreateServiceProvider(new BootstrapAdministratorOptions
+        {
+            Enabled = true,
+            Email = "bootstrap@example.com",
+            Password = "Strong-Bootstrap-Password-123!",
+            DisplayName = "Bootstrap Administrator"
+        });
+        await using var scope = provider.CreateAsyncScope();
+        var seeder = scope.ServiceProvider.GetRequiredService<IIdentityRoleSeeder>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        await seeder.SeedAsync();
+        await seeder.SeedAsync();
+
+        var user = await userManager.FindByEmailAsync("bootstrap@example.com");
+        Assert.NotNull(user);
+        Assert.True(user.EmailConfirmed);
+        Assert.True(user.IsEnabled);
+        Assert.Equal("Bootstrap Administrator", user.DisplayName);
+        Assert.True(await userManager.IsInRoleAsync(user, ApplicationRoles.Administrator));
+        Assert.Single(userManager.Users);
+    }
+
+    private static ServiceProvider CreateServiceProvider(
+        BootstrapAdministratorOptions? bootstrapAdministrator = null)
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -75,6 +103,8 @@ public sealed class IdentityRoleSeederTests
             .AddRoleValidator<ApplicationRoleValidator>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
         services.AddScoped<IIdentityRoleSeeder, IdentityRoleSeeder>();
+        services.AddSingleton(
+            bootstrapAdministrator ?? new BootstrapAdministratorOptions());
 
         return services.BuildServiceProvider(validateScopes: true);
     }

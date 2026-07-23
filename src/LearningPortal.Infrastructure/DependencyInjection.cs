@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace LearningPortal.Infrastructure;
@@ -31,7 +32,8 @@ public static class DependencyInjection
     /// <summary>Adds infrastructure services using the supplied application configuration.</summary>
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment? environment = null)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
@@ -51,11 +53,23 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
             ConfigureApplicationDbContext(serviceProvider, options, connectionString));
 
+        var developmentSeed = configuration
+            .GetSection(DevelopmentSeedOptions.SectionName)
+            .Get<DevelopmentSeedOptions>() ?? new DevelopmentSeedOptions();
+        var databaseInitialization = configuration
+            .GetSection(DatabaseInitializationOptions.SectionName)
+            .Get<DatabaseInitializationOptions>() ?? new DatabaseInitializationOptions();
+        services.AddSingleton(developmentSeed);
+        services.AddSingleton(databaseInitialization);
+
         services.AddIdentityCore<ApplicationUser>(options =>
             {
                 options.User.RequireUniqueEmail = true;
                 options.SignIn.RequireConfirmedEmail = true;
-                options.Password.RequiredLength = 12;
+                options.Password.RequiredLength =
+                    environment?.IsDevelopment() == true && developmentSeed.Enabled
+                        ? 8
+                        : 12;
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
@@ -83,6 +97,11 @@ public static class DependencyInjection
         if (eligibilityOptions.QualificationThreshold is < 1 or > 100)
             throw new InvalidOperationException("Instructor eligibility threshold must be between 1 and 100.");
         services.AddSingleton(eligibilityOptions);
+        var bootstrapAdministrator = configuration
+            .GetSection(BootstrapAdministratorOptions.SectionName)
+            .Get<BootstrapAdministratorOptions>() ?? new BootstrapAdministratorOptions();
+        ValidateBootstrapAdministratorOptions(bootstrapAdministrator);
+        services.AddSingleton(bootstrapAdministrator);
         var ollamaOptions = configuration.GetSection(OllamaOptions.SectionName)
             .Get<OllamaOptions>() ?? new OllamaOptions();
         ValidateOllamaOptions(ollamaOptions);
@@ -133,6 +152,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IIdentityRoleSeeder, IdentityRoleSeeder>();
+        services.AddScoped<IDevelopmentDataSeeder, DevelopmentDataSeeder>();
         services.AddScoped<IUserManagementService, UserManagementService>();
         services.AddScoped<IAccessTokenGenerator, JwtAccessTokenGenerator>();
         services.AddSingleton<IRefreshTokenProtector, RefreshTokenProtector>();
@@ -158,6 +178,23 @@ public static class DependencyInjection
             || options.Temperature is < 0 or > 2)
         {
             throw new InvalidOperationException("The Ollama configuration is invalid.");
+        }
+    }
+
+    private static void ValidateBootstrapAdministratorOptions(
+        BootstrapAdministratorOptions options)
+    {
+        if (!options.Enabled)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(options.Email)
+            || string.IsNullOrWhiteSpace(options.Password)
+            || string.IsNullOrWhiteSpace(options.DisplayName))
+        {
+            throw new InvalidOperationException(
+                "Enabled bootstrap administrator configuration requires email, password, and display name.");
         }
     }
 

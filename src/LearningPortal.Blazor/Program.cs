@@ -1,5 +1,6 @@
 using LearningPortal.Blazor;
 using LearningPortal.Blazor.Components;
+using LearningPortal.Blazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,10 +21,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapHealthChecks("/health");
+app.MapPortalAuthenticationEndpoints();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 await app.RunAsync();

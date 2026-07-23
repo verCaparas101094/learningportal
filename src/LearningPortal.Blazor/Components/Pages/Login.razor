@@ -1,0 +1,86 @@
+@page "/login"
+@rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Sign in | Learning Portal</PageTitle>
+
+<div class="authentication-page">
+    <AppCard AdditionalClass="authentication-card">
+        <p class="eyebrow">Learning Portal</p>
+        <h1>Sign in</h1>
+        <p>Use your enterprise learning account.</p>
+
+        @if (ErrorMessage is not null)
+        {
+            <div class="feedback error" role="alert">@ErrorMessage</div>
+        }
+
+        <form method="post" action="/auth/login">
+            <AntiforgeryToken />
+            <input type="hidden" name="returnUrl" value="@SafeReturnUrl" />
+            <label>
+                Email
+                <input name="email" type="email" autocomplete="username" required autofocus />
+            </label>
+            <label>
+                Password
+                <span class="password-field">
+                    <input name="password" type="@(_showPassword ? "text" : "password")"
+                           autocomplete="current-password" required />
+                    <button type="button" class="button" @onclick="TogglePassword">
+                        @(_showPassword ? "Hide" : "Show")
+                    </button>
+                </span>
+            </label>
+            <label class="remember-me">
+                <input name="rememberMe" type="checkbox" value="true" />
+                Keep me signed in
+            </label>
+            <button class="button button-primary" type="submit">Sign in</button>
+        </form>
+
+        <p class="authentication-footer">
+            Need an account? <a href="@RegisterUrl">Registration information</a>
+        </p>
+    </AppCard>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
+
+    [SupplyParameterFromQuery(Name = "signedOut")]
+    public bool SignedOut { get; set; }
+
+    private bool _showPassword;
+
+    private string SafeReturnUrl =>
+        AuthenticationNavigation.NormalizeLocalReturnUrl(ReturnUrl);
+
+    private string RegisterUrl =>
+        AuthenticationNavigation.BuildRegisterUrl(SafeReturnUrl);
+
+    private string? ErrorMessage => Error switch
+    {
+        "required" => "Enter both your email address and password.",
+        "invalid" => "The email address or password is incorrect.",
+        "unavailable" => "Sign in is temporarily unavailable. Please try again.",
+        _ when SignedOut => "You have been signed out.",
+        _ => null
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            Navigation.NavigateTo(SafeReturnUrl);
+        }
+    }
+
+    private void TogglePassword() => _showPassword = !_showPassword;
+}

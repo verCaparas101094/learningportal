@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
 <div class="app-shell @(_sidebarCollapsed ? "sidebar-collapsed" : string.Empty)">
     <aside id="portal-sidebar"
@@ -30,16 +31,16 @@
                     <NavLink class="sidebar-link" href="/my-instructor-eligibility">
                         <span aria-hidden="true">★</span><span class="link-label">Instructor Eligibility</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/certificates">
+                    <NavLink class="sidebar-link" href="/certificates" style="display:none">
                         <span aria-hidden="true">◇</span><span class="link-label">Certificates</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/achievements">
+                    <NavLink class="sidebar-link" href="/achievements" style="display:none">
                         <span aria-hidden="true">☆</span><span class="link-label">Achievements</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/calendar">
+                    <NavLink class="sidebar-link" href="/calendar" style="display:none">
                         <span aria-hidden="true">□</span><span class="link-label">Calendar</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/messages">
+                    <NavLink class="sidebar-link" href="/messages" style="display:none">
                         <span aria-hidden="true">✉</span><span class="link-label">Messages</span>
                     </NavLink>
                     <NavLink class="sidebar-link" href="/ai-tutor">
@@ -56,7 +57,7 @@
                     <NavLink class="sidebar-link" href="/my-courses">
                         <span aria-hidden="true">▤</span><span class="link-label">My Courses</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/analytics">
+                    <NavLink class="sidebar-link" href="/analytics" style="display:none">
                         <span aria-hidden="true">⌁</span><span class="link-label">Analytics</span>
                     </NavLink>
                 </NavigationSection>
@@ -73,13 +74,13 @@
                     <NavLink class="sidebar-link" href="/courses">
                         <span aria-hidden="true">▤</span><span class="link-label">Courses</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/lessons">
+                    <NavLink class="sidebar-link" href="/lessons" style="display:none">
                         <span aria-hidden="true">≡</span><span class="link-label">Lessons</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/enrollments">
+                    <NavLink class="sidebar-link" href="/enrollments" style="display:none">
                         <span aria-hidden="true">✓</span><span class="link-label">Enrollments</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/quizzes">
+                    <NavLink class="sidebar-link" href="/quizzes" style="display:none">
                         <span aria-hidden="true">?</span><span class="link-label">Quizzes</span>
                     </NavLink>
                     <NavLink class="sidebar-link" href="/admin/instructor-eligibility">
@@ -88,13 +89,13 @@
                     <NavLink class="sidebar-link" href="/admin/ai-tutor">
                         <span aria-hidden="true">AI</span><span class="link-label">AI Tutor Health</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/certificates">
+                    <NavLink class="sidebar-link" href="/certificates" style="display:none">
                         <span aria-hidden="true">◇</span><span class="link-label">Certificates</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/analytics">
+                    <NavLink class="sidebar-link" href="/analytics" style="display:none">
                         <span aria-hidden="true">⌁</span><span class="link-label">Analytics</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/settings">
+                    <NavLink class="sidebar-link" href="/settings" style="display:none">
                         <span aria-hidden="true">⚙</span><span class="link-label">Settings</span>
                     </NavLink>
                 </NavigationSection>
@@ -131,17 +132,17 @@
                 <span aria-hidden="true">☰</span>
             </button>
 
-            <label class="global-search">
+            <label class="global-search" style="visibility:hidden">
                 <span class="visually-hidden">Search the learning portal</span>
                 <span aria-hidden="true">⌕</span>
                 <input type="search" placeholder="Search courses, people, and resources" />
             </label>
 
             <div class="topbar-actions">
-                <button class="icon-button" type="button" aria-label="Theme options" title="Theme options">
+                <button class="icon-button" style="display:none" type="button" aria-label="Theme options" title="Theme options">
                     <span aria-hidden="true">◐</span>
                 </button>
-                <button class="icon-button notification-button" type="button" aria-label="Notifications" title="Notifications">
+                <button class="icon-button notification-button" style="display:none" type="button" aria-label="Notifications" title="Notifications">
                     <span aria-hidden="true">♢</span>
                     <span class="notification-indicator" aria-hidden="true"></span>
                 </button>
@@ -151,7 +152,16 @@
                         @{
                             var displayName = GetDisplayName(authorizationContext.User);
                         }
-                        <button class="profile-button" type="button" aria-label="Open profile menu" title="Profile menu">
+                        @if (_accountMenuOpen)
+                        {
+                            <button class="account-menu-dismiss" type="button"
+                                    aria-label="Close account menu"
+                                    @onclick="CloseAccountMenu"></button>
+                        }
+                        <div class="account-menu-container" @onkeydown="HandleAccountMenuKey">
+                        <button class="profile-button" type="button"
+                                aria-label="Open account menu" aria-haspopup="menu"
+                                aria-expanded="@_accountMenuOpen" @onclick="ToggleAccountMenu">
                             <span class="avatar">@GetInitials(displayName)</span>
                             <span class="profile-copy">
                                 <strong>@displayName</strong>
@@ -159,9 +169,33 @@
                             </span>
                             <span aria-hidden="true">⌄</span>
                         </button>
+                        @if (_accountMenuOpen)
+                        {
+                            <div class="account-menu" role="menu">
+                                <div class="account-menu-identity">
+                                    <strong>@displayName</strong>
+                                    <small>@GetEmail(authorizationContext.User)</small>
+                                </div>
+                                <a role="menuitem" href="/profile">Profile</a>
+                                <a role="menuitem" href="/my-learning">My Learning</a>
+                                <a role="menuitem" href="/ai-tutor">AI Tutor</a>
+                                @if (authorizationContext.User.IsInRole(ApplicationRoles.Administrator))
+                                {
+                                    <a role="menuitem" href="/users">Administration</a>
+                                }
+                                <form method="post" action="/auth/logout">
+                                    <AntiforgeryToken />
+                                    <button role="menuitem" type="submit">Sign out</button>
+                                </form>
+                            </div>
+                        }
+                        </div>
                     </Authorized>
                     <NotAuthorized>
-                        <span class="avatar" aria-label="Guest user">GU</span>
+                        <div class="guest-actions" aria-label="Guest account actions">
+                            <a class="button button-primary" href="@GuestSignInUrl">Sign in</a>
+                            <a class="button guest-register" href="@GuestRegisterUrl">Register</a>
+                        </div>
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
@@ -182,12 +216,36 @@
 @code {
     private bool _sidebarCollapsed;
     private bool _mobileSidebarOpen;
+    private bool _accountMenuOpen;
+
+    private string CurrentLocalUrl =>
+        AuthenticationNavigation.ResolveCurrentReturnUrl(
+            Navigation.BaseUri,
+            Navigation.Uri);
+
+    private string GuestSignInUrl =>
+        AuthenticationNavigation.BuildSignInUrl(CurrentLocalUrl);
+
+    private string GuestRegisterUrl =>
+        AuthenticationNavigation.BuildRegisterUrl(CurrentLocalUrl);
 
     private void ToggleSidebar() => _sidebarCollapsed = !_sidebarCollapsed;
 
     private void ToggleMobileSidebar() => _mobileSidebarOpen = !_mobileSidebarOpen;
 
     private void CloseMobileSidebar() => _mobileSidebarOpen = false;
+
+    private void ToggleAccountMenu() => _accountMenuOpen = !_accountMenuOpen;
+
+    private void CloseAccountMenu() => _accountMenuOpen = false;
+
+    private void HandleAccountMenuKey(KeyboardEventArgs args)
+    {
+        if (args.Key == "Escape")
+        {
+            CloseAccountMenu();
+        }
+    }
 
     private static string GetDisplayName(ClaimsPrincipal user) =>
         user.FindFirstValue(ApplicationClaimTypes.DisplayName)
@@ -199,6 +257,11 @@
         user.FindFirstValue(ApplicationClaimTypes.Role)
         ?? user.FindFirstValue(ClaimTypes.Role)
         ?? "Member";
+
+    private static string GetEmail(ClaimsPrincipal user) =>
+        user.FindFirstValue(ApplicationClaimTypes.Email)
+        ?? user.FindFirstValue(ClaimTypes.Email)
+        ?? string.Empty;
 
     private static string GetInitials(string displayName)
     {

@@ -1,0 +1,285 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LearningPortal.Api</name>
+    </assembly>
+    <members>
+        <member name="T:LearningPortal.Api.Constants.CorrelationIdConstants">
+            <summary>
+            Defines names used to propagate correlation identifiers through HTTP requests.
+            </summary>
+        </member>
+        <member name="F:LearningPortal.Api.Constants.CorrelationIdConstants.HeaderName">
+            <summary>
+            Gets the HTTP header used to receive and return a correlation identifier.
+            </summary>
+        </member>
+        <member name="F:LearningPortal.Api.Constants.CorrelationIdConstants.ItemKey">
+            <summary>
+            Gets the <see cref="P:Microsoft.AspNetCore.Http.HttpContext.Items"/> key used to store the current correlation identifier.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Api.Constants.ExceptionErrorCodes">
+            <summary>
+            Defines stable error codes for exceptions mapped by the API boundary.
+            </summary>
+        </member>
+        <member name="F:LearningPortal.Api.Constants.ExceptionErrorCodes.Validation">
+            <summary>The default validation failure code.</summary>
+        </member>
+        <member name="F:LearningPortal.Api.Constants.ExceptionErrorCodes.NotFound">
+            <summary>The default resource-not-found code.</summary>
+        </member>
+        <member name="F:LearningPortal.Api.Constants.ExceptionErrorCodes.Conflict">
+            <summary>The default conflict code.</summary>
+        </member>
+        <member name="F:LearningPortal.Api.Constants.ExceptionErrorCodes.Unauthorized">
+            <summary>The authentication failure code.</summary>
+        </member>
+        <member name="F:LearningPortal.Api.Constants.ExceptionErrorCodes.Forbidden">
+            <summary>The authorization failure code.</summary>
+        </member>
+        <member name="F:LearningPortal.Api.Constants.ExceptionErrorCodes.Cancelled">
+            <summary>The request-cancellation code.</summary>
+        </member>
+        <member name="F:LearningPortal.Api.Constants.ExceptionErrorCodes.Unexpected">
+            <summary>The unexpected server failure code.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.DependencyInjection">
+            <summary>Configures services owned by the HTTP API host.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.DependencyInjection.AddApi(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>Adds API presentation services.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.DependencyInjection.UseApiPipeline(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>Configures the ordered API middleware pipeline.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.AiTutorEndpoints">
+            <summary>Maps learner-owned local AI Tutor routes.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.AiTutorEndpoints.MapAiTutorEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps AI Tutor conversation and administrator health endpoints.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.CourseEndpoints">
+            <summary>Maps administrator and instructor course-management endpoints.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.CourseEndpoints.MapCourseEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps course-management routes.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.EnrollmentEndpoints">
+            <summary>Maps employee catalog and enrollment endpoints.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.EnrollmentEndpoints.MapEnrollmentEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps catalog and enrollment routes.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.HealthEndpoints">
+            <summary>Maps liveness and readiness probes.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.HealthEndpoints.MapPortalHealthChecks(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps health endpoints for orchestrators and load balancers.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.IdentityEndpoints">
+            <summary>
+            Maps authentication commands to anonymous Minimal API endpoints.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.IdentityEndpoints.MapIdentityEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>
+            Maps login, refresh-token rotation, and refresh-token revocation endpoints.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.InstructorEligibilityEndpoints">
+            <summary>Maps instructor eligibility and skill routes.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.InstructorEligibilityEndpoints.MapInstructorEligibilityEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps authenticated and administrator eligibility routes.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.LearningEndpoints">
+            <summary>Maps learner player and progress routes.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.LearningEndpoints.MapLearningEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps authenticated learner endpoints.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.LessonEndpoints">
+            <summary>Maps lesson-management endpoints.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.LessonEndpoints.MapLessonEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps authorized lesson routes.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.QuizEndpoints">
+            <summary>Maps quiz authoring and learner-attempt routes.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.QuizEndpoints.MapQuizEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps quiz routes.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Endpoints.UserManagementEndpoints">
+            <summary>
+            Maps the compact administrator-only user-management API.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Endpoints.UserManagementEndpoints.MapUserManagementEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps user listing, lookup, enabled-state, and additive role operations.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Exceptions.ConflictException">
+            <summary>
+            Represents an expected failure caused by a conflict with current resource state.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Exceptions.ConflictException.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:LearningPortal.Api.Exceptions.ConflictException"/> class.
+            </summary>
+            <param name="message">The safe error message returned to the caller.</param>
+            <param name="errorCode">The stable, machine-readable error code.</param>
+        </member>
+        <member name="P:LearningPortal.Api.Exceptions.ConflictException.ErrorCode">
+            <summary>
+            Gets the stable, machine-readable error code.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Api.Exceptions.ForbiddenAccessException">
+            <summary>
+            Represents an expected failure caused by insufficient permissions.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Exceptions.ForbiddenAccessException.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:LearningPortal.Api.Exceptions.ForbiddenAccessException"/> class.
+            </summary>
+            <param name="message">The safe error message returned to the caller.</param>
+            <param name="errorCode">The stable, machine-readable error code.</param>
+        </member>
+        <member name="P:LearningPortal.Api.Exceptions.ForbiddenAccessException.ErrorCode">
+            <summary>
+            Gets the stable, machine-readable error code.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Api.Exceptions.NotFoundException">
+            <summary>
+            Represents an expected failure caused by a requested resource not being found.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Exceptions.NotFoundException.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:LearningPortal.Api.Exceptions.NotFoundException"/> class.
+            </summary>
+            <param name="message">The safe error message returned to the caller.</param>
+            <param name="errorCode">The stable, machine-readable error code.</param>
+        </member>
+        <member name="P:LearningPortal.Api.Exceptions.NotFoundException.ErrorCode">
+            <summary>
+            Gets the stable, machine-readable error code.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Api.Extensions.AuthorizationEndpointExtensions">
+            <summary>
+            Provides strongly named authorization conventions for Minimal API endpoints and groups.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Extensions.AuthorizationEndpointExtensions.RequireAdministrator``1(``0)">
+            <summary>Requires the Administrator policy.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Extensions.AuthorizationEndpointExtensions.RequireInstructor``1(``0)">
+            <summary>Requires the Instructor policy, which also permits administrators.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Extensions.AuthorizationEndpointExtensions.RequireStudent``1(``0)">
+            <summary>Requires the Student policy, which also permits administrators.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Extensions.AuthorizationEndpointExtensions.RequireAdminOrInstructor``1(``0)">
+            <summary>Requires either the Administrator or Instructor policy.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Extensions.MiddlewareExtensions">
+            <summary>
+            Provides application builder extensions for the API's cross-cutting middleware.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Extensions.MiddlewareExtensions.UseCorrelationId(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Adds correlation identifier propagation to the request pipeline.
+            </summary>
+            <param name="app">The application builder.</param>
+            <returns>The application builder for chaining.</returns>
+        </member>
+        <member name="M:LearningPortal.Api.Extensions.MiddlewareExtensions.UseExceptionHandling(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Adds global exception-to-ProblemDetails conversion to the request pipeline.
+            </summary>
+            <param name="app">The application builder.</param>
+            <returns>The application builder for chaining.</returns>
+        </member>
+        <member name="T:LearningPortal.Api.Extensions.ResultExtensions">
+            <summary>Maps transport-independent results to HTTP responses.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Extensions.ResultExtensions.ToHttpResult``1(LearningPortal.Shared.Results.Result{``0})">
+            <summary>Converts a result into either an OK response or Problem Details.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Extensions.ResultExtensions.ToProblem(LearningPortal.Shared.Results.Error)">
+            <summary>Converts an error into an RFC 7807 response.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Health.HealthResponseWriter">
+            <summary>Writes a compact JSON health report suitable for operators.</summary>
+        </member>
+        <member name="M:LearningPortal.Api.Health.HealthResponseWriter.WriteAsync(Microsoft.AspNetCore.Http.HttpContext,Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport)">
+            <summary>Serializes the health report to the response body.</summary>
+        </member>
+        <member name="T:LearningPortal.Api.Middleware.CorrelationIdMiddleware">
+            <summary>
+            Establishes and propagates a correlation identifier for every HTTP request.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Middleware.CorrelationIdMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
+            <summary>
+            Establishes and propagates a correlation identifier for every HTTP request.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Middleware.CorrelationIdMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Processes a request and makes its correlation identifier available to downstream components.
+            </summary>
+            <param name="httpContext">The current HTTP context.</param>
+            <returns>A task representing the asynchronous middleware operation.</returns>
+        </member>
+        <member name="T:LearningPortal.Api.Middleware.ExceptionHandlingMiddleware">
+            <summary>
+            Converts unhandled exceptions into safe RFC 7807 responses at the API boundary.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Middleware.ExceptionHandlingMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Logging.ILogger{LearningPortal.Api.Middleware.ExceptionHandlingMiddleware})">
+            <summary>
+            Converts unhandled exceptions into safe RFC 7807 responses at the API boundary.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.Middleware.ExceptionHandlingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext,LearningPortal.Api.ProblemDetails.IApiProblemDetailsFactory)">
+            <summary>
+            Executes the downstream pipeline and handles any unhandled exception.
+            </summary>
+            <param name="httpContext">The current HTTP context.</param>
+            <param name="problemDetailsFactory">The centralized problem details factory.</param>
+            <returns>A task representing the asynchronous middleware operation.</returns>
+        </member>
+        <member name="T:LearningPortal.Api.ProblemDetails.ApiProblemDetailsFactory">
+            <summary>
+            Creates safe and consistently structured RFC 7807 problem details documents.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.ProblemDetails.ApiProblemDetailsFactory.Create(Microsoft.AspNetCore.Http.HttpContext,LearningPortal.Shared.Results.Error)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Api.ProblemDetails.IApiProblemDetailsFactory">
+            <summary>
+            Creates consistent RFC 7807 responses at the API boundary.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Api.ProblemDetails.IApiProblemDetailsFactory.Create(Microsoft.AspNetCore.Http.HttpContext,LearningPortal.Shared.Results.Error)">
+            <summary>
+            Creates problem details for the specified application error and request.
+            </summary>
+            <param name="httpContext">The current HTTP context.</param>
+            <param name="error">The transport-independent application error.</param>
+            <returns>A populated RFC 7807 problem details document.</returns>
+        </member>
+        <member name="T:Program">
+            <summary>Provides a public entry point for integration-test hosting.</summary>
+        </member>
+    </members>
+</doc>
