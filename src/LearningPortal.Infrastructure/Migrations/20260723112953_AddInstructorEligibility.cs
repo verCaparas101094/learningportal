@@ -92,31 +92,16 @@ namespace LearningPortal.Infrastructure.Migrations
 
             migrationBuilder.Sql(
                 """
-                INSERT INTO [Skills] (
-                    [Id], [Name], [Slug], [Description], [IsActive],
-                    [CreatedAtUtc], [CreatedBy], [UpdatedAtUtc], [UpdatedBy])
-                SELECT
-                    NEWID(),
-                    categories.[Category],
-                    LEFT(REPLACE(REPLACE(LOWER(categories.[Category]), N' ', N'-'), N'_', N'-'), 80)
-                        + N'-' + LEFT(CONVERT(varchar(64), HASHBYTES('SHA2_256', categories.[Category]), 2), 16),
-                    NULL,
-                    CAST(1 AS bit),
-                    SYSUTCDATETIME(),
-                    NULL,
-                    NULL,
-                    NULL
-                FROM (
-                    SELECT DISTINCT LTRIM(RTRIM([Category])) AS [Category]
-                    FROM [Courses]
-                    WHERE NULLIF(LTRIM(RTRIM([Category])), N'') IS NOT NULL
-                ) AS categories;
-
-                UPDATE courses
-                SET courses.[SkillId] = skills.[Id]
-                FROM [Courses] AS courses
-                INNER JOIN [Skills] AS skills
-                    ON skills.[Name] = LTRIM(RTRIM(courses.[Category]));
+                INSERT INTO [Skills] ([Id],[Name],[Slug],[Description],[IsActive],[CreatedAtUtc],[CreatedBy],[UpdatedAtUtc],[UpdatedBy])
+                SELECT NEWID(), categories.[Category],
+                    LEFT(REPLACE(REPLACE(LOWER(categories.[Category]),N' ',N'-'),N'_',N'-'),80)
+                    + N'-' + LEFT(CONVERT(varchar(64),HASHBYTES('SHA2_256',categories.[Category]),2),16),
+                    NULL,CAST(1 AS bit),SYSUTCDATETIME(),NULL,NULL,NULL
+                FROM (SELECT DISTINCT LTRIM(RTRIM([Category])) AS [Category] FROM [Courses]
+                      WHERE NULLIF(LTRIM(RTRIM([Category])),N'') IS NOT NULL) categories;
+                UPDATE courses SET courses.[SkillId]=skills.[Id]
+                FROM [Courses] courses INNER JOIN [Skills] skills
+                    ON skills.[Name]=LTRIM(RTRIM(courses.[Category]));
                 """);
 
             migrationBuilder.CreateIndex(

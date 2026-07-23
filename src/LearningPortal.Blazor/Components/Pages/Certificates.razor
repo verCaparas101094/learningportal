@@ -1,0 +1,20 @@
+@page "/certificates"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+@inject IJSRuntime JS
+
+<PageTitle>Certificates | Learning Portal</PageTitle>
+<PageHeader Eyebrow="Achievements" Title="My Certificates" Description="Download and verify your completed-course credentials." />
+@if(_loading){<LoadingState Message="Loading certificates…" />}
+else if(_error is not null){<div class="feedback error">@_error</div>}
+else if(_items.Count==0){<EmptyState Title="No certificates yet" Description="Complete a course and issue its certificate from My Learning." />}
+else
+{
+ <div class="catalog-grid">@foreach(var item in _items){<AppCard><article><h2>@item.CourseTitle</h2><StatusBadge Text="@item.Status" /><p>Issued @item.IssuedAtUtc.ToLocalTime().ToString("d")</p><p><strong>@item.CertificateNumber</strong></p><code>@item.VerificationCode</code><div class="course-actions"><button disabled="@_downloading" @onclick="()=>DownloadAsync(item)">Download PDF</button><a class="button" href="@($"/verify-certificate/{item.VerificationCode}")">Verify</a></div></article></AppCard>}</div>
+}
+
+@code {
+ private IReadOnlyList<CertificateListItemResponse> _items=[];private bool _loading=true,_downloading;private string? _error;
+ protected override async Task OnInitializedAsync(){try{_items=await ApiClient.GetMyCertificatesAsync();}catch(ApiProblemException e){_error=e.Message;}finally{_loading=false;}}
+ private async Task DownloadAsync(CertificateListItemResponse item){_downloading=true;try{var bytes=await ApiClient.DownloadCertificateAsync(item.Id);await using var stream=new MemoryStream(bytes);using var reference=new DotNetStreamReference(stream);var module=await JS.InvokeAsync<IJSObjectReference>("import","/download.js");await module.InvokeVoidAsync("downloadStream",$"ERNI-Certificate-{item.CertificateNumber}.pdf",reference);}catch(ApiProblemException e){_error=e.Message;}finally{_downloading=false;}}
+}
