@@ -51,9 +51,12 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 - `LearningPortal.Application.csproj` — references only Domain/Shared and application-level validation/logging abstractions.
 - `DependencyInjection.cs` — is the Application composition extension for handlers and FluentValidation validators.
 - `Abstractions/Identity/IIdentityService.cs` — keeps authentication use cases independent from ASP.NET Identity implementation types.
-- `Abstractions/Identity/ICurrentUserService.cs` — exposes authenticated user identity without coupling Application or Domain to HTTP.
+- `Abstractions/Identity/ICurrentUserService.cs` — exposes authenticated identity, profile claims, roles, and reusable claim/role checks without coupling Application to HTTP.
 - `Abstractions/Networking/IClientIpAddressProvider.cs` — supplies request-origin metadata without coupling authentication use cases to `HttpContext`.
 - `Abstractions/Time/ISystemClock.cs` — abstracts UTC time for deterministic auditing and tests.
+- `Authorization/ApplicationRoles.cs` — defines and validates the Administrator, Instructor, and Student role allowlist.
+- `Authorization/ApplicationClaimTypes.cs` — centralizes JWT/current-user claim names and reserves the future permission claim.
+- `Authorization/Policies.cs` — defines stable names for every registered role policy.
 - `Abstractions/Messaging/ICommand.cs` — marks state-changing CQRS messages.
 - `Abstractions/Messaging/ICommandDispatcher.cs` — dispatches Result-based commands through custom pipeline components without MediatR.
 - `Abstractions/Messaging/ICommandHandler.cs` — defines asynchronous command execution for dependency injection and testing.
@@ -82,7 +85,9 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 This project contains replaceable external-system implementations.
 
 - `LearningPortal.Infrastructure.csproj` — references Application/Domain and owns EF Core, SQL Server, Identity, JWT, and health-check packages.
-- `DependencyInjection.cs` — composes scoped and factory-created SQL Server contexts through one retry/interceptor configuration, plus Identity, JWT validation, repositories, unit of work, and database readiness checks.
+- `DependencyInjection.cs` — composes SQL Server, Identity role validation/seeding, JWT validation, authorization policies, repositories, unit of work, and database readiness checks.
+- `Authorization/AuthorizationServiceCollectionExtensions.cs` — registers the authenticated fallback and named role policies in one focused location.
+- `Authorization/ApplicationRoleValidator.cs` — prevents creation of Identity roles outside the application allowlist.
 - `Identity/ApplicationUser.cs` — extends the Identity persistence model with portal-specific profile data and an explicit enabled-account state.
 - `Identity/JwtOptions.cs` — provides strongly typed, startup-validated token settings.
 - `Identity/IdentityService.cs` — executes the complete refresh transaction through SQL Server's retry strategy and uses a factory-created context for concurrency replay recovery.
@@ -91,7 +96,10 @@ This project contains replaceable external-system implementations.
 - `Identity/RefreshTokenProtector.cs` — creates 512-bit tokens and SHA-256 hashes while ensuring raw values are never persisted.
 - `Identity/IAccessTokenGenerator.cs` — abstracts signed access-token generation from refresh-token lifecycle logic.
 - `Identity/JwtAccessTokenGenerator.cs` — emits signed JWTs containing sub, name, email, role, jti, and numeric iat claims.
-- `Identity/CurrentUserService.cs` — resolves the GUID user identifier from the current authenticated HTTP principal.
+- `Identity/CurrentUserService.cs` — projects user, profile, role, and future permission claims from the authenticated HTTP principal.
+- `Identity/IIdentityRoleSeeder.cs` — abstracts the asynchronous, idempotent role-seeding operation.
+- `Identity/IdentityRoleSeeder.cs` — creates only missing application roles with UUIDv7 identifiers and never seeds users.
+- `Identity/IdentityRoleSeedingExtensions.cs` — invokes the scoped role seeder from the API composition root during startup.
 - `Networking/ClientIpAddressProvider.cs` — captures the remote request IP for refresh-token creation and revocation audit fields.
 - `Time/SystemClock.cs` — implements application time through the platform TimeProvider.
 - `Persistence/ApplicationDbContext.cs` — is the single EF Core unit of work for business aggregates and Identity tables.
@@ -112,7 +120,7 @@ This project contains replaceable external-system implementations.
 This project is the Minimal API host and composition root.
 
 - `LearningPortal.Api.csproj` — references Application, Infrastructure, and Shared while hosting ASP.NET Core and Swagger.
-- `Program.cs` — builds logging/DI, orders middleware, maps endpoints, and exposes an integration-test entry point.
+- `Program.cs` — builds logging/DI, seeds missing Identity roles, orders middleware, maps endpoints, and exposes an integration-test entry point.
 - `DependencyInjection.cs` — centralizes API CORS, Problem Details factory registration, Swagger, and ordered pipeline registration.
 - `Endpoints/IdentityEndpoints.cs` — maps anonymous login, refresh, and idempotent revoke endpoints to the custom CQRS dispatcher and Result-to-HTTP conventions.
 - `Endpoints/CourseEndpoints.cs` — maps protected course HTTP routes to CQRS handlers and Result responses.
@@ -128,6 +136,7 @@ This project is the Minimal API host and composition root.
 - `ProblemDetails/ApiProblemDetailsFactory.cs` — centralizes status, title, type, trace, correlation, and error-code output.
 - `Extensions/MiddlewareExtensions.cs` — exposes explicit correlation and exception pipeline registration methods.
 - `Extensions/ResultExtensions.cs` — translates transport-neutral Result errors into appropriate HTTP status codes.
+- `Extensions/AuthorizationEndpointExtensions.cs` — applies named role policies to Minimal API endpoints without magic strings.
 - `Health/HealthResponseWriter.cs` — emits compact JSON health output for operators and orchestrators.
 - `appsettings.json` — contains safe defaults for SQL Server, JWT metadata, CORS, logging, and host filtering; its JWT secret is intentionally blank.
 - `appsettings.Development.json` — supplies local-only developer logging and a replaceable development signing key.
@@ -163,9 +172,14 @@ This project is the interactive Blazor Web App host.
 
 This project verifies authentication behavior against real Identity services and an isolated EF Core store.
 
-- `LearningPortal.Infrastructure.Tests.csproj` — declares the .NET 10 xUnit test assembly and references the layers exercised by authentication tests.
+- `LearningPortal.Infrastructure.Tests.csproj` — declares the fast .NET 10 xUnit assembly for authentication and authorization tests.
 - `Authentication/AuthenticationTestContext.cs` — builds a deterministic Identity/EF test host with fake UTC time and client IP abstractions.
 - `Authentication/IdentityServiceTests.cs` — verifies login, lockout, hash-only storage, rotation, replay containment, expiry, idempotent revocation, duplicate refresh rejection, and JWT claims.
+- `Authorization/ApplicationRolesTests.cs` — verifies the fixed role allowlist and case-insensitive validation.
+- `Authorization/CurrentUserServiceTests.cs` — verifies current-user claim projection, distinct roles, and claim/role helpers.
+- `Authorization/AuthorizationPolicyTests.cs` — verifies the authenticated fallback and role composition of every named policy.
+- `Authorization/AuthorizationEndpointExtensionsTests.cs` — verifies that each Minimal API helper applies the expected policy metadata.
+- `Authorization/IdentityRoleSeederTests.cs` — verifies idempotent role creation and rejection of unsupported role creation/assignment.
 
 ## LearningPortal.Infrastructure.IntegrationTests
 

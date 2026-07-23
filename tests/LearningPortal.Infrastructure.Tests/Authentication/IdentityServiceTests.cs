@@ -211,5 +211,10 @@ public sealed class IdentityServiceTests
         Assert.Contains(token.Claims, claim => claim.Type == "role" && claim.Value == AuthenticationTestContext.Role);
         Assert.Contains(token.Claims, claim => claim.Type == JwtRegisteredClaimNames.Jti);
         Assert.Contains(token.Claims, claim => claim.Type == JwtRegisteredClaimNames.Iat);
+        var roles = token.Claims
+            .Where(claim => claim.Type == "role")
+            .Select(claim => claim.Value)
+            .ToArray();
+        Assert.Equal(roles.Distinct(StringComparer.OrdinalIgnoreCase), roles);
     }
 }

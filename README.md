@@ -52,9 +52,27 @@ The full file-by-file placement rationale is in [docs/FILE_CATALOG.md](docs/FILE
 
 Swagger is available at `https://localhost:7081/swagger`, the Blazor host at `https://localhost:7080`, and API health probes at `/health/live` and `/health/ready`.
 
+## Authorization architecture
+
+Authorization defaults to authenticated access. Login, refresh, revoke, liveness, and readiness explicitly remain anonymous.
+
+| Role | Intended capabilities |
+| --- | --- |
+| `Administrator` | Full portal access and access to every role policy |
+| `Instructor` | Create courses, manage lessons, and view students |
+| `Student` | Enroll, learn, and take quizzes |
+
+Application code uses `ApplicationRoles`, `ApplicationClaimTypes`, and `Policies` instead of magic strings. The registered policies are `AdminOnly`, `InstructorOnly`, `StudentOnly`, and `AdminOrInstructor`; administrators satisfy all four policies.
+
+Minimal API endpoints can use `RequireAdministrator()`, `RequireInstructor()`, `RequireStudent()`, or `RequireAdminOrInstructor()`. The current-user abstraction exposes the authenticated identifier, display name, email, roles, and claim/role helpers without exposing `HttpContext` to Application.
+
+The `permission` claim name is reserved so permission requirements can be added later without changing token contracts. This foundation intentionally does not include permission tables, dynamic policy providers, role-management UI, or database-backed permission evaluation.
+
+At startup, only missing `Administrator`, `Instructor`, and `Student` Identity roles are created. Role seeding is idempotent and never creates users.
+
 ## Tests
 
-Run the fast authentication service tests without Docker:
+Run the fast authentication and authorization tests without Docker:
 
 ```powershell
 dotnet test tests/LearningPortal.Infrastructure.Tests/LearningPortal.Infrastructure.Tests.csproj --configuration Release

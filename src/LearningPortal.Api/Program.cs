@@ -2,6 +2,7 @@ using LearningPortal.Api;
 using LearningPortal.Api.Endpoints;
 using LearningPortal.Application;
 using LearningPortal.Infrastructure;
+using LearningPortal.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,8 @@ builder.Services
     .AddApi(builder.Configuration);
 
 var app = builder.Build();
+
+await app.SeedIdentityRolesAsync();
 
 app.UseApiPipeline();
 app.MapIdentityEndpoints();

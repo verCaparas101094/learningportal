@@ -1,8 +1,10 @@
 using System.Text;
 using LearningPortal.Application.Abstractions.Identity;
-using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Application.Abstractions.Networking;
+using LearningPortal.Application.Abstractions.Time;
+using LearningPortal.Application.Authorization;
 using LearningPortal.Domain.Repositories;
+using LearningPortal.Infrastructure.Authorization;
 using LearningPortal.Infrastructure.Identity;
 using LearningPortal.Infrastructure.Persistence;
 using LearningPortal.Infrastructure.Persistence.Interceptors;
@@ -55,6 +57,7 @@ public static class DependencyInjection
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             })
             .AddRoles<IdentityRole<Guid>>()
+            .AddRoleValidator<ApplicationRoleValidator>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddSignInManager()
             .AddDefaultTokenProviders();
@@ -86,16 +89,17 @@ public static class DependencyInjection
                     IssuerSigningKey = signingKey,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromMinutes(1),
-                    NameClaimType = "name",
-                    RoleClaimType = "role"
+                    NameClaimType = ApplicationClaimTypes.DisplayName,
+                    RoleClaimType = ApplicationClaimTypes.Role
                 };
             });
 
-        services.AddAuthorization();
+        services.AddApplicationAuthorization();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IIdentityRoleSeeder, IdentityRoleSeeder>();
         services.AddScoped<IAccessTokenGenerator, JwtAccessTokenGenerator>();
         services.AddSingleton<IRefreshTokenProtector, RefreshTokenProtector>();
         services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("sql-server", tags: ["ready"]);

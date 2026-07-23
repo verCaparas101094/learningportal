@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using LearningPortal.Application.Abstractions.Time;
+using LearningPortal.Application.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -31,18 +32,21 @@ public sealed class JwtAccessTokenGenerator(
         var expiresAtUtc = now.AddMinutes(jwtOptions.ExpirationMinutes);
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new("name", string.IsNullOrWhiteSpace(user.DisplayName) ? user.Email ?? user.UserName ?? user.Id.ToString() : user.DisplayName),
-            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-            new(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString()),
+            new(ApplicationClaimTypes.UserId, user.Id.ToString()),
+            new(ApplicationClaimTypes.DisplayName, string.IsNullOrWhiteSpace(user.DisplayName) ? user.Email ?? user.UserName ?? user.Id.ToString() : user.DisplayName),
+            new(ApplicationClaimTypes.Email, user.Email ?? string.Empty),
+            new(ApplicationClaimTypes.JwtId, Guid.CreateVersion7().ToString()),
             new(
-                JwtRegisteredClaimNames.Iat,
+                ApplicationClaimTypes.IssuedAt,
                 now.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture),
                 ClaimValueTypes.Integer64)
         };
 
         var roles = await userManager.GetRolesAsync(user);
-        claims.AddRange(roles.Select(role => new Claim("role", role)));
+        claims.AddRange(
+            roles
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Select(role => new Claim(ApplicationClaimTypes.Role, role)));
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey));
         var token = new JwtSecurityToken(
