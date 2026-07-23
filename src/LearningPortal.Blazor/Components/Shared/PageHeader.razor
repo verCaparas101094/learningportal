@@ -1,0 +1,35 @@
+<header class="page-header">
+    <div>
+        @if (!string.IsNullOrWhiteSpace(Eyebrow))
+        {
+            <p class="eyebrow">@Eyebrow</p>
+        }
+        <h1>@Title</h1>
+        @if (!string.IsNullOrWhiteSpace(Description))
+        {
+            <p class="description">@Description</p>
+        }
+    </div>
+    @if (Actions is not null)
+    {
+        <div class="actions">@Actions</div>
+    }
+</header>
+
+@code {
+    /// <summary>Gets or sets optional context shown above the title.</summary>
+    [Parameter]
+    public string? Eyebrow { get; set; }
+
+    /// <summary>Gets or sets the page title.</summary>
+    [Parameter, EditorRequired]
+    public required string Title { get; set; }
+
+    /// <summary>Gets or sets supporting page text.</summary>
+    [Parameter]
+    public string? Description { get; set; }
+
+    /// <summary>Gets or sets optional page-level actions.</summary>
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+}

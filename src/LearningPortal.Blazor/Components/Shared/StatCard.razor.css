@@ -1,0 +1,39 @@
+::deep .stat-card {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    min-height: 7rem;
+}
+
+.stat-icon {
+    align-items: center;
+    background: var(--color-primary-soft);
+    border-radius: .8rem;
+    color: var(--color-primary);
+    display: flex;
+    flex: 0 0 2.8rem;
+    font-size: 1.25rem;
+    height: 2.8rem;
+    justify-content: center;
+}
+
+p {
+    color: var(--color-text-muted);
+    font-size: .78rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+strong {
+    display: block;
+    font-size: 1.45rem;
+    letter-spacing: -.03em;
+    margin-top: .2rem;
+}
+
+small {
+    color: var(--color-success);
+    display: block;
+    font-size: .7rem;
+    margin-top: .15rem;
+}

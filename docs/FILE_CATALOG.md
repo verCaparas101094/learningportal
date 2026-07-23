@@ -158,23 +158,34 @@ This project is the Minimal API host and composition root.
 
 This project is the interactive Blazor Web App host.
 
-- `LearningPortal.Blazor.csproj` — hosts Razor components and references only Shared contracts.
+- `LearningPortal.Blazor.csproj` — hosts Razor components and references Application authorization constants plus Shared contracts.
 - `Program.cs` — configures logging, middleware, static assets, server interactivity, and the host health endpoint.
-- `DependencyInjection.cs` — validates the API URL and registers Razor components, a typed HTTP client, and health checks.
+- `DependencyInjection.cs` — validates the API URL and registers Razor components, component authorization state, a typed HTTP client, and health checks.
 - `Models/ApiHealthResponse.cs` — models only the health payload consumed by the UI.
 - `Services/LearningPortalApiClient.cs` — encapsulates asynchronous HTTP access so components remain testable and presentation-focused.
 - `Components/App.razor` — defines the HTML document shell, asset links, router output, and Blazor reconnect script.
-- `Components/Routes.razor` — owns route discovery, focus behavior, and the default layout.
-- `Components/_Imports.razor` — centralizes namespaces and Razor imports shared by all components.
-- `Components/Pages/Home.razor` — provides the portal landing page and displays API connectivity through the typed client.
+- `Components/Routes.razor` — owns authorization-aware route discovery, focus behavior, and the default layout.
+- `Components/RedirectToAccessDenied.razor` — redirects unauthenticated or unauthorized component navigation safely.
+- `Components/_Imports.razor` — centralizes authorization, layout, design-component, and framework namespaces.
+- `Components/Pages/Dashboard.razor` and `.css` — demonstrate the authenticated design system with static learning and course samples.
+- `Components/Pages/MyCourses.razor` — provides the scoped learner placeholder.
+- `Components/Pages/Users.razor` — provides the administrator-only user-management placeholder.
+- `Components/Pages/AccessDenied.razor` and `.css` — explain unauthenticated and role-denied navigation.
 - `Components/Pages/Error.razor` — provides a safe host-level error page with a request identifier.
 - `Components/Pages/NotFound.razor` — provides the route-not-found experience.
-- `Components/Layout/MainLayout.razor` — supplies the shared page layout and global Blazor error UI.
-- `Components/Layout/MainLayout.razor.css` — scopes layout and error-banner styling to `MainLayout`.
+- `Components/Layout/MainLayout.razor` and `.css` — provide the responsive authenticated shell, role-aware navigation, top bar, profile summary, and global error UI.
+- `Components/Layout/NavigationSection.razor` and `.css` — group role-specific links consistently within the sidebar.
+- `Components/Shared/AppCard.razor` and `.css` — provide the base rounded content surface.
+- `Components/Shared/StatCard.razor` and `.css` — display concise dashboard metrics.
+- `Components/Shared/StatusBadge.razor` and `.css` — display allowlisted semantic status tones.
+- `Components/Shared/PageHeader.razor` and `.css` — standardize page titles, descriptions, and actions.
+- `Components/Shared/EmptyState.razor` and `.css` — provide a consistent no-content placeholder.
+- `Components/Shared/LoadingState.razor` and `.css` — provide an accessible lightweight loading indicator.
+- `Components/Shared/AuthenticatedContent.razor` — protects component content with the current principal and optional application roles without changing JWT behavior.
 - `Components/Layout/ReconnectModal.razor` — displays interactive-server connection state and retry actions.
 - `Components/Layout/ReconnectModal.razor.css` — scopes reconnect dialog styling.
 - `Components/Layout/ReconnectModal.razor.js` — integrates browser events with Blazor reconnect/reload behavior.
-- `wwwroot/app.css` — defines application-wide visual styles and the portal landing-page presentation.
+- `wwwroot/app.css` — defines accessible theme tokens, focus states, buttons, and shared shell/card variants.
 - `appsettings.json` — configures the API base URL, host filtering, and normal logging levels.
 - `appsettings.Development.json` — increases local diagnostic logging without changing production defaults.
 - `Properties/launchSettings.json` — defines stable Blazor ports and an HTTP-only API URL override for that profile.

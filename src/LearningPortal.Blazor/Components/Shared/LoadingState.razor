@@ -1,0 +1,10 @@
+<div class="loading-state" role="status" aria-live="polite">
+    <span class="loading-spinner" aria-hidden="true"></span>
+    <span>@Message</span>
+</div>
+
+@code {
+    /// <summary>Gets or sets the accessible loading message.</summary>
+    [Parameter]
+    public string Message { get; set; } = "Loading content…";
+}

@@ -1,0 +1,29 @@
+<AppCard AdditionalClass="stat-card">
+    <div class="stat-icon" aria-hidden="true">@Icon</div>
+    <div>
+        <p>@Label</p>
+        <strong>@Value</strong>
+        @if (!string.IsNullOrWhiteSpace(Detail))
+        {
+            <small>@Detail</small>
+        }
+    </div>
+</AppCard>
+
+@code {
+    /// <summary>Gets or sets the concise icon or symbol.</summary>
+    [Parameter]
+    public string Icon { get; set; } = "•";
+
+    /// <summary>Gets or sets the metric label.</summary>
+    [Parameter, EditorRequired]
+    public required string Label { get; set; }
+
+    /// <summary>Gets or sets the primary metric value.</summary>
+    [Parameter, EditorRequired]
+    public required string Value { get; set; }
+
+    /// <summary>Gets or sets optional supporting text.</summary>
+    [Parameter]
+    public string? Detail { get; set; }
+}

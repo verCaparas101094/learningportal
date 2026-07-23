@@ -5,7 +5,7 @@ namespace LearningPortal.Blazor;
 /// <summary>Registers services owned by the Blazor presentation host.</summary>
 public static class DependencyInjection
 {
-    /// <summary>Adds Razor components, the API client, and host health checks.</summary>
+    /// <summary>Adds Razor components, component authorization, the API client, and host health checks.</summary>
     public static IServiceCollection AddBlazorPresentation(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -17,6 +17,8 @@ public static class DependencyInjection
         }
 
         services.AddRazorComponents().AddInteractiveServerComponents();
+        services.AddAuthorizationCore();
+        services.AddCascadingAuthenticationState();
         services.AddHttpClient<LearningPortalApiClient>(client => client.BaseAddress = apiUri);
         services.AddHealthChecks();
 

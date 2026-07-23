@@ -1,0 +1,98 @@
+@page "/"
+@page "/dashboard"
+@rendermode InteractiveServer
+
+<PageTitle>Dashboard | Learning Portal</PageTitle>
+
+<AuthenticatedContent>
+<PageHeader Eyebrow="Learning workspace"
+            Title="Welcome back, Alex"
+            Description="Continue your learning journey and keep your goals moving forward." />
+
+<AppCard AdditionalClass="continue-card">
+    <div class="continue-art" aria-hidden="true">
+        <span>UX</span>
+    </div>
+    <div class="continue-copy">
+        <StatusBadge Text="In progress" Tone="primary" />
+        <p class="continue-eyebrow">Continue learning</p>
+        <h2>Product Design Fundamentals</h2>
+        <p>Module 6 of 10 · Designing accessible user flows</p>
+        <div class="progress-row">
+            <div class="progress-track" aria-label="Course progress: 64 percent">
+                <span style="width: 64%"></span>
+            </div>
+            <strong>64%</strong>
+        </div>
+        <a class="button button-primary" href="/my-courses">Resume course <span aria-hidden="true">→</span></a>
+    </div>
+</AppCard>
+
+<section class="dashboard-section" aria-labelledby="overview-heading">
+    <div class="section-heading">
+        <div>
+            <h2 id="overview-heading">Your overview</h2>
+            <p>A quick look at your current learning activity.</p>
+        </div>
+    </div>
+    <div class="stat-grid">
+        <StatCard Icon="▤" Label="Courses in progress" Value="5" Detail="2 due this week" />
+        <StatCard Icon="✓" Label="Courses completed" Value="18" Detail="+3 this quarter" />
+        <StatCard Icon="◇" Label="Certificates earned" Value="12" Detail="Latest: UX Foundations" />
+        <StatCard Icon="☆" Label="Learning streak" Value="14 days" Detail="Personal best" />
+    </div>
+</section>
+
+<section class="dashboard-section" aria-labelledby="courses-heading">
+    <div class="section-heading">
+        <div>
+            <h2 id="courses-heading">Explore courses</h2>
+            <p>Recommended learning based on your interests.</p>
+        </div>
+        <a href="/my-courses">View all courses <span aria-hidden="true">→</span></a>
+    </div>
+
+    <div class="course-grid">
+        @foreach (var course in Courses)
+        {
+            <AppCard AdditionalClass="course-card">
+                <div class="course-cover @course.CoverClass">
+                    <span>@course.Abbreviation</span>
+                    <StatusBadge Text="@course.Level" />
+                </div>
+                <div class="course-body">
+                    <p class="course-category">@course.Category</p>
+                    <h3>@course.Title</h3>
+                    <p class="course-meta">@course.Modules modules · @course.Duration</p>
+                    <div class="course-progress">
+                        <div class="progress-track" aria-label="@($"{course.Progress} percent complete")">
+                            <span style="@($"width: {course.Progress}%")"></span>
+                        </div>
+                        <small>@course.Progress%</small>
+                    </div>
+                </div>
+            </AppCard>
+        }
+    </div>
+</section>
+</AuthenticatedContent>
+
+@code {
+    private static readonly CourseSample[] Courses =
+    [
+        new("LD", "Leadership", "Leading High-Performing Teams", "Intermediate", 8, "4h 20m", 72, "cover-blue"),
+        new("DA", "Data", "Data Literacy for Everyone", "Beginner", 10, "5h 15m", 35, "cover-violet"),
+        new("CS", "Security", "Cybersecurity Essentials", "Required", 6, "2h 40m", 88, "cover-teal"),
+        new("CM", "Communication", "Presenting with Confidence", "Popular", 7, "3h 10m", 20, "cover-orange")
+    ];
+
+    private sealed record CourseSample(
+        string Abbreviation,
+        string Category,
+        string Title,
+        string Level,
+        int Modules,
+        string Duration,
+        int Progress,
+        string CoverClass);
+}

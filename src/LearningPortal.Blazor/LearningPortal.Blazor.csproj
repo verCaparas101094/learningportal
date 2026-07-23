@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <ProjectReference Include="..\LearningPortal.Application\LearningPortal.Application.csproj" />
     <ProjectReference Include="..\LearningPortal.Shared\LearningPortal.Shared.csproj" />
   </ItemGroup>
 

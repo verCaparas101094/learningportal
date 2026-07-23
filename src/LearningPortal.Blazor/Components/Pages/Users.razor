@@ -1,0 +1,18 @@
+@page "/users"
+@rendermode InteractiveServer
+
+<PageTitle>Users | Learning Portal</PageTitle>
+
+<AuthenticatedContent Roles="@ApplicationRoles.Administrator">
+<PageHeader Eyebrow="Administration"
+            Title="Users"
+            Description="Manage learner access, account status, and application roles.">
+    <Actions>
+        <button class="button button-primary" type="button">Invite user</button>
+    </Actions>
+</PageHeader>
+
+<EmptyState Icon="♙"
+            Title="User management UI is coming next"
+            Description="The administrator API already exists. Table functionality is intentionally outside this design-shell phase." />
+</AuthenticatedContent>
