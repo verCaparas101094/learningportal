@@ -5,6 +5,8 @@ using LearningPortal.Application.Abstractions.Networking;
 using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Application.Authorization;
 using LearningPortal.Application.InstructorEligibility;
+using LearningPortal.Application.AiTutor;
+using LearningPortal.Infrastructure.AiTutor;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Authorization;
 using LearningPortal.Infrastructure.Identity;
@@ -81,6 +83,17 @@ public static class DependencyInjection
         if (eligibilityOptions.QualificationThreshold is < 1 or > 100)
             throw new InvalidOperationException("Instructor eligibility threshold must be between 1 and 100.");
         services.AddSingleton(eligibilityOptions);
+        var ollamaOptions = configuration.GetSection(OllamaOptions.SectionName)
+            .Get<OllamaOptions>() ?? new OllamaOptions();
+        ValidateOllamaOptions(ollamaOptions);
+        services.AddSingleton(ollamaOptions);
+        services.AddHttpClient<IOllamaClient, OllamaClient>(client =>
+        {
+            client.BaseAddress = new Uri(
+                ollamaOptions.BaseUrl.TrimEnd('/') + "/",
+                UriKind.Absolute);
+            client.Timeout = TimeSpan.FromSeconds(ollamaOptions.RequestTimeoutSeconds);
+        });
 
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
             ?? throw new InvalidOperationException("JWT configuration is missing.");
@@ -115,6 +128,7 @@ public static class DependencyInjection
         services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IInstructorEligibilityRepository, InstructorEligibilityRepository>();
+        services.AddScoped<IAiTutorConversationRepository, AiTutorConversationRepository>();
         services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IIdentityService, IdentityService>();
@@ -125,6 +139,26 @@ public static class DependencyInjection
         services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("sql-server", tags: ["ready"]);
 
         return services;
+    }
+
+    private static void ValidateOllamaOptions(OllamaOptions options)
+    {
+        if (!Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out var baseUri)
+            || baseUri.Scheme is not ("http" or "https"))
+        {
+            throw new InvalidOperationException(
+                "Ollama BaseUrl must be an absolute HTTP or HTTPS URL.");
+        }
+
+        if (string.IsNullOrWhiteSpace(options.Model)
+            || options.RequestTimeoutSeconds is < 1 or > 600
+            || options.MaxContextCharacters is < 1_000 or > 200_000
+            || options.MaxQuestionCharacters is < 1 or > 10_000
+            || options.MaxConversationMessages is < 1 or > 100
+            || options.Temperature is < 0 or > 2)
+        {
+            throw new InvalidOperationException("The Ollama configuration is invalid.");
+        }
     }
 
     private static void ConfigureApplicationDbContext(

@@ -1,0 +1,60 @@
+@page "/admin/ai-tutor"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>AI Tutor health | Learning Portal</PageTitle>
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        <PageHeader Eyebrow="Administration"
+                    Title="Local AI Tutor health"
+                    Description="Connectivity and configured model availability without exposing connection details." />
+        @if (_loading)
+        {
+            <LoadingState Message="Checking local Ollama…" />
+        }
+        else if (_error is not null)
+        {
+            <div class="feedback error" role="alert">@_error</div>
+        }
+        else if (_health is not null)
+        {
+            <AppCard>
+                <dl>
+                    <dt>Feature</dt><dd>@(_health.Enabled ? "Enabled" : "Disabled")</dd>
+                    <dt>Local service</dt><dd>@(_health.Reachable ? "Reachable" : "Unavailable")</dd>
+                    <dt>Configured model</dt><dd>@(_health.ModelAvailable ? "Available" : "Unavailable")</dd>
+                    <dt>Status</dt><dd><StatusBadge Text="@_health.Status" /></dd>
+                </dl>
+                <button class="button" @onclick="LoadAsync">Check again</button>
+            </AppCard>
+        }
+    </Authorized>
+    <NotAuthorized><p role="alert">Administrator access is required.</p></NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private OllamaHealthResponse? _health;
+    private string? _error;
+    private bool _loading = true;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _health = await ApiClient.GetOllamaHealthAsync();
+        }
+        catch (ApiProblemException exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

@@ -43,6 +43,8 @@ using LearningPortal.Shared.Learning;
 using LearningPortal.Application.Quizzes;
 using LearningPortal.Shared.Quizzes;
 using LearningPortal.Application.InstructorEligibility;
+using LearningPortal.Application.AiTutor;
+using LearningPortal.Shared.AiTutor;
 using LearningPortal.Shared.InstructorEligibility;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -116,6 +118,14 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetSkills, Result<IReadOnlyList<SkillResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
         services.AddScoped<ICommandHandler<RecalculateInstructorEligibility, Result<IReadOnlyList<InstructorEligibilityResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
         services.AddScoped<ICommandHandler<AssignCourseInstructor, Result<CourseResponse>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
+        services.AddScoped<IAiTutorContextBuilder, AiTutorContextBuilder>();
+        services.AddScoped<AiTutorHandler>();
+        services.AddScoped<ICommandHandler<StartAiTutorConversation, Result<AiTutorConversationResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<ICommandHandler<SendAiTutorMessage, Result<AiTutorReplyResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<ICommandHandler<ArchiveAiTutorConversation, Result<AiTutorConversationResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<IQueryHandler<GetMyAiTutorConversations, Result<IReadOnlyList<AiTutorConversationListItemResponse>>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<IQueryHandler<GetAiTutorConversation, Result<AiTutorConversationResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<IQueryHandler<CheckOllamaHealth, Result<OllamaHealthResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
 
         return services;
     }

@@ -18,6 +18,7 @@ else if (_player is not null)
             else if (_player.LessonType == "Pdf" && _player.SourceUrl is not null) { <LessonPdfViewer SourceUrl="@_player.SourceUrl" /> }
             else if (_player.SourceUrl is not null) { <a class="button button-primary" href="@_player.SourceUrl" target="_blank" rel="noopener noreferrer">Open external resource</a> }
             <div class="course-actions">
+                <a class="button" href="@($"/ai-tutor?courseId={_player.CourseId:D}&lessonId={_player.LessonId:D}")">Ask about this lesson</a>
                 @if (_player.PreviousLessonId is Guid previous) { <a class="button" href="@($"/learn/{CourseSlug}/lessons/{previous}")">Previous</a> }
                 <button class="button button-primary" disabled="@_completing" @onclick="CompleteAsync">Mark complete</button>
                 @if (_player.NextLessonId is Guid next) { <a class="button" href="@($"/learn/{CourseSlug}/lessons/{next}")">Next</a> }

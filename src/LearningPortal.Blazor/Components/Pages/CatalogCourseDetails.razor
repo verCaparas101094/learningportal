@@ -14,6 +14,7 @@ else if (_course is not null)
             else if (_course.CanContinue)
             {
                 <button class="button button-primary" disabled="@_mutating" @onclick="ContinueAsync">Continue learning</button>
+                <a class="button" href="@($"/ai-tutor?courseId={_course.CourseId:D}")">Ask AI Tutor</a>
                 <button class="button button-danger" disabled="@_mutating" @onclick="OpenWithdraw">Withdraw</button>
             }
         </Actions>

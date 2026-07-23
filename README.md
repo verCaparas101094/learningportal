@@ -52,6 +52,47 @@ The full file-by-file placement rationale is in [docs/FILE_CATALOG.md](docs/FILE
 
 Swagger is available at `https://localhost:7081/swagger`, the Blazor host at `https://localhost:7080`, and API health probes at `/health/live` and `/health/ready`.
 
+## Local Ollama AI Tutor
+
+The AI Tutor uses only a locally configured Ollama HTTP service. It has no
+OpenAI, Azure OpenAI, Gemini, Anthropic, or other external AI fallback.
+Install Ollama separately, then prepare and start the default model:
+
+```powershell
+ollama pull llama3.2:3b
+ollama list
+ollama serve
+```
+
+The default API configuration is:
+
+```json
+"Ollama": {
+  "BaseUrl": "http://localhost:11434",
+  "Model": "llama3.2:3b",
+  "RequestTimeoutSeconds": 120,
+  "MaxContextCharacters": 30000,
+  "MaxQuestionCharacters": 2000,
+  "MaxConversationMessages": 20,
+  "Temperature": 0.2,
+  "Enabled": true
+}
+```
+
+Verify connectivity with `http://localhost:11434/api/tags` or the
+administrator-only AI Tutor health page. If the tutor reports that the model is
+unavailable, compare `ollama list` with the configured model name. If the
+service is unreachable, start `ollama serve` and confirm the configured URL.
+Set `Ollama__Enabled=false` to disable the optional feature without affecting
+the application health probes.
+
+Only learner-visible published course material and bounded recent conversation
+history are sent to the configured Ollama service. User emails, tokens,
+connection strings, certificate codes, hidden prompts, other learners' data,
+and unpublished content are excluded. Prompts and responses are not logged.
+Prompt-injection defenses reduce risk but cannot eliminate it; the model has no
+portal tools, URL retrieval, filesystem, shell, or code-execution access.
+
 ## Authorization architecture
 
 Authorization defaults to authenticated access. Login, refresh, revoke, liveness, and readiness explicitly remain anonymous.

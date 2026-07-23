@@ -7,6 +7,7 @@ using LearningPortal.Domain.Enrollments.Exceptions;
 using LearningPortal.Domain.Learning;
 using LearningPortal.Domain.Quizzes;
 using LearningPortal.Domain.Skills;
+using LearningPortal.Domain.AiTutor;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
 using LearningPortal.Infrastructure.Persistence.Configurations;
@@ -44,6 +45,10 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Skill> Skills => Set<Skill>();
     /// <summary>Gets instructor eligibility records.</summary>
     public DbSet<InstructorEligibility> InstructorEligibility => Set<InstructorEligibility>();
+    /// <summary>Gets AI tutor conversations.</summary>
+    public DbSet<AiTutorConversation> AiTutorConversations=>Set<AiTutorConversation>();
+    /// <summary>Gets visible AI tutor messages.</summary>
+    public DbSet<AiTutorMessage> AiTutorMessages=>Set<AiTutorMessage>();
 
     /// <summary>Gets the persisted hashed refresh tokens.</summary>
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();

@@ -1,0 +1,262 @@
+@page "/ai-tutor"
+@rendermode InteractiveServer
+@implements IDisposable
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>AI Tutor | Learning Portal</PageTitle>
+
+<AuthenticatedContent>
+    <PageHeader Eyebrow="My learning"
+                Title="AI Tutor"
+                Description="Ask questions grounded in the published material from your courses." />
+
+    <div class="feedback warning" role="note">
+        AI answers may be imperfect. Verify important information. The tutor cannot
+        change scores, completion, eligibility, or certificates.
+    </div>
+
+    @if (_error is not null)
+    {
+        <div class="feedback error" role="alert">@_error</div>
+    }
+
+    @if (_loading)
+    {
+        <LoadingState Message="Loading AI Tutor conversations…" />
+    }
+    else
+    {
+        <div class="ai-tutor-layout">
+            <aside class="ai-tutor-sidebar">
+                <h2>Conversations</h2>
+                <label>
+                    Course
+                    <select @bind="_selectedCourseId">
+                        <option value="">Select an accessible course</option>
+                        @foreach (var course in _courses)
+                        {
+                            <option value="@course.CourseId">@course.CourseTitle</option>
+                        }
+                    </select>
+                </label>
+                <button class="button button-primary"
+                        disabled="@(_busy || _selectedCourseId is null)"
+                        @onclick="StartAsync">
+                    New conversation
+                </button>
+
+                @if (_conversations.Count == 0)
+                {
+                    <p>No conversations yet.</p>
+                }
+                else
+                {
+                    @foreach (var item in _conversations)
+                    {
+                        <button class="ai-tutor-conversation"
+                                @onclick="() => OpenAsync(item.Id)">
+                            <strong>@item.Title</strong>
+                            <small>@item.LastMessageAtUtc.ToLocalTime().ToString("g")</small>
+                        </button>
+                    }
+                }
+            </aside>
+
+            <section class="ai-tutor-chat" aria-live="polite">
+                @if (_active is null)
+                {
+                    <EmptyState Title="Choose a conversation"
+                                Description="Start a conversation for one of your active or completed courses." />
+                }
+                else
+                {
+                    <div class="ai-tutor-heading">
+                        <div>
+                            <h2>@_active.Title</h2>
+                            <StatusBadge Text="@_active.Status" />
+                        </div>
+                        <button class="button"
+                                disabled="@(_busy || _active.Status == "Archived")"
+                                @onclick="ArchiveAsync">
+                            Archive
+                        </button>
+                    </div>
+
+                    <div class="ai-tutor-messages">
+                        @foreach (var message in _active.Messages.OrderBy(value => value.Sequence))
+                        {
+                            <article class="@($"ai-tutor-message {message.Role.ToLowerInvariant()}")">
+                                <strong>@(message.Role == "User" ? "You" : "Local AI Tutor")</strong>
+                                <p>@message.Content</p>
+                            </article>
+                        }
+                    </div>
+
+                    @if (_active.Status == "Archived")
+                    {
+                        <div class="feedback warning">This conversation is archived and read-only.</div>
+                    }
+                    else
+                    {
+                        <label for="ai-question">Your question</label>
+                        <textarea id="ai-question" rows="4" maxlength="2000"
+                                  @bind="_question"
+                                  placeholder="Ask about the selected course material…"></textarea>
+                        <div class="course-actions">
+                            <button class="button button-primary"
+                                    disabled="@(_busy || string.IsNullOrWhiteSpace(_question))"
+                                    @onclick="SendAsync">
+                                @(_busy ? "Thinking…" : "Send")
+                            </button>
+                            @if (_busy)
+                            {
+                                <button class="button" @onclick="Cancel">Cancel</button>
+                            }
+                        </div>
+                    }
+                }
+            </section>
+        </div>
+    }
+</AuthenticatedContent>
+
+@code {
+    [SupplyParameterFromQuery(Name = "courseId")]
+    public Guid? CourseId { get; set; }
+
+    [SupplyParameterFromQuery(Name = "lessonId")]
+    public Guid? LessonId { get; set; }
+
+    private IReadOnlyCollection<MyLearningItemResponse> _courses = [];
+    private IReadOnlyList<AiTutorConversationListItemResponse> _conversations = [];
+    private AiTutorConversationResponse? _active;
+    private Guid? _selectedCourseId;
+    private string _question = string.Empty;
+    private string? _error;
+    private bool _loading = true;
+    private bool _busy;
+    private CancellationTokenSource? _sendCancellation;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var courses = await ApiClient.GetMyEnrollmentsAsync(
+                new(null, null, 1, 100));
+            _courses = courses.Items
+                .Where(item => item.Status is "Enrolled" or "InProgress" or "Completed")
+                .ToArray();
+            _conversations = await ApiClient.GetMyAiTutorConversationsAsync();
+            _selectedCourseId = CourseId ?? _courses.FirstOrDefault()?.CourseId;
+            if (CourseId is not null && !_conversations.Any())
+            {
+                await StartAsync();
+            }
+        }
+        catch (ApiProblemException exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task StartAsync()
+    {
+        if (_selectedCourseId is not Guid courseId)
+        {
+            return;
+        }
+
+        await MutateAsync(async cancellationToken =>
+        {
+            _active = await ApiClient.StartAiTutorConversationAsync(
+                new(courseId, courseId == CourseId ? LessonId : null),
+                cancellationToken);
+            await RefreshListAsync(cancellationToken);
+        });
+    }
+
+    private async Task OpenAsync(Guid id)
+    {
+        _error = null;
+        try
+        {
+            _active = await ApiClient.GetAiTutorConversationAsync(id);
+        }
+        catch (ApiProblemException exception)
+        {
+            _error = exception.Message;
+        }
+    }
+
+    private async Task SendAsync()
+    {
+        if (_active is null || string.IsNullOrWhiteSpace(_question))
+        {
+            return;
+        }
+
+        var question = _question;
+        await MutateAsync(async cancellationToken =>
+        {
+            var reply = await ApiClient.SendAiTutorMessageAsync(
+                _active.Id, new(question), cancellationToken);
+            _active = reply.Conversation;
+            _question = string.Empty;
+            await RefreshListAsync(cancellationToken);
+        });
+    }
+
+    private async Task ArchiveAsync()
+    {
+        if (_active is null)
+        {
+            return;
+        }
+
+        await MutateAsync(async cancellationToken =>
+        {
+            _active = await ApiClient.ArchiveAiTutorConversationAsync(
+                _active.Id, cancellationToken);
+            await RefreshListAsync(cancellationToken);
+        });
+    }
+
+    private async Task RefreshListAsync(CancellationToken cancellationToken) =>
+        _conversations = await ApiClient.GetMyAiTutorConversationsAsync(cancellationToken);
+
+    private async Task MutateAsync(Func<CancellationToken, Task> action)
+    {
+        _error = null;
+        _busy = true;
+        _sendCancellation?.Dispose();
+        _sendCancellation = new CancellationTokenSource();
+        try
+        {
+            await action(_sendCancellation.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            _error = "The AI Tutor request was cancelled.";
+        }
+        catch (ApiProblemException exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void Cancel() => _sendCancellation?.Cancel();
+
+    public void Dispose()
+    {
+        _sendCancellation?.Cancel();
+        _sendCancellation?.Dispose();
+    }
+}
