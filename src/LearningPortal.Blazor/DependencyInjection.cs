@@ -19,7 +19,11 @@ public static class DependencyInjection
         services.AddRazorComponents().AddInteractiveServerComponents();
         services.AddAuthorizationCore();
         services.AddCascadingAuthenticationState();
-        services.AddHttpClient<LearningPortalApiClient>(client => client.BaseAddress = apiUri);
+        services.AddHttpContextAccessor();
+        services.AddTransient<CurrentBearerTokenHandler>();
+        services
+            .AddHttpClient<LearningPortalApiClient>(client => client.BaseAddress = apiUri)
+            .AddHttpMessageHandler<CurrentBearerTokenHandler>();
         services.AddHealthChecks();
 
         return services;
