@@ -100,6 +100,7 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IIdentityRoleSeeder, IdentityRoleSeeder>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
         services.AddScoped<IAccessTokenGenerator, JwtAccessTokenGenerator>();
         services.AddSingleton<IRefreshTokenProtector, RefreshTokenProtector>();
         services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("sql-server", tags: ["ready"]);

@@ -7,9 +7,14 @@ using LearningPortal.Application.Authentication.Commands.Revoke;
 using LearningPortal.Application.Courses.Commands.CreateCourse;
 using LearningPortal.Application.Courses.Queries.GetCourses;
 using LearningPortal.Application.Messaging;
+using LearningPortal.Application.UserManagement.Commands.AssignUserRole;
+using LearningPortal.Application.UserManagement.Commands.SetUserEnabled;
+using LearningPortal.Application.UserManagement.Queries.GetUserById;
+using LearningPortal.Application.UserManagement.Queries.GetUsers;
 using LearningPortal.Shared.Courses;
 using LearningPortal.Shared.Identity;
 using LearningPortal.Shared.Results;
+using LearningPortal.Shared.UserManagement;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LearningPortal.Application;
@@ -28,6 +33,10 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<RevokeRefreshTokenCommand, Result<bool>>, RevokeRefreshTokenCommandHandler>();
         services.AddScoped<ICommandHandler<CreateCourseCommand, Result<CourseDto>>, CreateCourseCommandHandler>();
         services.AddScoped<IQueryHandler<GetCoursesQuery, Result<IReadOnlyList<CourseDto>>>, GetCoursesQueryHandler>();
+        services.AddScoped<IQueryHandler<GetUsersQuery, Result<PagedUsersResponse>>, GetUsersQueryHandler>();
+        services.AddScoped<IQueryHandler<GetUserByIdQuery, Result<UserResponse>>, GetUserByIdQueryHandler>();
+        services.AddScoped<ICommandHandler<SetUserEnabledCommand, Result<UserResponse>>, SetUserEnabledCommandHandler>();
+        services.AddScoped<ICommandHandler<AssignUserRoleCommand, Result<UserResponse>>, AssignUserRoleCommandHandler>();
 
         return services;
     }
