@@ -5,6 +5,7 @@ using LearningPortal.Domain.Lessons.Exceptions;
 using LearningPortal.Domain.Enrollments;
 using LearningPortal.Domain.Enrollments.Exceptions;
 using LearningPortal.Domain.Learning;
+using LearningPortal.Domain.Quizzes;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
 using LearningPortal.Infrastructure.Persistence.Configurations;
@@ -28,6 +29,12 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Enrollment> Enrollments => Set<Enrollment>();
     /// <summary>Gets learner lesson progress records.</summary>
     public DbSet<LessonProgress> LessonProgress => Set<LessonProgress>();
+    /// <summary>Gets quizzes.</summary>
+    public DbSet<Quiz> Quizzes => Set<Quiz>();
+    /// <summary>Gets quiz questions.</summary>
+    public DbSet<QuizQuestion> QuizQuestions => Set<QuizQuestion>();
+    /// <summary>Gets quiz answer choices.</summary>
+    public DbSet<QuizAnswerChoice> QuizAnswerChoices => Set<QuizAnswerChoice>();
 
     /// <summary>Gets the persisted hashed refresh tokens.</summary>
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
