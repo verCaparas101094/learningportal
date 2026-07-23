@@ -9,4 +9,4 @@ namespace LearningPortal.Application.Authentication.Commands.Login;
 /// </summary>
 /// <param name="Email">The user's email address.</param>
 /// <param name="Password">The user's password.</param>
-public sealed record LoginCommand(string Email, string Password) : ICommand<Result<TokenResponse>>;
+public sealed record LoginCommand(string Email, string Password) : ICommand<Result<AuthenticationResponse>>;

@@ -8,4 +8,4 @@ namespace LearningPortal.Application.Authentication.Commands.Refresh;
 /// Requests rotation of an active refresh token.
 /// </summary>
 /// <param name="RefreshToken">The raw refresh token supplied by the caller.</param>
-public sealed record RefreshTokenCommand(string RefreshToken) : ICommand<Result<TokenResponse>>;
+public sealed record RefreshTokenCommand(string RefreshToken) : ICommand<Result<AuthenticationResponse>>;

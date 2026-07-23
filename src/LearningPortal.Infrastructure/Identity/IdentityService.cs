@@ -1,10 +1,13 @@
+using System.Data;
 using LearningPortal.Application.Abstractions.Identity;
+using LearningPortal.Application.Abstractions.Networking;
 using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Infrastructure.Persistence;
 using LearningPortal.Shared.Identity;
 using LearningPortal.Shared.Results;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -19,109 +22,189 @@ public sealed class IdentityService(
     ApplicationDbContext dbContext,
     IAccessTokenGenerator accessTokenGenerator,
     IRefreshTokenProtector refreshTokenProtector,
+    IClientIpAddressProvider clientIpAddressProvider,
     IOptions<JwtOptions> options,
     ISystemClock systemClock,
     ILogger<IdentityService> logger)
     : IIdentityService
 {
     /// <inheritdoc />
-    public async Task<Result<TokenResponse>> LoginAsync(
+    public async Task<Result<AuthenticationResponse>> LoginAsync(
         string email,
         string password,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var user = await userManager.FindByEmailAsync(email);
-        var signInResult = user is null
-            ? null
-            : await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: true);
 
-        if (user is null || signInResult?.Succeeded != true)
+        if (user is null)
         {
-            return Result<TokenResponse>.Failure(Errors.Authentication.InvalidCredentials());
+            return Result<AuthenticationResponse>.Failure(Errors.Authentication.InvalidCredentials());
         }
 
-        return await IssueTokenPairAsync(user, cancellationToken);
+        if (!user.IsEnabled)
+        {
+            return await PasswordMatchesAsync(user, password)
+                ? Result<AuthenticationResponse>.Failure(Errors.Authentication.UserUnavailable())
+                : Result<AuthenticationResponse>.Failure(Errors.Authentication.InvalidCredentials());
+        }
+
+        var signInResult = await signInManager.CheckPasswordSignInAsync(
+            user,
+            password,
+            lockoutOnFailure: true);
+
+        if (signInResult.Succeeded)
+        {
+            return await IssueTokenPairAsync(user, cancellationToken);
+        }
+
+        if (signInResult.IsLockedOut && await PasswordMatchesAsync(user, password))
+        {
+            return Result<AuthenticationResponse>.Failure(Errors.Authentication.UserLocked());
+        }
+
+        if (signInResult.IsNotAllowed && await PasswordMatchesAsync(user, password))
+        {
+            return Result<AuthenticationResponse>.Failure(Errors.Authentication.UserUnavailable());
+        }
+
+        return Result<AuthenticationResponse>.Failure(Errors.Authentication.InvalidCredentials());
     }
 
     /// <inheritdoc />
-    public async Task<Result<TokenResponse>> RefreshAsync(
+    public async Task<Result<AuthenticationResponse>> RefreshAsync(
         string refreshToken,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(refreshToken))
         {
-            return Result<TokenResponse>.Failure(Errors.Authentication.InvalidRefreshToken());
+            return Result<AuthenticationResponse>.Failure(Errors.Authentication.InvalidRefreshToken());
         }
 
         var tokenHash = refreshTokenProtector.Hash(refreshToken);
-        var storedToken = await dbContext.RefreshTokens
-            .SingleOrDefaultAsync(token => token.TokenHash == tokenHash, cancellationToken);
-
-        if (storedToken is null)
-        {
-            return Result<TokenResponse>.Failure(Errors.Authentication.InvalidRefreshToken());
-        }
-
-        var utcNow = systemClock.UtcNow;
-        if (storedToken.RevokedAtUtc is not null)
-        {
-            await RevokeAllActiveTokensAsync(storedToken.UserId, utcNow, cancellationToken);
-            logger.LogWarning(
-                "Refresh token replay detected for user {UserId}; all active refresh tokens were revoked.",
-                storedToken.UserId);
-            return Result<TokenResponse>.Failure(Errors.Authentication.RefreshTokenReused());
-        }
-
-        if (!storedToken.IsActive(utcNow))
-        {
-            storedToken.Revoke(utcNow);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            return Result<TokenResponse>.Failure(Errors.Authentication.RefreshTokenExpired());
-        }
-
-        var user = await userManager.FindByIdAsync(storedToken.UserId.ToString());
-        if (user is null)
-        {
-            storedToken.Revoke(utcNow);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            return Result<TokenResponse>.Failure(Errors.Authentication.InvalidRefreshToken());
-        }
-
-        var replacementMaterial = refreshTokenProtector.Generate();
-        var replacementExpiresAtUtc = utcNow.AddDays(options.Value.RefreshTokenExpirationDays);
-        var replacement = RefreshToken.Create(
-            user.Id,
-            replacementMaterial.TokenHash,
-            utcNow,
-            replacementExpiresAtUtc);
-        var accessToken = await accessTokenGenerator.GenerateAsync(user, cancellationToken);
-
-        storedToken.Rotate(replacementMaterial.TokenHash, utcNow);
-        await dbContext.RefreshTokens.AddAsync(replacement, cancellationToken);
+        IDbContextTransaction? transaction = null;
 
         try
         {
+            if (dbContext.Database.IsRelational())
+            {
+                transaction = await dbContext.Database.BeginTransactionAsync(
+                    IsolationLevel.ReadCommitted,
+                    cancellationToken);
+            }
+
+            var storedToken = await dbContext.RefreshTokens
+                .SingleOrDefaultAsync(token => token.TokenHash == tokenHash, cancellationToken);
+
+            if (storedToken is null)
+            {
+                return Result<AuthenticationResponse>.Failure(Errors.Authentication.InvalidRefreshToken());
+            }
+
+            var utcNow = systemClock.UtcNow;
+            var clientIpAddress = clientIpAddressProvider.IpAddress;
+
+            if (storedToken.IsRevoked)
+            {
+                await RevokeAllActiveTokensAsync(
+                    storedToken.UserId,
+                    utcNow,
+                    clientIpAddress,
+                    cancellationToken);
+                await CommitAsync(transaction, cancellationToken);
+
+                logger.LogWarning(
+                    "Previously revoked refresh token presented for user {UserId}; active refresh tokens were revoked. Rotated: {WasRotated}.",
+                    storedToken.UserId,
+                    storedToken.ReplacedByTokenHash is not null);
+
+                var error = storedToken.ReplacedByTokenHash is not null
+                    ? Errors.Authentication.RefreshTokenReused()
+                    : Errors.Authentication.RefreshTokenRevoked();
+                return Result<AuthenticationResponse>.Failure(error);
+            }
+
+            if (storedToken.IsExpired(utcNow))
+            {
+                storedToken.Revoke(utcNow, clientIpAddress);
+                await dbContext.SaveChangesAsync(cancellationToken);
+                await CommitAsync(transaction, cancellationToken);
+                return Result<AuthenticationResponse>.Failure(Errors.Authentication.RefreshTokenExpired());
+            }
+
+            var user = await userManager.FindByIdAsync(storedToken.UserId.ToString());
+            var userError = await ValidateRefreshUserAsync(user, storedToken, cancellationToken);
+
+            if (userError is not null)
+            {
+                await RevokeAllActiveTokensAsync(
+                    storedToken.UserId,
+                    utcNow,
+                    clientIpAddress,
+                    cancellationToken);
+                await CommitAsync(transaction, cancellationToken);
+                return Result<AuthenticationResponse>.Failure(userError);
+            }
+
+            var authenticatedUser = user!;
+            var replacementMaterial = refreshTokenProtector.Generate();
+            var replacementExpiresAtUtc = utcNow.AddDays(options.Value.RefreshTokenExpirationDays);
+            var replacement = RefreshToken.Create(
+                authenticatedUser.Id,
+                replacementMaterial.TokenHash,
+                storedToken.SecurityStampHash,
+                clientIpAddress,
+                utcNow,
+                replacementExpiresAtUtc);
+            var accessToken = await accessTokenGenerator.GenerateAsync(authenticatedUser, cancellationToken);
+
+            storedToken.Rotate(replacementMaterial.TokenHash, utcNow, clientIpAddress);
+            await dbContext.RefreshTokens.AddAsync(replacement, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
+            await CommitAsync(transaction, cancellationToken);
+
+            logger.LogInformation("Rotated refresh token for user {UserId}.", authenticatedUser.Id);
+            return Result<AuthenticationResponse>.Success(new AuthenticationResponse(
+                accessToken.Token,
+                accessToken.ExpiresAtUtc,
+                replacementMaterial.RawToken,
+                replacementExpiresAtUtc));
         }
         catch (DbUpdateConcurrencyException exception)
         {
-            logger.LogWarning(
-                exception,
-                "Concurrent refresh token rotation detected for user {UserId}.",
-                storedToken.UserId);
+            if (transaction is not null)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+            }
 
             dbContext.ChangeTracker.Clear();
-            await RevokeAllActiveTokensAsync(storedToken.UserId, utcNow, cancellationToken);
-            return Result<TokenResponse>.Failure(Errors.Authentication.RefreshTokenReused());
-        }
+            var replayedToken = await dbContext.RefreshTokens
+                .AsNoTracking()
+                .SingleOrDefaultAsync(token => token.TokenHash == tokenHash, cancellationToken);
 
-        logger.LogInformation("Rotated refresh token for user {UserId}.", user.Id);
-        return Result<TokenResponse>.Success(new TokenResponse(
-            accessToken.Token,
-            accessToken.ExpiresAtUtc,
-            replacementMaterial.RawToken,
-            replacementExpiresAtUtc));
+            if (replayedToken is not null)
+            {
+                await RevokeAllActiveTokensAsync(
+                    replayedToken.UserId,
+                    systemClock.UtcNow,
+                    clientIpAddressProvider.IpAddress,
+                    cancellationToken);
+                logger.LogWarning(
+                    exception,
+                    "Concurrent refresh-token rotation detected for user {UserId}; active refresh tokens were revoked.",
+                    replayedToken.UserId);
+            }
+
+            return Result<AuthenticationResponse>.Failure(Errors.Authentication.RefreshTokenReused());
+        }
+        finally
+        {
+            if (transaction is not null)
+            {
+                await transaction.DisposeAsync();
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -135,43 +218,41 @@ public sealed class IdentityService(
         }
 
         var tokenHash = refreshTokenProtector.Hash(refreshToken);
-        var storedToken = await dbContext.RefreshTokens
-            .SingleOrDefaultAsync(token => token.TokenHash == tokenHash, cancellationToken);
+        var utcNow = systemClock.UtcNow;
+        var clientIpAddress = clientIpAddressProvider.IpAddress;
 
-        if (storedToken is null)
+        var affectedRows = await RevokeByHashAsync(
+            tokenHash,
+            utcNow,
+            clientIpAddress,
+            cancellationToken);
+
+        if (affectedRows > 0)
         {
-            return Result<bool>.Success(true);
+            logger.LogInformation("A refresh token was revoked successfully.");
         }
 
-        if (storedToken.RevokedAtUtc is null)
-        {
-            storedToken.Revoke(systemClock.UtcNow);
-
-            try
-            {
-                await dbContext.SaveChangesAsync(cancellationToken);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                dbContext.ChangeTracker.Clear();
-                await RevokeAllActiveTokensAsync(storedToken.UserId, systemClock.UtcNow, cancellationToken);
-            }
-        }
-
-        logger.LogInformation("Revoked refresh token for user {UserId}.", storedToken.UserId);
         return Result<bool>.Success(true);
     }
 
-    private async Task<Result<TokenResponse>> IssueTokenPairAsync(
+    private async Task<Result<AuthenticationResponse>> IssueTokenPairAsync(
         ApplicationUser user,
         CancellationToken cancellationToken)
     {
+        var securityStampHash = await GetSecurityStampHashAsync(user);
+        if (securityStampHash is null)
+        {
+            return Result<AuthenticationResponse>.Failure(Errors.Authentication.UserUnavailable());
+        }
+
         var utcNow = systemClock.UtcNow;
         var refreshToken = refreshTokenProtector.Generate();
         var refreshTokenExpiresAtUtc = utcNow.AddDays(options.Value.RefreshTokenExpirationDays);
         var persistedToken = RefreshToken.Create(
             user.Id,
             refreshToken.TokenHash,
+            securityStampHash,
+            clientIpAddressProvider.IpAddress,
             utcNow,
             refreshTokenExpiresAtUtc);
         var accessToken = await accessTokenGenerator.GenerateAsync(user, cancellationToken);
@@ -180,22 +261,115 @@ public sealed class IdentityService(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Issued authentication token pair for user {UserId}.", user.Id);
-        return Result<TokenResponse>.Success(new TokenResponse(
+        return Result<AuthenticationResponse>.Success(new AuthenticationResponse(
             accessToken.Token,
             accessToken.ExpiresAtUtc,
             refreshToken.RawToken,
             refreshTokenExpiresAtUtc));
     }
 
+    private async Task<Error?> ValidateRefreshUserAsync(
+        ApplicationUser? user,
+        RefreshToken refreshToken,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (user is null || !user.IsEnabled || !await signInManager.CanSignInAsync(user))
+        {
+            return Errors.Authentication.UserUnavailable();
+        }
+
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            return Errors.Authentication.UserLocked();
+        }
+
+        var securityStamp = await GetSecurityStampAsync(user);
+        return securityStamp is null || !refreshTokenProtector.Matches(securityStamp, refreshToken.SecurityStampHash)
+            ? Errors.Authentication.UserUnavailable()
+            : null;
+    }
+
+    private async Task<string?> GetSecurityStampHashAsync(ApplicationUser user)
+    {
+        var securityStamp = await GetSecurityStampAsync(user);
+        return securityStamp is null ? null : refreshTokenProtector.Hash(securityStamp);
+    }
+
+    private async Task<string?> GetSecurityStampAsync(ApplicationUser user)
+    {
+        if (!userManager.SupportsUserSecurityStamp)
+        {
+            return null;
+        }
+
+        var securityStamp = await userManager.GetSecurityStampAsync(user);
+        return string.IsNullOrWhiteSpace(securityStamp) ? null : securityStamp;
+    }
+
+    private Task<bool> PasswordMatchesAsync(ApplicationUser user, string password) =>
+        userManager.CheckPasswordAsync(user, password);
+
+    private static Task CommitAsync(
+        IDbContextTransaction? transaction,
+        CancellationToken cancellationToken) =>
+        transaction?.CommitAsync(cancellationToken) ?? Task.CompletedTask;
+
     private async Task RevokeAllActiveTokensAsync(
         Guid userId,
         DateTimeOffset revokedAtUtc,
+        string revokedByIp,
         CancellationToken cancellationToken)
     {
-        await dbContext.RefreshTokens
-            .Where(token => token.UserId == userId && token.RevokedAtUtc == null)
-            .ExecuteUpdateAsync(
-                setters => setters.SetProperty(token => token.RevokedAtUtc, revokedAtUtc),
+        var query = dbContext.RefreshTokens
+            .Where(token => token.UserId == userId && token.RevokedAtUtc == null);
+
+        if (dbContext.Database.IsRelational())
+        {
+            await query.ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(token => token.RevokedAtUtc, revokedAtUtc)
+                    .SetProperty(token => token.RevokedByIp, revokedByIp),
                 cancellationToken);
+            return;
+        }
+
+        var activeTokens = await query.ToListAsync(cancellationToken);
+        foreach (var activeToken in activeTokens)
+        {
+            activeToken.Revoke(revokedAtUtc, revokedByIp);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<int> RevokeByHashAsync(
+        string tokenHash,
+        DateTimeOffset revokedAtUtc,
+        string revokedByIp,
+        CancellationToken cancellationToken)
+    {
+        var query = dbContext.RefreshTokens
+            .Where(token => token.TokenHash == tokenHash && token.RevokedAtUtc == null);
+
+        if (dbContext.Database.IsRelational())
+        {
+            return await query.ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(token => token.RevokedAtUtc, revokedAtUtc)
+                    .SetProperty(token => token.RevokedByIp, revokedByIp),
+                cancellationToken);
+        }
+
+        var token = await query.SingleOrDefaultAsync(cancellationToken);
+        if (token is null)
+        {
+            return 0;
+        }
+
+        token.Revoke(revokedAtUtc, revokedByIp);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return 1;
     }
 }

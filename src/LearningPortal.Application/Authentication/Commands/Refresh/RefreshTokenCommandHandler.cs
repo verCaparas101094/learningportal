@@ -9,10 +9,10 @@ namespace LearningPortal.Application.Authentication.Commands.Refresh;
 /// Delegates refresh-token rotation to the identity abstraction.
 /// </summary>
 public sealed class RefreshTokenCommandHandler(IIdentityService identityService)
-    : ICommandHandler<RefreshTokenCommand, Result<TokenResponse>>
+    : ICommandHandler<RefreshTokenCommand, Result<AuthenticationResponse>>
 {
     /// <inheritdoc />
-    public Task<Result<TokenResponse>> HandleAsync(
+    public Task<Result<AuthenticationResponse>> HandleAsync(
         RefreshTokenCommand command,
         CancellationToken cancellationToken = default) =>
         identityService.RefreshAsync(command.RefreshToken, cancellationToken);

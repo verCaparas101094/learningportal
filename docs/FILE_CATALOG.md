@@ -37,7 +37,7 @@ This project contains stable contracts that both HTTP hosts may reference.
 - `Identity/LoginRequest.cs` — models credentials accepted by the authentication API.
 - `Identity/RefreshTokenRequest.cs` — models a raw token submitted for secure rotation.
 - `Identity/RevokeTokenRequest.cs` — models a raw token submitted for idempotent revocation.
-- `Identity/TokenResponse.cs` — returns access and refresh tokens with their independent UTC expirations.
+- `Identity/AuthenticationResponse.cs` — returns access and refresh tokens with their independent UTC expirations.
 - `Results/ErrorType.cs` — classifies failures without introducing HTTP concerns into lower layers.
 - `Results/Error.cs` — carries stable machine and human-readable failure information.
 - `Results/Errors.cs` — centralizes consistently coded validation, common, authentication, and authorization errors.
@@ -52,6 +52,7 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 - `DependencyInjection.cs` — is the Application composition extension for handlers and FluentValidation validators.
 - `Abstractions/Identity/IIdentityService.cs` — keeps authentication use cases independent from ASP.NET Identity implementation types.
 - `Abstractions/Identity/ICurrentUserService.cs` — exposes authenticated user identity without coupling Application or Domain to HTTP.
+- `Abstractions/Networking/IClientIpAddressProvider.cs` — supplies request-origin metadata without coupling authentication use cases to `HttpContext`.
 - `Abstractions/Time/ISystemClock.cs` — abstracts UTC time for deterministic auditing and tests.
 - `Abstractions/Messaging/ICommand.cs` — marks state-changing CQRS messages.
 - `Abstractions/Messaging/ICommandDispatcher.cs` — dispatches Result-based commands through custom pipeline components without MediatR.
@@ -82,27 +83,29 @@ This project contains replaceable external-system implementations.
 
 - `LearningPortal.Infrastructure.csproj` — references Application/Domain and owns EF Core, SQL Server, Identity, JWT, and health-check packages.
 - `DependencyInjection.cs` — composes SQL Server, Identity, JWT validation, repositories, unit of work, and database readiness checks.
-- `Identity/ApplicationUser.cs` — extends the Identity persistence model with portal-specific user profile data.
+- `Identity/ApplicationUser.cs` — extends the Identity persistence model with portal-specific profile data and an explicit enabled-account state.
 - `Identity/JwtOptions.cs` — provides strongly typed, startup-validated token settings.
-- `Identity/IdentityService.cs` — implements credential verification, token-pair issuance, rotation, revocation, and replay containment.
-- `Identity/RefreshToken.cs` — encapsulates hashed refresh-token persistence, expiration, rotation, revocation, and rowversion state.
+- `Identity/IdentityService.cs` — implements non-disclosing credential verification, security-stamp validation, transactional token rotation, idempotent revocation, and replay containment.
+- `Identity/RefreshToken.cs` — encapsulates hash-only refresh-token persistence, security-stamp binding, IP audit metadata, expiration, rotation, revocation, and rowversion state.
 - `Identity/IRefreshTokenProtector.cs` — abstracts secure opaque-token generation and one-way hashing for unit testing.
 - `Identity/RefreshTokenProtector.cs` — creates 512-bit tokens and SHA-256 hashes while ensuring raw values are never persisted.
 - `Identity/IAccessTokenGenerator.cs` — abstracts signed access-token generation from refresh-token lifecycle logic.
 - `Identity/JwtAccessTokenGenerator.cs` — emits signed JWTs containing sub, name, email, role, jti, and numeric iat claims.
 - `Identity/CurrentUserService.cs` — resolves the GUID user identifier from the current authenticated HTTP principal.
+- `Networking/ClientIpAddressProvider.cs` — captures the remote request IP for refresh-token creation and revocation audit fields.
 - `Time/SystemClock.cs` — implements application time through the platform TimeProvider.
 - `Persistence/ApplicationDbContext.cs` — is the single EF Core unit of work for business aggregates and Identity tables.
 - `Persistence/Configurations/CourseConfiguration.cs` — keeps course SQL mapping, lengths, precision, and indexes outside the domain entity.
-- `Persistence/Configurations/RefreshTokenConfiguration.cs` — maps hash-only token storage, indexes, Identity ownership, and rowversion concurrency.
+- `Persistence/Configurations/ApplicationUserConfiguration.cs` — preserves existing users as enabled when the account-state column is deployed.
+- `Persistence/Configurations/RefreshTokenConfiguration.cs` — maps hash-only token storage, security-stamp and IP fields, lookup indexes, Identity ownership, and rowversion concurrency.
 - `Persistence/Extensions/ModelBuilderExtensions.cs` — ignores in-memory domain events and applies audit, rowversion, soft-delete, index, and global-filter conventions.
 - `Persistence/Interceptors/AuditSaveChangesInterceptor.cs` — owns audit-field population and converts tracked deletes into soft deletes.
 - `Persistence/Repositories/Repository.cs` — implements the Domain repository contract with async EF Core operations and no-tracking reads.
 - `Migrations/20260722082720_DomainFoundation.cs` — deploys audit-user, soft-delete, rowversion, and soft-delete index columns.
 - `Migrations/20260722082720_DomainFoundation.Designer.cs` — records EF Core metadata for the Domain Foundation migration.
 - `Migrations/ApplicationDbContextModelSnapshot.cs` — tracks the current database model used to calculate future migrations.
-- `Migrations/20260722152618_EnterpriseAuthentication.cs` — creates secure refresh-token persistence and supporting indexes.
-- `Migrations/20260722152618_EnterpriseAuthentication.Designer.cs` — records EF metadata for the authentication migration.
+- `Migrations/20260723032505_EnterpriseAuthentication.cs` — adds enabled-account state and creates secure refresh-token persistence with unique-hash and expiration indexes.
+- `Migrations/20260723032505_EnterpriseAuthentication.Designer.cs` — records EF metadata for the finalized authentication migration.
 
 ## LearningPortal.Api
 
@@ -111,7 +114,7 @@ This project is the Minimal API host and composition root.
 - `LearningPortal.Api.csproj` — references Application, Infrastructure, and Shared while hosting ASP.NET Core and Swagger.
 - `Program.cs` — builds logging/DI, orders middleware, maps endpoints, and exposes an integration-test entry point.
 - `DependencyInjection.cs` — centralizes API CORS, Problem Details factory registration, Swagger, and ordered pipeline registration.
-- `Endpoints/IdentityEndpoints.cs` — maps the anonymous token endpoint to validation and the identity port.
+- `Endpoints/IdentityEndpoints.cs` — maps anonymous login, refresh, and idempotent revoke endpoints to the custom CQRS dispatcher and Result-to-HTTP conventions.
 - `Endpoints/CourseEndpoints.cs` — maps protected course HTTP routes to CQRS handlers and Result responses.
 - `Endpoints/HealthEndpoints.cs` — exposes distinct liveness and SQL-backed readiness probes.
 - `Constants/CorrelationIdConstants.cs` — defines the shared request header and context-item keys used for correlation.
@@ -155,3 +158,11 @@ This project is the interactive Blazor Web App host.
 - `appsettings.json` — configures the API base URL, host filtering, and normal logging levels.
 - `appsettings.Development.json` — increases local diagnostic logging without changing production defaults.
 - `Properties/launchSettings.json` — defines stable Blazor ports and an HTTP-only API URL override for that profile.
+
+## LearningPortal.Infrastructure.Tests
+
+This project verifies authentication behavior against real Identity services and an isolated EF Core store.
+
+- `LearningPortal.Infrastructure.Tests.csproj` — declares the .NET 10 xUnit test assembly and references the layers exercised by authentication tests.
+- `Authentication/AuthenticationTestContext.cs` — builds a deterministic Identity/EF test host with fake UTC time and client IP abstractions.
+- `Authentication/IdentityServiceTests.cs` — verifies login, lockout, hash-only storage, rotation, replay containment, expiry, idempotent revocation, duplicate refresh rejection, and JWT claims.

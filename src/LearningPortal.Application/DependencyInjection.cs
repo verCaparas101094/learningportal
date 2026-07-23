@@ -23,8 +23,8 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblyContaining<CreateCourseCommandValidator>(ServiceLifetime.Scoped);
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
         services.AddScoped(typeof(ICommandPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-        services.AddScoped<ICommandHandler<LoginCommand, Result<TokenResponse>>, LoginCommandHandler>();
-        services.AddScoped<ICommandHandler<RefreshTokenCommand, Result<TokenResponse>>, RefreshTokenCommandHandler>();
+        services.AddScoped<ICommandHandler<LoginCommand, Result<AuthenticationResponse>>, LoginCommandHandler>();
+        services.AddScoped<ICommandHandler<RefreshTokenCommand, Result<AuthenticationResponse>>, RefreshTokenCommandHandler>();
         services.AddScoped<ICommandHandler<RevokeRefreshTokenCommand, Result<bool>>, RevokeRefreshTokenCommandHandler>();
         services.AddScoped<ICommandHandler<CreateCourseCommand, Result<CourseDto>>, CreateCourseCommandHandler>();
         services.AddScoped<IQueryHandler<GetCoursesQuery, Result<IReadOnlyList<CourseDto>>>, GetCoursesQueryHandler>();

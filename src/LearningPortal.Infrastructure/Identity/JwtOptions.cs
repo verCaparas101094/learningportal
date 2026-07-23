@@ -16,7 +16,7 @@ public sealed class JwtOptions
     public string SigningKey { get; set; } = string.Empty;
 
     /// <summary>Gets or sets the token lifetime in minutes.</summary>
-    public int ExpirationMinutes { get; set; } = 60;
+    public int ExpirationMinutes { get; set; } = 15;
 
     /// <summary>Gets or sets the refresh token lifetime in days.</summary>
     public int RefreshTokenExpirationDays { get; set; } = 30;

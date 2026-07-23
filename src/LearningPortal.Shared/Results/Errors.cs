@@ -165,12 +165,39 @@ public static class Errors
             ErrorType.Unauthorized);
 
         /// <summary>
+        /// Creates an error for an explicitly revoked refresh token.
+        /// </summary>
+        /// <returns>A revoked refresh-token error.</returns>
+        public static Error RefreshTokenRevoked() => new(
+            "Authentication.RefreshTokenRevoked",
+            "The refresh token is no longer valid.",
+            ErrorType.Unauthorized);
+
+        /// <summary>
         /// Creates an error when a rotated refresh token is presented again.
         /// </summary>
         /// <returns>A refresh-token replay error.</returns>
         public static Error RefreshTokenReused() => new(
-            "Authentication.RefreshTokenReused",
+            "Authentication.RefreshTokenReplayDetected",
             "The refresh token is no longer valid.",
+            ErrorType.Unauthorized);
+
+        /// <summary>
+        /// Creates an error for a user currently locked by ASP.NET Identity.
+        /// </summary>
+        /// <returns>A locked-user error.</returns>
+        public static Error UserLocked() => new(
+            "Authentication.UserLocked",
+            "The account is temporarily unavailable.",
+            ErrorType.Unauthorized);
+
+        /// <summary>
+        /// Creates an error for a disabled or otherwise unavailable user.
+        /// </summary>
+        /// <returns>An unavailable-user error.</returns>
+        public static Error UserUnavailable() => new(
+            "Authentication.UserUnavailable",
+            "The account is unavailable.",
             ErrorType.Unauthorized);
     }
 

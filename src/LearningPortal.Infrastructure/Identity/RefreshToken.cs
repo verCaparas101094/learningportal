@@ -12,12 +12,16 @@ public sealed class RefreshToken
     private RefreshToken(
         Guid userId,
         string tokenHash,
+        string securityStampHash,
+        string createdByIp,
         DateTimeOffset createdAtUtc,
         DateTimeOffset expiresAtUtc)
     {
         Id = Guid.CreateVersion7();
         UserId = userId;
         TokenHash = tokenHash;
+        SecurityStampHash = securityStampHash;
+        CreatedByIp = createdByIp;
         CreatedAtUtc = createdAtUtc;
         ExpiresAtUtc = expiresAtUtc;
     }
@@ -31,6 +35,9 @@ public sealed class RefreshToken
     /// <summary>Gets the SHA-256 hash of the refresh token.</summary>
     public string TokenHash { get; private set; } = string.Empty;
 
+    /// <summary>Gets the hash of the user's security stamp at issuance.</summary>
+    public string SecurityStampHash { get; private set; } = string.Empty;
+
     /// <summary>Gets the token creation timestamp in UTC.</summary>
     public DateTimeOffset CreatedAtUtc { get; private set; }
 
@@ -43,6 +50,12 @@ public sealed class RefreshToken
     /// <summary>Gets the hash of the token that replaced this token during rotation.</summary>
     public string? ReplacedByTokenHash { get; private set; }
 
+    /// <summary>Gets the client IP address that created the token.</summary>
+    public string CreatedByIp { get; private set; } = string.Empty;
+
+    /// <summary>Gets the client IP address that revoked or rotated the token.</summary>
+    public string? RevokedByIp { get; private set; }
+
     /// <summary>Gets the SQL Server rowversion used to prevent concurrent rotation.</summary>
     public byte[] RowVersion { get; private set; } = [];
 
@@ -50,6 +63,8 @@ public sealed class RefreshToken
     public static RefreshToken Create(
         Guid userId,
         string tokenHash,
+        string securityStampHash,
+        string createdByIp,
         DateTimeOffset createdAtUtc,
         DateTimeOffset expiresAtUtc)
     {
@@ -59,32 +74,53 @@ public sealed class RefreshToken
         }
 
         ArgumentException.ThrowIfNullOrWhiteSpace(tokenHash);
+        ArgumentException.ThrowIfNullOrWhiteSpace(securityStampHash);
+        ArgumentException.ThrowIfNullOrWhiteSpace(createdByIp);
 
         if (expiresAtUtc <= createdAtUtc)
         {
             throw new ArgumentOutOfRangeException(nameof(expiresAtUtc), "Expiration must follow creation.");
         }
 
-        return new RefreshToken(userId, tokenHash, createdAtUtc, expiresAtUtc);
+        return new RefreshToken(
+            userId,
+            tokenHash,
+            securityStampHash,
+            createdByIp,
+            createdAtUtc,
+            expiresAtUtc);
     }
+
+    /// <summary>Determines whether the token has expired at the supplied UTC timestamp.</summary>
+    public bool IsExpired(DateTimeOffset utcNow) => ExpiresAtUtc <= utcNow;
+
+    /// <summary>Gets a value indicating whether the token has been revoked.</summary>
+    public bool IsRevoked => RevokedAtUtc is not null;
 
     /// <summary>Determines whether the token can currently be used.</summary>
     public bool IsActive(DateTimeOffset utcNow) =>
-        RevokedAtUtc is null && ExpiresAtUtc > utcNow;
+        !IsRevoked && !IsExpired(utcNow);
 
     /// <summary>Revokes the token without assigning a replacement.</summary>
-    public void Revoke(DateTimeOffset revokedAtUtc)
+    public void Revoke(DateTimeOffset revokedAtUtc, string revokedByIp)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(revokedByIp);
+
         if (RevokedAtUtc is null)
         {
             RevokedAtUtc = revokedAtUtc;
+            RevokedByIp = revokedByIp;
         }
     }
 
     /// <summary>Revokes the token and records the hash of its rotation replacement.</summary>
-    public void Rotate(string replacementTokenHash, DateTimeOffset revokedAtUtc)
+    public void Rotate(
+        string replacementTokenHash,
+        DateTimeOffset revokedAtUtc,
+        string revokedByIp)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(replacementTokenHash);
+        ArgumentException.ThrowIfNullOrWhiteSpace(revokedByIp);
 
         if (RevokedAtUtc is not null)
         {
@@ -93,5 +129,6 @@ public sealed class RefreshToken
 
         ReplacedByTokenHash = replacementTokenHash;
         RevokedAtUtc = revokedAtUtc;
+        RevokedByIp = revokedByIp;
     }
 }

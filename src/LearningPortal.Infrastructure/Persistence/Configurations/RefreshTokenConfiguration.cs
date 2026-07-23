@@ -19,17 +19,24 @@ public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refresh
             .HasMaxLength(64)
             .IsUnicode(false)
             .IsRequired();
+        builder.Property(token => token.SecurityStampHash)
+            .HasMaxLength(64)
+            .IsUnicode(false)
+            .IsRequired();
         builder.Property(token => token.CreatedAtUtc).HasPrecision(0).IsRequired();
         builder.Property(token => token.ExpiresAtUtc).HasPrecision(0).IsRequired();
         builder.Property(token => token.RevokedAtUtc).HasPrecision(0);
         builder.Property(token => token.ReplacedByTokenHash)
             .HasMaxLength(64)
             .IsUnicode(false);
+        builder.Property(token => token.CreatedByIp).HasMaxLength(45).IsRequired();
+        builder.Property(token => token.RevokedByIp).HasMaxLength(45);
         builder.Property(token => token.RowVersion)
             .IsRowVersion()
             .IsConcurrencyToken();
 
         builder.HasIndex(token => token.TokenHash).IsUnique();
+        builder.HasIndex(token => token.ExpiresAtUtc);
         builder.HasIndex(token => new { token.UserId, token.ExpiresAtUtc });
         builder.HasOne<ApplicationUser>()
             .WithMany()

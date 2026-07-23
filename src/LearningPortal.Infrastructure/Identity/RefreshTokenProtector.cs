@@ -24,4 +24,23 @@ public sealed class RefreshTokenProtector : IRefreshTokenProtector
         ArgumentException.ThrowIfNullOrWhiteSpace(rawToken);
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(rawToken)));
     }
+
+    /// <inheritdoc />
+    public bool Matches(string rawValue, string expectedHash)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(rawValue);
+        ArgumentException.ThrowIfNullOrWhiteSpace(expectedHash);
+
+        var actualBytes = Convert.FromHexString(Hash(rawValue));
+
+        try
+        {
+            var expectedBytes = Convert.FromHexString(expectedHash);
+            return CryptographicOperations.FixedTimeEquals(actualBytes, expectedBytes);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
 }

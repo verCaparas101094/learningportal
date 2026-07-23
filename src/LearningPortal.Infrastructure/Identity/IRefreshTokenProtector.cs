@@ -10,6 +10,9 @@ public interface IRefreshTokenProtector
 
     /// <summary>Computes the stable one-way hash for a raw refresh token.</summary>
     string Hash(string rawToken);
+
+    /// <summary>Compares a raw value with a stored hash using fixed-time comparison.</summary>
+    bool Matches(string rawValue, string expectedHash);
 }
 
 /// <summary>

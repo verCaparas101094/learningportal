@@ -24,14 +24,14 @@ public static class IdentityEndpoints
         group.MapPost("/login", LoginAsync)
             .WithName("Login")
             .WithSummary("Authenticates a user and issues an access and refresh token pair.")
-            .Produces<TokenResponse>()
+            .Produces<AuthenticationResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
 
         group.MapPost("/refresh", RefreshAsync)
             .WithName("RefreshToken")
             .WithSummary("Rotates an active refresh token and issues a new token pair.")
-            .Produces<TokenResponse>()
+            .Produces<AuthenticationResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
 
@@ -49,7 +49,7 @@ public static class IdentityEndpoints
         ICommandDispatcher commandDispatcher,
         CancellationToken cancellationToken)
     {
-        var result = await commandDispatcher.SendAsync<LoginCommand, TokenResponse>(
+        var result = await commandDispatcher.SendAsync<LoginCommand, AuthenticationResponse>(
             new LoginCommand(request.Email, request.Password),
             cancellationToken);
         return result.ToHttpResult();
@@ -60,7 +60,7 @@ public static class IdentityEndpoints
         ICommandDispatcher commandDispatcher,
         CancellationToken cancellationToken)
     {
-        var result = await commandDispatcher.SendAsync<RefreshTokenCommand, TokenResponse>(
+        var result = await commandDispatcher.SendAsync<RefreshTokenCommand, AuthenticationResponse>(
             new RefreshTokenCommand(request.RefreshToken),
             cancellationToken);
         return result.ToHttpResult();

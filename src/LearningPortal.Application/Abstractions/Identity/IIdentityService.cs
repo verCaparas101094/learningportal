@@ -7,13 +7,13 @@ namespace LearningPortal.Application.Abstractions.Identity;
 public interface IIdentityService
 {
     /// <summary>Validates credentials and issues an access and refresh token pair.</summary>
-    Task<Result<TokenResponse>> LoginAsync(
+    Task<Result<AuthenticationResponse>> LoginAsync(
         string email,
         string password,
         CancellationToken cancellationToken = default);
 
     /// <summary>Rotates an active refresh token and issues a new token pair.</summary>
-    Task<Result<TokenResponse>> RefreshAsync(
+    Task<Result<AuthenticationResponse>> RefreshAsync(
         string refreshToken,
         CancellationToken cancellationToken = default);
 

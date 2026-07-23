@@ -9,10 +9,10 @@ namespace LearningPortal.Application.Authentication.Commands.Login;
 /// Delegates credential authentication and token issuance to the identity abstraction.
 /// </summary>
 public sealed class LoginCommandHandler(IIdentityService identityService)
-    : ICommandHandler<LoginCommand, Result<TokenResponse>>
+    : ICommandHandler<LoginCommand, Result<AuthenticationResponse>>
 {
     /// <inheritdoc />
-    public Task<Result<TokenResponse>> HandleAsync(
+    public Task<Result<AuthenticationResponse>> HandleAsync(
         LoginCommand command,
         CancellationToken cancellationToken = default) =>
         identityService.LoginAsync(command.Email, command.Password, cancellationToken);

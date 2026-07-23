@@ -1,11 +1,13 @@
 using System.Text;
 using LearningPortal.Application.Abstractions.Identity;
 using LearningPortal.Application.Abstractions.Time;
+using LearningPortal.Application.Abstractions.Networking;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
 using LearningPortal.Infrastructure.Persistence;
 using LearningPortal.Infrastructure.Persistence.Interceptors;
 using LearningPortal.Infrastructure.Persistence.Repositories;
+using LearningPortal.Infrastructure.Networking;
 using LearningPortal.Infrastructure.Time;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -29,6 +31,7 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IClientIpAddressProvider, ClientIpAddressProvider>();
         services.AddSingleton<ISystemClock, SystemClock>();
         services.AddScoped<AuditSaveChangesInterceptor>();
 
