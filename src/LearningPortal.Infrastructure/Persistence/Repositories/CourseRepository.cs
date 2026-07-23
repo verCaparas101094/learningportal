@@ -22,6 +22,20 @@ public sealed class CourseRepository(ApplicationDbContext dbContext) : ICourseRe
             .SingleOrDefaultAsync(course => course.Id == courseId, cancellationToken);
 
     /// <inheritdoc />
+    public Task<Course?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken = default) =>
+        dbContext.Courses.AsNoTracking().SingleOrDefaultAsync(
+            course => course.Slug == slug && course.Status == CourseStatus.Published,
+            cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Course>> GetByIdsReadOnlyAsync(
+        IReadOnlyCollection<Guid> courseIds,
+        CancellationToken cancellationToken = default) =>
+        await dbContext.Courses.AsNoTracking()
+            .Where(course => courseIds.Contains(course.Id))
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
     public async Task<(IReadOnlyList<Course> Items, int TotalCount)> GetPageAsync(
         string? search,
         CourseStatus? status,

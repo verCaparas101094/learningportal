@@ -3,6 +3,7 @@ using System.Text.Json;
 using LearningPortal.Blazor.Models;
 using LearningPortal.Shared.Courses;
 using LearningPortal.Shared.Lessons;
+using LearningPortal.Shared.Enrollments;
 using LearningPortal.Shared.UserManagement;
 
 namespace LearningPortal.Blazor.Services;
@@ -194,6 +195,71 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
     {
         using var response = await httpClient.PostAsJsonAsync("api/lessons/preview", request, cancellationToken);
         return await ReadResponseAsync<LessonContentPreviewResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets the published employee course catalog.</summary>
+    public async Task<PagedCourseCatalogResponse> GetCatalogAsync(
+        GetCatalogRequest request, CancellationToken cancellationToken = default)
+    {
+        var uri = $"api/catalog/courses?PageNumber={request.PageNumber}&PageSize={request.PageSize}";
+        if (!string.IsNullOrWhiteSpace(request.Search)) uri += $"&Search={Uri.EscapeDataString(request.Search.Trim())}";
+        using var response = await httpClient.GetAsync(uri, cancellationToken);
+        return await ReadResponseAsync<PagedCourseCatalogResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets published course details.</summary>
+    public async Task<CourseDetailsResponse> GetCatalogCourseAsync(
+        string slug, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/catalog/courses/{Uri.EscapeDataString(slug)}", cancellationToken);
+        return await ReadResponseAsync<CourseDetailsResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Enrolls the current employee in a course.</summary>
+    public async Task<EnrollmentResponse> EnrollAsync(
+        Guid courseId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsync($"api/courses/{courseId:D}/enroll", null, cancellationToken);
+        return await ReadResponseAsync<EnrollmentResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Withdraws an enrollment using optimistic concurrency.</summary>
+    public Task<EnrollmentResponse> WithdrawAsync(
+        Guid enrollmentId, string rowVersion, CancellationToken cancellationToken = default) =>
+        PutAsync<EnrollmentResponse>(
+            $"api/enrollments/{enrollmentId:D}/withdraw", new WithdrawEnrollmentRequest(rowVersion), cancellationToken);
+
+    /// <summary>Gets the current employee's enrollments.</summary>
+    public async Task<PagedMyLearningResponse> GetMyEnrollmentsAsync(
+        GetEnrollmentsRequest request, CancellationToken cancellationToken = default)
+    {
+        var uri = $"api/enrollments/me?PageNumber={request.PageNumber}&PageSize={request.PageSize}";
+        if (!string.IsNullOrWhiteSpace(request.Search)) uri += $"&Search={Uri.EscapeDataString(request.Search.Trim())}";
+        if (!string.IsNullOrWhiteSpace(request.Status)) uri += $"&Status={Uri.EscapeDataString(request.Status.Trim())}";
+        using var response = await httpClient.GetAsync(uri, cancellationToken);
+        return await ReadResponseAsync<PagedMyLearningResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets an authorized enrollment.</summary>
+    public async Task<EnrollmentResponse> GetEnrollmentAsync(
+        Guid enrollmentId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"api/enrollments/{enrollmentId:D}", cancellationToken);
+        return await ReadResponseAsync<EnrollmentResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets an authorized course enrollment page.</summary>
+    public async Task<PagedEnrollmentsResponse> GetCourseEnrollmentsAsync(
+        Guid courseId,
+        GetEnrollmentsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var uri = $"api/courses/{courseId:D}/enrollments?PageNumber={request.PageNumber}&PageSize={request.PageSize}";
+        if (!string.IsNullOrWhiteSpace(request.Search)) uri += $"&Search={Uri.EscapeDataString(request.Search.Trim())}";
+        if (!string.IsNullOrWhiteSpace(request.Status)) uri += $"&Status={Uri.EscapeDataString(request.Status.Trim())}";
+        using var response = await httpClient.GetAsync(uri, cancellationToken);
+        return await ReadResponseAsync<PagedEnrollmentsResponse>(response, cancellationToken);
     }
 
     private async Task<TResponse> PutAsync<TResponse>(

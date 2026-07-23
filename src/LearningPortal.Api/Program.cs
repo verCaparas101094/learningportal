@@ -24,6 +24,7 @@ app.UseApiPipeline();
 app.MapIdentityEndpoints();
 app.MapCourseEndpoints();
 app.MapLessonEndpoints();
+app.MapEnrollmentEndpoints();
 app.MapUserManagementEndpoints();
 app.MapPortalHealthChecks();
 

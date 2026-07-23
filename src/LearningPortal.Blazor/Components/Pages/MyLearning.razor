@@ -1,0 +1,84 @@
+@page "/my-learning"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>My Learning | Learning Portal</PageTitle>
+<PageHeader Eyebrow="Employee learning" Title="My Learning" Description="Review your course enrollments." />
+@if (!string.IsNullOrWhiteSpace(_error)) { <div class="feedback error" role="alert">@_error</div> }
+<div class="course-filters">
+    <input type="search" @bind="_search" placeholder="Search my courses" aria-label="Search my courses" />
+    <select @bind="_status" aria-label="Enrollment status">
+        <option value="">All statuses</option>
+        <option>Enrolled</option><option>InProgress</option><option>Completed</option><option>Withdrawn</option>
+    </select>
+    <button class="button button-primary" @onclick="SearchAsync">Apply</button>
+</div>
+@if (_loading) { <LoadingState Message="Loading your courses…" /> }
+else if (_page is null || _page.Items.Count == 0)
+{
+    <EmptyState Icon="□" Title="No enrollments found" Description="Browse the catalog to begin learning." />
+}
+else
+{
+    <div class="catalog-grid">
+        @foreach (var item in _page.Items)
+        {
+            <AppCard>
+                <article>
+                    <h2>@item.CourseTitle</h2><p>@item.DescriptionSummary</p><StatusBadge Text="@item.Status" />
+                    <p>Enrolled @item.EnrolledAtUtc.ToString("MMM d, yyyy") · @item.PublishedLessonCount lessons</p>
+                    <div class="course-actions">
+                        <a class="button" href="@($"/catalog/{item.CourseSlug}")">View details</a>
+                        @if (item.CanContinue)
+                        {
+                            <button class="button button-primary" disabled
+                                    title="Course content is not available yet">Continue learning</button>
+                            <button class="button button-danger" @onclick="() => OpenWithdraw(item.EnrollmentId)">Withdraw</button>
+                        }
+                    </div>
+                </article>
+            </AppCard>
+        }
+    </div>
+    <PaginationControls PageNumber="@_page.PageNumber" TotalPages="@_page.TotalPages"
+                        Disabled="@_loading" OnPageChanged="ChangePageAsync" />
+}
+<ConfirmDialog IsOpen="@(_withdrawId is not null)" Title="Withdraw from course?"
+               Message="Your enrollment will be marked as withdrawn." ConfirmText="Withdraw"
+               IsDestructive="true" IsBusy="@_mutating" OnConfirm="WithdrawAsync" OnCancel="CloseWithdraw" />
+
+@code {
+    private PagedMyLearningResponse? _page;
+    private string? _search;
+    private string? _status;
+    private string? _error;
+    private bool _loading = true;
+    private bool _mutating;
+    private int _pageNumber = 1;
+    private Guid? _withdrawId;
+    protected override Task OnInitializedAsync() => LoadAsync();
+    private async Task LoadAsync()
+    {
+        _loading = true; _error = null;
+        try { _page = await ApiClient.GetMyEnrollmentsAsync(new(_search, _status, _pageNumber, 12)); }
+        catch (ApiProblemException exception) { _error = exception.Message; }
+        finally { _loading = false; }
+    }
+    private async Task SearchAsync() { _pageNumber = 1; await LoadAsync(); }
+    private async Task ChangePageAsync(int page) { _pageNumber = page; await LoadAsync(); }
+    private void OpenWithdraw(Guid id) => _withdrawId = id;
+    private void CloseWithdraw() => _withdrawId = null;
+    private async Task WithdrawAsync()
+    {
+        if (_withdrawId is not Guid id) return;
+        _mutating = true;
+        try
+        {
+            var enrollment = await ApiClient.GetEnrollmentAsync(id);
+            await ApiClient.WithdrawAsync(id, enrollment.RowVersion);
+            _withdrawId = null; await LoadAsync();
+        }
+        catch (ApiProblemException exception) { _error = exception.Message; }
+        finally { _mutating = false; }
+    }
+}

@@ -74,6 +74,8 @@ public sealed class LessonApplicationTests
     {
         public Task<Course?> GetByIdAsync(Guid id, CancellationToken ct = default) => Task.FromResult<Course?>(course);
         public Task<Course?> GetByIdReadOnlyAsync(Guid id, CancellationToken ct = default) => Task.FromResult<Course?>(course);
+        public Task<Course?> GetPublishedBySlugAsync(string slug, CancellationToken ct = default) => Task.FromResult<Course?>(course);
+        public Task<IReadOnlyList<Course>> GetByIdsReadOnlyAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct = default) => Task.FromResult<IReadOnlyList<Course>>([course]);
         public Task<(IReadOnlyList<Course> Items, int TotalCount)> GetPageAsync(string? s, CourseStatus? status, Guid? i, int p, int z, CancellationToken ct = default) => throw new NotSupportedException();
         public Task<bool> SlugExistsAsync(string s, Guid? e = null, CancellationToken ct = default) => throw new NotSupportedException();
         public Task AddAsync(Course c, CancellationToken ct = default) => throw new NotSupportedException();
@@ -88,6 +90,8 @@ public sealed class LessonApplicationTests
         { Search = s; return Task.FromResult((items, count)); }
         public Task<Lesson?> GetByIdAsync(Guid id, CancellationToken ct = default) => throw new NotSupportedException();
         public Task<Lesson?> GetByIdReadOnlyAsync(Guid id, CancellationToken ct = default) => throw new NotSupportedException();
+        public Task<IReadOnlyList<Lesson>> GetPublishedByCourseAsync(Guid id, CancellationToken ct = default) => Task.FromResult(items);
+        public Task<IReadOnlyList<Lesson>> GetPublishedByCoursesAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct = default) => Task.FromResult(items);
         public Task<bool> OrderExistsAsync(Guid c, int o, Guid? e = null, CancellationToken ct = default) => Task.FromResult(false);
         public Task AddAsync(Lesson l, CancellationToken ct = default) { Added = l; return Task.CompletedTask; }
         public void Remove(Lesson l) => throw new NotSupportedException();

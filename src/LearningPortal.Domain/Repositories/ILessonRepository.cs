@@ -9,6 +9,14 @@ public interface ILessonRepository
     Task<Lesson?> GetByIdAsync(Guid lessonId, CancellationToken cancellationToken = default);
     /// <summary>Gets a read-only lesson.</summary>
     Task<Lesson?> GetByIdReadOnlyAsync(Guid lessonId, CancellationToken cancellationToken = default);
+    /// <summary>Gets published lessons for a course in display order.</summary>
+    Task<IReadOnlyList<Lesson>> GetPublishedByCourseAsync(
+        Guid courseId,
+        CancellationToken cancellationToken = default);
+    /// <summary>Gets published lessons for selected courses.</summary>
+    Task<IReadOnlyList<Lesson>> GetPublishedByCoursesAsync(
+        IReadOnlyCollection<Guid> courseIds,
+        CancellationToken cancellationToken = default);
     /// <summary>Gets a filtered page.</summary>
     Task<(IReadOnlyList<Lesson> Items, int TotalCount)> GetPageAsync(
         Guid? courseId,
