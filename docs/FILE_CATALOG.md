@@ -22,8 +22,10 @@ This project is the dependency-free business core.
 - `Common/Events/DomainEvent.cs` — generates UUIDv7 event identifiers and UTC timestamps for derived domain facts.
 - `Common/AuditableEntity.cs` — provides interceptor-managed creation/update metadata and SQL Server rowversion state.
 - `Common/ISoftDelete.cs` — marks entities whose deletes must be retained with deletion audit metadata.
-- `Courses/Course.cs` — owns course state and construction invariants; it belongs under the course aggregate feature.
-- `Courses/Events/CourseCreatedDomainEvent.cs` — captures the course identifier and normalized title when a course is created.
+- `Courses/Course.cs`, `CourseStatus.cs`, and `SlugNormalizer.cs` — own the Draft/Published/Archived lifecycle, editable data, ownership, and normalized slugs.
+- `Courses/Events/*` — capture course creation, publication, archival, and deletion facts without dispatching them.
+- `Courses/Exceptions/*` — translate provider-detected slug and rowversion conflicts without leaking EF Core into Application.
+- `Repositories/ICourseRepository.cs` — defines tracked lookup, filtered paging, slug uniqueness, deletion, and rowversion operations required by course management.
 - `Repositories/IRepository.cs` — defines persistence behavior required by use cases without coupling Domain to EF Core.
 - `Repositories/IUnitOfWork.cs` — defines the transaction boundary used to commit aggregate changes atomically.
 
@@ -32,8 +34,7 @@ This project is the dependency-free business core.
 This project contains stable contracts that both HTTP hosts may reference.
 
 - `LearningPortal.Shared.csproj` — declares the contract-only assembly.
-- `Courses/CourseDto.cs` — is the immutable course representation sent across process boundaries.
-- `Courses/CreateCourseRequest.cs` — models course creation input independently of the Application command.
+- `Courses/*` — contains compact course detail/list/page responses and list/create/update request contracts, including Base64 rowversion values.
 - `Identity/LoginRequest.cs` — models credentials accepted by the authentication API.
 - `Identity/RefreshTokenRequest.cs` — models a raw token submitted for secure rotation.
 - `Identity/RevokeTokenRequest.cs` — models a raw token submitted for idempotent revocation.
@@ -68,11 +69,9 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 - `Abstractions/Messaging/ICommandPipelineBehavior.cs` — defines composable pre/post-handler behavior and its asynchronous continuation delegate.
 - `Abstractions/Messaging/IQuery.cs` — marks read-only CQRS messages.
 - `Abstractions/Messaging/IQueryHandler.cs` — defines asynchronous query execution for dependency injection and testing.
-- `Courses/Commands/CreateCourse/CreateCourseCommand.cs` — is the Application-layer request to create a course.
-- `Courses/Commands/CreateCourse/CreateCourseCommandValidator.cs` — contains input rules that do not belong to core domain invariants.
-- `Courses/Commands/CreateCourse/CreateCourseCommandHandler.cs` — coordinates aggregate creation, repository persistence, the unit of work, Result output, and structured logging.
-- `Courses/Queries/GetCourses/GetCoursesQuery.cs` — represents the read-side request for the course catalog.
-- `Courses/Queries/GetCourses/GetCoursesQueryHandler.cs` — loads aggregates and projects them to shared DTOs without leaking EF entities.
+- `Courses/Commands/*` — validates and handles authorized create, Draft update, publish, archive, and soft-delete operations.
+- `Courses/Queries/*` — validates and handles ownership-filtered course detail and paginated list reads.
+- `Courses/CourseAuthorization.cs`, `CourseMappings.cs`, and `CoursePersistence.cs` — centralize ownership checks, transport projection, and standard conflict mapping.
 - `Authentication/Commands/Login/LoginCommand.cs` — represents credential authentication in the existing CQRS pipeline.
 - `Authentication/Commands/Login/LoginCommandValidator.cs` — validates email and password shape before Identity access.
 - `Authentication/Commands/Login/LoginCommandHandler.cs` — delegates validated login requests to the identity abstraction.
@@ -113,7 +112,8 @@ This project contains replaceable external-system implementations.
 - `Networking/ClientIpAddressProvider.cs` — captures the remote request IP for refresh-token creation and revocation audit fields.
 - `Time/SystemClock.cs` — implements application time through the platform TimeProvider.
 - `Persistence/ApplicationDbContext.cs` — is the single EF Core unit of work for business aggregates and Identity tables.
-- `Persistence/Configurations/CourseConfiguration.cs` — keeps course SQL mapping, lengths, precision, and indexes outside the domain entity.
+- `Persistence/Configurations/CourseConfiguration.cs` — maps course lengths, string status, rowversion, filtered unique slug, and management indexes.
+- `Persistence/Repositories/CourseRepository.cs` — implements tracked mutations and ownership-filtered, soft-delete-aware course reads.
 - `Persistence/Configurations/ApplicationUserConfiguration.cs` — preserves existing users as enabled when the account-state column is deployed.
 - `Persistence/Configurations/RefreshTokenConfiguration.cs` — maps hash-only token storage, security-stamp and IP fields, lookup indexes, Identity ownership, and rowversion concurrency.
 - `Persistence/Extensions/ModelBuilderExtensions.cs` — ignores in-memory domain events and applies audit, rowversion, soft-delete, index, and global-filter conventions.
@@ -124,6 +124,7 @@ This project contains replaceable external-system implementations.
 - `Migrations/ApplicationDbContextModelSnapshot.cs` — tracks the current database model used to calculate future migrations.
 - `Migrations/20260723032505_EnterpriseAuthentication.cs` — adds enabled-account state and creates secure refresh-token persistence with unique-hash and expiration indexes.
 - `Migrations/20260723032505_EnterpriseAuthentication.Designer.cs` — records EF metadata for the finalized authentication migration.
+- `Migrations/*_CourseManagementFoundation.cs` and `.Designer.cs` — evolve Courses with management fields, safe legacy backfill, constraints, and indexes.
 
 ## LearningPortal.Api
 
@@ -133,7 +134,7 @@ This project is the Minimal API host and composition root.
 - `Program.cs` — builds logging/DI, seeds missing Identity roles, orders middleware, maps endpoints, and exposes an integration-test entry point.
 - `DependencyInjection.cs` — centralizes API CORS, Problem Details factory registration, Swagger, and ordered pipeline registration.
 - `Endpoints/IdentityEndpoints.cs` — maps anonymous login, refresh, and idempotent revoke endpoints to the custom CQRS dispatcher and Result-to-HTTP conventions.
-- `Endpoints/CourseEndpoints.cs` — maps protected course HTTP routes to CQRS handlers and Result responses.
+- `Endpoints/CourseEndpoints.cs` — maps Administrator/Instructor course list, detail, create, update, publish, archive, and delete routes.
 - `Endpoints/HealthEndpoints.cs` — exposes distinct liveness and SQL-backed readiness probes.
 - `Endpoints/UserManagementEndpoints.cs` — maps the compact administrator-only user-management API.
 - `Constants/CorrelationIdConstants.cs` — defines the shared request header and context-item keys used for correlation.
@@ -203,6 +204,7 @@ This project verifies authentication behavior against real Identity services and
 - `Authorization/AuthorizationEndpointExtensionsTests.cs` — verifies that each Minimal API helper applies the expected policy metadata.
 - `Authorization/IdentityRoleSeederTests.cs` — verifies idempotent role creation and rejection of unsupported role creation/assignment.
 - `UserManagement/UserManagementServiceTests.cs` — verifies pagination, lookup failures, enabled state, and valid/invalid/idempotent role assignment.
+- `Courses/CourseDomainTests.cs` and `CourseApplicationTests.cs` — verify lifecycle, slug, ownership, pagination, role, state, duplicate, and concurrency behavior.
 
 ## LearningPortal.Infrastructure.IntegrationTests
 
@@ -214,3 +216,4 @@ This slower test project validates behavior that EF InMemory cannot represent by
 - `Authentication/RefreshRotationCoordinator.cs` — synchronizes two independent refresh requests after both have loaded the original token.
 - `Authentication/CoordinatedAccessTokenGenerator.cs` — inserts the test coordination barrier while delegating JWT creation to the production generator.
 - `Authentication/RefreshTokenRelationalTests.cs` — verifies relational transactions, independent-context concurrency, replay revocation, unique hashes, rowversion, and migration indexes.
+- `Courses/CoursePersistenceRelationalTests.cs` — verifies SQL Server filtered slug uniqueness and soft-delete query filtering.
