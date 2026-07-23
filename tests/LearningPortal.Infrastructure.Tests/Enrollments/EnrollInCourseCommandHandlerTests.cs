@@ -43,6 +43,20 @@ public sealed class EnrollInCourseCommandHandlerTests
         Assert.Equal("Enrollment.CourseNotPublished", result.Error!.Code);
     }
 
+    /// <summary>Verifies archived courses cannot receive new enrollments.</summary>
+    [Fact]
+    public async Task Handle_ArchivedCourse_ReturnsCourseNotPublished()
+    {
+        var course = CreateCourse(published: true);
+        Assert.True(course.TryArchive());
+        var handler = CreateHandler(course, Guid.NewGuid(), new(), new());
+
+        var result = await handler.HandleAsync(new(course.Id), CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal("Enrollment.CourseNotPublished", result.Error!.Code);
+    }
+
     /// <summary>Verifies duplicate rejection.</summary>
     [Fact]
     public async Task Handle_DuplicateActiveEnrollment_ReturnsConflict()

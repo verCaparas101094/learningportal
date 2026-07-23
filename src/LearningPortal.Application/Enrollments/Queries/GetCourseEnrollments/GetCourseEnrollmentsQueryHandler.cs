@@ -23,6 +23,9 @@ public sealed class GetCourseEnrollmentsQueryHandler(
         if (!validation.IsValid)
             return Result<PagedEnrollmentsResponse>.Failure(Errors.Validation.Failed(
                 string.Join(" ", validation.Errors.Select(x => x.ErrorMessage).Distinct())));
+        if (!currentUser.IsAuthenticated || currentUser.UserId is null)
+            return Result<PagedEnrollmentsResponse>.Failure(Errors.Authentication.Unauthorized());
+
         var course = await courses.GetByIdReadOnlyAsync(query.CourseId, cancellationToken);
         if (course is null) return Result<PagedEnrollmentsResponse>.Failure(Errors.CourseManagement.NotFound(query.CourseId));
         if (!currentUser.HasRole(ApplicationRoles.Administrator)
