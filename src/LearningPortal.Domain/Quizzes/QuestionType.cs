@@ -1,3 +1,12 @@
-#pragma warning disable CS1591
 namespace LearningPortal.Domain.Quizzes;
-public enum QuestionType { SingleChoice, MultipleChoice, TrueFalse }
+
+/// <summary>Defines supported automatically scored quiz question types.</summary>
+public enum QuestionType
+{
+    /// <summary>Requires one selected answer.</summary>
+    SingleChoice,
+    /// <summary>Requires an exact selected answer set.</summary>
+    MultipleChoice,
+    /// <summary>Requires one of two true/false answers.</summary>
+    TrueFalse
+}
