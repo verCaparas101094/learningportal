@@ -261,6 +261,14 @@ public sealed class CourseApplicationTests
             CancellationToken cancellationToken = default) =>
             GetByIdAsync(courseId, cancellationToken);
 
+        public Task<Course?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Courses.SingleOrDefault(course => course.Slug == slug && course.Status == CourseStatus.Published));
+
+        public Task<IReadOnlyList<Course>> GetByIdsReadOnlyAsync(
+            IReadOnlyCollection<Guid> courseIds,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<Course>>(Courses.Where(course => courseIds.Contains(course.Id)).ToArray());
+
         public Task<(IReadOnlyList<Course> Items, int TotalCount)> GetPageAsync(
             string? search,
             CourseStatus? status,
@@ -348,6 +356,11 @@ public sealed class CourseApplicationTests
 
     private sealed class FakeUserManagementService(Guid validInstructorId) : IUserManagementService
     {
+        public Task<IReadOnlyDictionary<Guid, UserResponse>> GetUsersByIdsAsync(
+            IReadOnlyCollection<Guid> userIds,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, UserResponse>>(new Dictionary<Guid, UserResponse>());
+
         public Task<Result<UserResponse>> GetUserByIdAsync(
             Guid userId,
             CancellationToken cancellationToken = default) =>

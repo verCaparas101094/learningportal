@@ -1,0 +1,80 @@
+@page "/catalog/{Slug}"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Course Details | Learning Portal</PageTitle>
+@if (_loading) { <LoadingState Message="Loading course details…" /> }
+else if (!string.IsNullOrWhiteSpace(_error)) { <div class="feedback error" role="alert">@_error</div> }
+else if (_course is not null)
+{
+    <PageHeader Eyebrow="@_course.Category" Title="@_course.Title" Description="@_course.Description">
+        <Actions>
+            @if (_course.CanEnroll) { <button class="button button-primary" disabled="@_mutating" @onclick="EnrollAsync">Enroll</button> }
+            else if (_course.CanContinue)
+            {
+                <button class="button button-primary" disabled
+                        title="Course content is not available yet">Continue learning</button>
+                <button class="button button-danger" disabled="@_mutating" @onclick="OpenWithdraw">Withdraw</button>
+            }
+        </Actions>
+    </PageHeader>
+    <AppCard>
+        <p>Instructor: @_course.InstructorName</p>
+        <p>@_course.PublishedLessonCount lessons · @_course.EstimatedMinutes minutes</p>
+        @if (_course.EnrollmentStatus is not null) { <StatusBadge Text="@_course.EnrollmentStatus" /> }
+    </AppCard>
+    <h2>Course outline</h2>
+    @if (_course.Lessons.Count == 0) { <EmptyState Icon="□" Title="No published lessons" Description="The outline is being prepared." /> }
+    else
+    {
+        <ol>
+            @foreach (var lesson in _course.Lessons)
+            {
+                <li><strong>@lesson.Title</strong> · @lesson.EstimatedMinutes minutes · @lesson.LessonType</li>
+            }
+        </ol>
+    }
+}
+<ConfirmDialog IsOpen="@_confirmWithdraw" Title="Withdraw from course?"
+               Message="Your enrollment will be marked as withdrawn." ConfirmText="Withdraw"
+               IsDestructive="true" IsBusy="@_mutating" OnConfirm="WithdrawAsync" OnCancel="CloseWithdraw" />
+
+@code {
+    [Parameter] public string Slug { get; set; } = string.Empty;
+    private CourseDetailsResponse? _course;
+    private bool _loading = true;
+    private bool _mutating;
+    private bool _confirmWithdraw;
+    private string? _error;
+    protected override Task OnParametersSetAsync() => LoadAsync();
+    private async Task LoadAsync()
+    {
+        _loading = true; _error = null;
+        try { _course = await ApiClient.GetCatalogCourseAsync(Slug); }
+        catch (ApiProblemException exception) { _error = exception.Message; }
+        finally { _loading = false; }
+    }
+    private async Task EnrollAsync()
+    {
+        if (_course is null) return;
+        _mutating = true;
+        try { await ApiClient.EnrollAsync(_course.CourseId); await LoadAsync(); }
+        catch (ApiProblemException exception) { _error = exception.Message; }
+        finally { _mutating = false; }
+    }
+    private void OpenWithdraw() => _confirmWithdraw = true;
+    private void CloseWithdraw() => _confirmWithdraw = false;
+    private async Task WithdrawAsync()
+    {
+        if (_course?.EnrollmentId is not Guid id) return;
+        _mutating = true;
+        try
+        {
+            var enrollment = await ApiClient.GetEnrollmentAsync(id);
+            await ApiClient.WithdrawAsync(id, enrollment.RowVersion);
+            _confirmWithdraw = false; await LoadAsync();
+        }
+        catch (ApiProblemException exception) { _error = exception.Message; }
+        finally { _mutating = false; }
+    }
+}

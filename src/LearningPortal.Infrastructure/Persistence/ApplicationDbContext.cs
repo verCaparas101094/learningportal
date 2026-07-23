@@ -2,6 +2,8 @@ using LearningPortal.Domain.Courses;
 using LearningPortal.Domain.Courses.Exceptions;
 using LearningPortal.Domain.Lessons;
 using LearningPortal.Domain.Lessons.Exceptions;
+using LearningPortal.Domain.Enrollments;
+using LearningPortal.Domain.Enrollments.Exceptions;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
 using LearningPortal.Infrastructure.Persistence.Configurations;
@@ -21,6 +23,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Course> Courses => Set<Course>();
     /// <summary>Gets course lessons.</summary>
     public DbSet<Lesson> Lessons => Set<Lesson>();
+    /// <summary>Gets course enrollments.</summary>
+    public DbSet<Enrollment> Enrollments => Set<Enrollment>();
 
     /// <summary>Gets the persisted hashed refresh tokens.</summary>
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -52,6 +56,11 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         {
             throw new LessonConcurrencyException(exception);
         }
+        catch (DbUpdateConcurrencyException exception)
+            when (exception.Entries.Any(entry => entry.Entity is Enrollment))
+        {
+            throw new EnrollmentConcurrencyException(exception);
+        }
         catch (DbUpdateException exception)
             when (IsCourseSlugUniqueIndexViolation(exception))
         {
@@ -61,6 +70,11 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             when (IsLessonOrderUniqueIndexViolation(exception))
         {
             throw new DuplicateLessonOrderException(exception);
+        }
+        catch (DbUpdateException exception)
+            when (IsEnrollmentUniqueIndexViolation(exception))
+        {
+            throw new DuplicateActiveEnrollmentException(exception);
         }
     }
 
@@ -75,4 +89,11 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         exception.Entries.Any(entry => entry.Entity is Lesson)
         && exception.InnerException is SqlException { Number: 2601 or 2627 } sqlException
         && sqlException.Message.Contains(LessonConfiguration.CourseOrderIndexName, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsEnrollmentUniqueIndexViolation(DbUpdateException exception) =>
+        exception.Entries.Any(entry => entry.Entity is Enrollment)
+        && exception.InnerException is SqlException { Number: 2601 or 2627 } sqlException
+        && sqlException.Message.Contains(
+            EnrollmentConfiguration.ActiveEnrollmentIndexName,
+            StringComparison.OrdinalIgnoreCase);
 }

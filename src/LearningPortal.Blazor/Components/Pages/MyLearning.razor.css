@@ -1,0 +1,4 @@
+.catalog-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1rem; margin:1rem 0; }
+.catalog-grid article { display:flex; flex-direction:column; gap:.75rem; height:100%; }
+.catalog-grid h2,.catalog-grid p { margin:0; }
+.course-actions { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:auto; }

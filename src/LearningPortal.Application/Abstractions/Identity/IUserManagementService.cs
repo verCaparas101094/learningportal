@@ -20,6 +20,11 @@ public interface IUserManagementService
         Guid userId,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Returns safe user projections for the requested identifiers.</summary>
+    Task<IReadOnlyDictionary<Guid, UserResponse>> GetUsersByIdsAsync(
+        IReadOnlyCollection<Guid> userIds,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Enables or disables one user.</summary>
     Task<Result<UserResponse>> SetEnabledAsync(
         Guid userId,

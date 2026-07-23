@@ -1,0 +1,72 @@
+@page "/catalog"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Course Catalog | Learning Portal</PageTitle>
+<PageHeader Eyebrow="Employee learning" Title="Course Catalog" Description="Explore published employee courses." />
+@if (!string.IsNullOrWhiteSpace(_error)) { <div class="feedback error" role="alert">@_error</div> }
+<div class="course-filters">
+    <input type="search" @bind="_search" placeholder="Search courses" aria-label="Search catalog" />
+    <button class="button button-primary" @onclick="SearchAsync">Search</button>
+</div>
+@if (_loading) { <LoadingState Message="Loading the course catalog…" /> }
+else if (_page is null || _page.Items.Count == 0)
+{
+    <EmptyState Icon="□" Title="No published courses found" Description="Try another search or return later." />
+}
+else
+{
+    <div class="catalog-grid">
+        @foreach (var course in _page.Items)
+        {
+            <AppCard>
+                <article>
+                    <p>@course.InstructorName</p><h2>@course.Title</h2><p>@course.DescriptionSummary</p>
+                    <p>@course.PublishedLessonCount lessons · @course.EstimatedMinutes minutes</p>
+                    @if (course.EnrollmentStatus is not null) { <StatusBadge Text="@course.EnrollmentStatus" /> }
+                    <div class="course-actions">
+                        <a class="button" href="@($"/catalog/{course.Slug}")">View details</a>
+                        @if (course.CanEnroll)
+                        {
+                            <button class="button button-primary" disabled="@_mutating"
+                                    @onclick="() => EnrollAsync(course.CourseId)">Enroll</button>
+                        }
+                        else if (course.CanContinue)
+                        {
+                            <button class="button button-primary" disabled
+                                    title="Course content is not available yet">Continue learning</button>
+                        }
+                    </div>
+                </article>
+            </AppCard>
+        }
+    </div>
+    <PaginationControls PageNumber="@_page.PageNumber" TotalPages="@_page.TotalPages"
+                        Disabled="@_loading" OnPageChanged="ChangePageAsync" />
+}
+
+@code {
+    private PagedCourseCatalogResponse? _page;
+    private string? _search;
+    private string? _error;
+    private bool _loading = true;
+    private bool _mutating;
+    private int _pageNumber = 1;
+    protected override Task OnInitializedAsync() => LoadAsync();
+    private async Task LoadAsync()
+    {
+        _loading = true; _error = null;
+        try { _page = await ApiClient.GetCatalogAsync(new(_search, null, _pageNumber, 12)); }
+        catch (ApiProblemException exception) { _error = exception.Message; }
+        finally { _loading = false; }
+    }
+    private async Task SearchAsync() { _pageNumber = 1; await LoadAsync(); }
+    private async Task ChangePageAsync(int page) { _pageNumber = page; await LoadAsync(); }
+    private async Task EnrollAsync(Guid courseId)
+    {
+        _mutating = true; _error = null;
+        try { await ApiClient.EnrollAsync(courseId); await LoadAsync(); }
+        catch (ApiProblemException exception) { _error = exception.Message; }
+        finally { _mutating = false; }
+    }
+}

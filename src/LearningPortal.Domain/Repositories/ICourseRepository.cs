@@ -11,6 +11,14 @@ public interface ICourseRepository
     /// <summary>Returns an untracked course by identifier.</summary>
     Task<Course?> GetByIdReadOnlyAsync(Guid courseId, CancellationToken cancellationToken = default);
 
+    /// <summary>Returns an untracked published course by slug.</summary>
+    Task<Course?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken = default);
+
+    /// <summary>Returns untracked courses matching identifiers.</summary>
+    Task<IReadOnlyList<Course>> GetByIdsReadOnlyAsync(
+        IReadOnlyCollection<Guid> courseIds,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Returns a filtered course page and total matching count.</summary>
     Task<(IReadOnlyList<Course> Items, int TotalCount)> GetPageAsync(
         string? search,

@@ -14,6 +14,22 @@ public sealed class LessonRepository(ApplicationDbContext context) : ILessonRepo
     public Task<Lesson?> GetByIdReadOnlyAsync(Guid id, CancellationToken ct = default) =>
         context.Lessons.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id, ct);
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Lesson>> GetPublishedByCourseAsync(
+        Guid courseId,
+        CancellationToken cancellationToken = default) =>
+        await context.Lessons.AsNoTracking()
+            .Where(x => x.CourseId == courseId && x.Status == LessonStatus.Published)
+            .OrderBy(x => x.Order).ThenBy(x => x.Id)
+            .ToListAsync(cancellationToken);
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Lesson>> GetPublishedByCoursesAsync(
+        IReadOnlyCollection<Guid> courseIds,
+        CancellationToken cancellationToken = default) =>
+        await context.Lessons.AsNoTracking()
+            .Where(x => courseIds.Contains(x.CourseId) && x.Status == LessonStatus.Published)
+            .OrderBy(x => x.CourseId).ThenBy(x => x.Order)
+            .ToListAsync(cancellationToken);
+    /// <inheritdoc />
     public async Task<(IReadOnlyList<Lesson> Items, int TotalCount)> GetPageAsync(
         Guid? courseId, string? search, int pageNumber, int pageSize, Guid? instructorId = null, CancellationToken ct = default)
     {

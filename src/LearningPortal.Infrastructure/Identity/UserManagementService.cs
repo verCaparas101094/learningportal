@@ -81,6 +81,23 @@ public sealed class UserManagementService(
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<Guid, UserResponse>> GetUsersByIdsAsync(
+        IReadOnlyCollection<Guid> userIds,
+        CancellationToken cancellationToken = default)
+    {
+        var users = await userManager.Users.AsNoTracking()
+            .Where(user => userIds.Contains(user.Id))
+            .ToListAsync(cancellationToken);
+        var responses = new Dictionary<Guid, UserResponse>(users.Count);
+        foreach (var user in users)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            responses[user.Id] = await CreateResponseAsync(user);
+        }
+        return responses;
+    }
+
+    /// <inheritdoc />
     public async Task<Result<UserResponse>> SetEnabledAsync(
         Guid userId,
         bool isEnabled,

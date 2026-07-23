@@ -29,6 +29,14 @@ using LearningPortal.Application.Lessons;
 using LearningPortal.Shared.Courses;
 using LearningPortal.Shared.Identity;
 using LearningPortal.Shared.Results;
+using LearningPortal.Application.Enrollments.Commands.EnrollInCourse;
+using LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment;
+using LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments;
+using LearningPortal.Application.Enrollments.Queries.GetEnrollmentById;
+using LearningPortal.Application.Enrollments.Queries.GetMyEnrollments;
+using LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog;
+using LearningPortal.Application.Enrollments.Queries.GetPublishedCourseDetails;
+using LearningPortal.Shared.Enrollments;
 using LearningPortal.Shared.UserManagement;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -66,6 +74,13 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetLessonsByCourseQuery, Result<PagedLessonsResponse>>, GetLessonsByCourseQueryHandler>();
         services.AddScoped<IQueryHandler<GetLessonsQuery, Result<PagedLessonsResponse>>, GetLessonsQueryHandler>();
         services.AddScoped<ILessonContentPreviewService, LessonContentPreviewService>();
+        services.AddScoped<ICommandHandler<EnrollInCourseCommand, Result<EnrollmentResponse>>, EnrollInCourseCommandHandler>();
+        services.AddScoped<ICommandHandler<WithdrawEnrollmentCommand, Result<EnrollmentResponse>>, WithdrawEnrollmentCommandHandler>();
+        services.AddScoped<IQueryHandler<GetPublishedCourseCatalogQuery, Result<PagedCourseCatalogResponse>>, GetPublishedCourseCatalogQueryHandler>();
+        services.AddScoped<IQueryHandler<GetPublishedCourseDetailsQuery, Result<CourseDetailsResponse>>, GetPublishedCourseDetailsQueryHandler>();
+        services.AddScoped<IQueryHandler<GetMyEnrollmentsQuery, Result<PagedMyLearningResponse>>, GetMyEnrollmentsQueryHandler>();
+        services.AddScoped<IQueryHandler<GetEnrollmentByIdQuery, Result<EnrollmentResponse>>, GetEnrollmentByIdQueryHandler>();
+        services.AddScoped<IQueryHandler<GetCourseEnrollmentsQuery, Result<PagedEnrollmentsResponse>>, GetCourseEnrollmentsQueryHandler>();
 
         return services;
     }

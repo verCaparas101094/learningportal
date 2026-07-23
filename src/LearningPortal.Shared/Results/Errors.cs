@@ -296,4 +296,19 @@ public static class Errors
         /// <summary>Creates a lesson content validation error.</summary>
         public static Error InvalidContent(string message) => new("Lesson.InvalidContent", message, ErrorType.Validation);
     }
+
+    /// <summary>Provides enrollment errors.</summary>
+    public static class Enrollment
+    {
+        /// <summary>Creates a missing enrollment error.</summary>
+        public static Error NotFound(Guid id) => new("Enrollment.NotFound", $"The enrollment with identifier '{id}' was not found.", ErrorType.NotFound);
+        /// <summary>Creates a duplicate active enrollment error.</summary>
+        public static Error Duplicate() => new("Enrollment.Duplicate", "You are already enrolled in this course.", ErrorType.Conflict);
+        /// <summary>Creates an unpublished-course error.</summary>
+        public static Error CourseNotPublished() => new("Enrollment.CourseNotPublished", "Only published courses can be enrolled in.", ErrorType.Conflict);
+        /// <summary>Creates an invalid transition error.</summary>
+        public static Error InvalidState() => new("Enrollment.InvalidState", "The enrollment cannot be changed in its current state.", ErrorType.Conflict);
+        /// <summary>Creates an optimistic concurrency conflict.</summary>
+        public static Error ConcurrencyConflict() => new("Enrollment.ConcurrencyConflict", "The enrollment was modified by another request. Reload it and try again.", ErrorType.Conflict);
+    }
 }
