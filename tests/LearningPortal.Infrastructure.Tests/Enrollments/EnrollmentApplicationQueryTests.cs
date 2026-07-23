@@ -2,6 +2,7 @@ using LearningPortal.Application.Abstractions.Identity;
 using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment;
 using LearningPortal.Application.Enrollments.Queries.GetEnrollmentById;
+using LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments;
 using LearningPortal.Application.Enrollments.Queries.GetMyEnrollments;
 using LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog;
 using LearningPortal.Domain.Courses;
@@ -76,6 +77,23 @@ public sealed class EnrollmentApplicationQueryTests
         Assert.Equal("Authorization.Forbidden", result.Error!.Code);
     }
 
+    /// <summary>Verifies administrators can withdraw another student's active enrollment.</summary>
+    [Fact]
+    public async Task Withdraw_Administrator_CanWithdrawAnotherStudentsEnrollment()
+    {
+        var enrollment = Enrollment.Create(Guid.NewGuid(), Guid.NewGuid(), Now);
+        var handler = new WithdrawEnrollmentCommandHandler(
+            new FakeEnrollmentRepository(enrollment), new FakeUnitOfWork(),
+            new FakeCurrentUser(Guid.NewGuid(), "Administrator"), new FakeClock(),
+            NullLogger<WithdrawEnrollmentCommandHandler>.Instance);
+
+        var result = await handler.HandleAsync(
+            new(enrollment.Id, Convert.ToBase64String([1])), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(EnrollmentStatus.Withdrawn, enrollment.Status);
+    }
+
     /// <summary>Verifies enrollment details enforce ownership.</summary>
     [Fact]
     public async Task EnrollmentDetails_ForeignStudent_ReturnsForbidden()
@@ -111,6 +129,28 @@ public sealed class EnrollmentApplicationQueryTests
         Assert.Equal(published.Id, result.Value.Items.Single().CourseId);
     }
 
+    /// <summary>Verifies catalog cards contain the current student's enrollment state.</summary>
+    [Fact]
+    public async Task Catalog_IncludesCurrentStudentsEnrollmentState()
+    {
+        var studentId = Guid.NewGuid();
+        var course = CreateCourse(published: true);
+        var enrollment = Enrollment.Create(course.Id, studentId, Now);
+        var handler = new GetPublishedCourseCatalogQueryHandler(
+            new FakeCourseRepository([course]), new FakeLessonRepository(),
+            new FakeEnrollmentRepository(enrollment), new FakeUserManagementService(),
+            new FakeCurrentUser(studentId), new GetPublishedCourseCatalogQueryValidator());
+
+        var result = await handler.HandleAsync(new(null, 1, 12), CancellationToken.None);
+
+        Assert.True(result.IsSuccess);
+        var item = Assert.Single(result.Value.Items);
+        Assert.Equal("Enrolled", item.EnrollmentStatus);
+        Assert.Equal(enrollment.Id, item.EnrollmentId);
+        Assert.True(item.IsEnrolled);
+        Assert.False(item.CanEnroll);
+    }
+
     /// <summary>Verifies My Learning is scoped to the current user and published content.</summary>
     [Fact]
     public async Task MyLearning_UsesCurrentStudentAndHidesUnpublishedCourses()
@@ -131,6 +171,22 @@ public sealed class EnrollmentApplicationQueryTests
         Assert.Equal(studentId, repository.RequestedStudentId);
         Assert.Single(result.Value.Items);
         Assert.Equal(published.Id, result.Value.Items.Single().CourseId);
+    }
+
+    /// <summary>Verifies a non-owning instructor cannot list course enrollments.</summary>
+    [Fact]
+    public async Task CourseEnrollments_NonOwningInstructor_ReturnsForbidden()
+    {
+        var course = CreateCourse(published: true);
+        var handler = new GetCourseEnrollmentsQueryHandler(
+            new FakeCourseRepository([course]), new FakeEnrollmentRepository(),
+            new FakeUserManagementService(), new FakeCurrentUser(Guid.NewGuid(), "Instructor"),
+            new GetCourseEnrollmentsQueryValidator());
+
+        var result = await handler.HandleAsync(new(course.Id, null, null, 1, 10), CancellationToken.None);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal("Authorization.Forbidden", result.Error!.Code);
     }
 
     private static Course CreateCourse(bool published)
