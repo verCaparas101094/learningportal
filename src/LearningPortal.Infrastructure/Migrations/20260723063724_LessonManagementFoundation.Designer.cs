@@ -4,6 +4,7 @@ using LearningPortal.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LearningPortal.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260723063724_LessonManagementFoundation")]
+    partial class LessonManagementFoundation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,102 +113,6 @@ namespace LearningPortal.Infrastructure.Migrations
                     b.HasIndex("Status");
 
                     b.ToTable("Courses", (string)null);
-                });
-
-            modelBuilder.Entity("LearningPortal.Domain.Lessons.Lesson", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasPrecision(0)
-                        .HasColumnType("datetimeoffset(0)");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("DeletedAtUtc")
-                        .HasPrecision(0)
-                        .HasColumnType("datetimeoffset(0)");
-
-                    b.Property<Guid?>("DeletedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("EstimatedMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ExternalUrl")
-                        .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("LessonType")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("MarkdownContent")
-                        .HasMaxLength(100000)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
-                        .HasPrecision(0)
-                        .HasColumnType("datetimeoffset(0)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("VideoProvider")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("Title");
-
-                    b.HasIndex("CourseId", "Order")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Lessons_CourseId_Order")
-                        .HasFilter("[IsDeleted] = 0");
-
-                    b.HasIndex("CourseId", "Status");
-
-                    b.ToTable("Lessons", (string)null);
                 });
 
             modelBuilder.Entity("LearningPortal.Infrastructure.Identity.ApplicationUser", b =>
@@ -477,15 +384,6 @@ namespace LearningPortal.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("LearningPortal.Domain.Lessons.Lesson", b =>
-                {
-                    b.HasOne("LearningPortal.Domain.Courses.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("LearningPortal.Infrastructure.Identity.RefreshToken", b =>

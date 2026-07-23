@@ -1,11 +1,13 @@
 using System.Text;
 using LearningPortal.Application.Abstractions.Identity;
+using LearningPortal.Application.Abstractions.Lessons;
 using LearningPortal.Application.Abstractions.Networking;
 using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Application.Authorization;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Authorization;
 using LearningPortal.Infrastructure.Identity;
+using LearningPortal.Infrastructure.Lessons;
 using LearningPortal.Infrastructure.Persistence;
 using LearningPortal.Infrastructure.Persistence.Interceptors;
 using LearningPortal.Infrastructure.Persistence.Repositories;
@@ -33,6 +35,8 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddSingleton<IVideoEmbedResolver, VideoEmbedResolver>();
+        services.AddSingleton<IMarkdownRenderer, MarkdownRenderer>();
         services.AddScoped<IClientIpAddressProvider, ClientIpAddressProvider>();
         services.AddSingleton<ISystemClock, SystemClock>();
         services.AddScoped<AuditSaveChangesInterceptor>();
@@ -98,6 +102,7 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<ICourseRepository, CourseRepository>();
+        services.AddScoped<ILessonRepository, LessonRepository>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IIdentityRoleSeeder, IdentityRoleSeeder>();

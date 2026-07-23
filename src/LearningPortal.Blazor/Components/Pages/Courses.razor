@@ -132,6 +132,7 @@
                                     </td>
                                     <td data-label="Actions">
                                         <div class="course-actions">
+                                            <a class="button" href="@($"/courses/{course.Id:D}/lessons")">Lessons</a>
                                             @if (IsDraft(course))
                                             {
                                                 <button type="button"

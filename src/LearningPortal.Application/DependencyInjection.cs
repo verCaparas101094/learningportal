@@ -16,6 +16,16 @@ using LearningPortal.Application.UserManagement.Commands.AssignUserRole;
 using LearningPortal.Application.UserManagement.Commands.SetUserEnabled;
 using LearningPortal.Application.UserManagement.Queries.GetUserById;
 using LearningPortal.Application.UserManagement.Queries.GetUsers;
+using LearningPortal.Application.Lessons.Commands.CreateLesson;
+using LearningPortal.Application.Lessons.Commands.UpdateLesson;
+using LearningPortal.Application.Lessons.Commands.PublishLesson;
+using LearningPortal.Application.Lessons.Commands.DeleteLesson;
+using LearningPortal.Application.Lessons.Commands.MoveLesson;
+using LearningPortal.Application.Lessons.Queries.GetLessonById;
+using LearningPortal.Application.Lessons.Queries.GetLessonsByCourse;
+using LearningPortal.Application.Lessons.Queries.GetLessons;
+using LearningPortal.Shared.Lessons;
+using LearningPortal.Application.Lessons;
 using LearningPortal.Shared.Courses;
 using LearningPortal.Shared.Identity;
 using LearningPortal.Shared.Results;
@@ -47,6 +57,15 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetUserByIdQuery, Result<UserResponse>>, GetUserByIdQueryHandler>();
         services.AddScoped<ICommandHandler<SetUserEnabledCommand, Result<UserResponse>>, SetUserEnabledCommandHandler>();
         services.AddScoped<ICommandHandler<AssignUserRoleCommand, Result<UserResponse>>, AssignUserRoleCommandHandler>();
+        services.AddScoped<ICommandHandler<CreateLessonCommand, Result<LessonResponse>>, CreateLessonCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdateLessonCommand, Result<LessonResponse>>, UpdateLessonCommandHandler>();
+        services.AddScoped<ICommandHandler<PublishLessonCommand, Result<LessonResponse>>, PublishLessonCommandHandler>();
+        services.AddScoped<ICommandHandler<DeleteLessonCommand, Result<bool>>, DeleteLessonCommandHandler>();
+        services.AddScoped<ICommandHandler<MoveLessonCommand, Result<LessonResponse>>, MoveLessonCommandHandler>();
+        services.AddScoped<IQueryHandler<GetLessonByIdQuery, Result<LessonResponse>>, GetLessonByIdQueryHandler>();
+        services.AddScoped<IQueryHandler<GetLessonsByCourseQuery, Result<PagedLessonsResponse>>, GetLessonsByCourseQueryHandler>();
+        services.AddScoped<IQueryHandler<GetLessonsQuery, Result<PagedLessonsResponse>>, GetLessonsQueryHandler>();
+        services.AddScoped<ILessonContentPreviewService, LessonContentPreviewService>();
 
         return services;
     }

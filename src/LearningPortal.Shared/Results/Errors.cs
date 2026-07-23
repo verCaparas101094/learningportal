@@ -279,4 +279,21 @@ public static class Errors
             "The course was modified by another request. Reload it and try again.",
             ErrorType.Conflict);
     }
+
+    /// <summary>Provides lesson-management errors.</summary>
+    public static class LessonManagement
+    {
+        /// <summary>Creates a missing lesson error.</summary>
+        public static Error NotFound(Guid id) => new("Lesson.NotFound", $"The lesson with identifier '{id}' was not found.", ErrorType.NotFound);
+        /// <summary>Creates a duplicate order error.</summary>
+        public static Error DuplicateOrder() => new("Lesson.DuplicateOrder", "A lesson with the specified order already exists.", ErrorType.Conflict);
+        /// <summary>Creates an invalid lifecycle error.</summary>
+        public static Error InvalidState(string operation) => new("Lesson.InvalidState", $"The lesson cannot be {operation} in its current state.", ErrorType.Conflict);
+        /// <summary>Creates an invalid order error.</summary>
+        public static Error InvalidOrder() => new("Lesson.InvalidOrder", "The requested lesson order is invalid.", ErrorType.Validation);
+        /// <summary>Creates a concurrency conflict error.</summary>
+        public static Error ConcurrencyConflict() => new("Lesson.ConcurrencyConflict", "The lesson was modified by another request. Reload it and try again.", ErrorType.Conflict);
+        /// <summary>Creates a lesson content validation error.</summary>
+        public static Error InvalidContent(string message) => new("Lesson.InvalidContent", message, ErrorType.Validation);
+    }
 }
