@@ -2,6 +2,7 @@ using System.Data;
 using LearningPortal.Application.Abstractions.Identity;
 using LearningPortal.Application.Abstractions.Networking;
 using LearningPortal.Application.Abstractions.Time;
+using LearningPortal.Application.Authorization;
 using LearningPortal.Infrastructure.Persistence;
 using LearningPortal.Shared.Identity;
 using LearningPortal.Shared.Results;
@@ -29,6 +30,52 @@ public sealed class IdentityService(
     ILogger<IdentityService> logger)
     : IIdentityService
 {
+    /// <inheritdoc />
+    public async Task<Result<AuthenticationResponse>> RegisterAsync(
+        string firstName,
+        string lastName,
+        string email,
+        string password,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var normalizedEmail = email.Trim();
+        if (await userManager.FindByEmailAsync(normalizedEmail) is not null)
+        {
+            return Result<AuthenticationResponse>.Failure(Errors.Common.Failure(
+                "Authentication.RegistrationFailed",
+                "The account could not be registered with the supplied details."));
+        }
+
+        var user = new ApplicationUser
+        {
+            Id = Guid.CreateVersion7(),
+            UserName = normalizedEmail,
+            Email = normalizedEmail,
+            EmailConfirmed = true,
+            DisplayName = $"{firstName.Trim()} {lastName.Trim()}".Trim(),
+            IsEnabled = true
+        };
+        var createResult = await userManager.CreateAsync(user, password);
+        if (!createResult.Succeeded)
+        {
+            return Result<AuthenticationResponse>.Failure(Errors.Validation.Failed(
+                string.Join(
+                    " ",
+                    createResult.Errors.Select(error => SafeIdentityError(error.Code)))));
+        }
+
+        var roleResult = await userManager.AddToRoleAsync(user, ApplicationRoles.Student);
+        if (!roleResult.Succeeded)
+        {
+            await userManager.DeleteAsync(user);
+            return Result<AuthenticationResponse>.Failure(Errors.Common.Unexpected());
+        }
+
+        logger.LogInformation("Registered standard learning portal user {UserId}.", user.Id);
+        return await IssueTokenPairAsync(user, cancellationToken);
+    }
+
     /// <inheritdoc />
     public async Task<Result<AuthenticationResponse>> LoginAsync(
         string email,
@@ -202,6 +249,17 @@ public sealed class IdentityService(
 
     private Task<bool> PasswordMatchesAsync(ApplicationUser user, string password) =>
         userManager.CheckPasswordAsync(user, password);
+
+    private static string SafeIdentityError(string code) => code switch
+    {
+        "PasswordTooShort" => "The password is too short.",
+        "PasswordRequiresNonAlphanumeric" =>
+            "The password requires a non-alphanumeric character.",
+        "PasswordRequiresDigit" => "The password requires a digit.",
+        "PasswordRequiresLower" => "The password requires a lowercase letter.",
+        "PasswordRequiresUpper" => "The password requires an uppercase letter.",
+        _ => "The supplied registration details are invalid."
+    };
 
     private async Task<Result<AuthenticationResponse>> ExecuteRefreshRotationAsync(
         string tokenHash,

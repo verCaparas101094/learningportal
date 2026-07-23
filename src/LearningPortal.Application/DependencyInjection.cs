@@ -4,6 +4,7 @@ using LearningPortal.Application.Behaviors;
 using LearningPortal.Application.Authentication.Commands.Login;
 using LearningPortal.Application.Authentication.Commands.Refresh;
 using LearningPortal.Application.Authentication.Commands.Revoke;
+using LearningPortal.Application.Authentication.Commands.Register;
 using LearningPortal.Application.Courses.Commands.ArchiveCourse;
 using LearningPortal.Application.Courses.Commands.CreateCourse;
 using LearningPortal.Application.Courses.Commands.DeleteCourse;
@@ -43,6 +44,8 @@ using LearningPortal.Shared.Learning;
 using LearningPortal.Application.Quizzes;
 using LearningPortal.Shared.Quizzes;
 using LearningPortal.Application.InstructorEligibility;
+using LearningPortal.Application.AiTutor;
+using LearningPortal.Shared.AiTutor;
 using LearningPortal.Shared.InstructorEligibility;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -60,6 +63,7 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<LoginCommand, Result<AuthenticationResponse>>, LoginCommandHandler>();
         services.AddScoped<ICommandHandler<RefreshTokenCommand, Result<AuthenticationResponse>>, RefreshTokenCommandHandler>();
         services.AddScoped<ICommandHandler<RevokeRefreshTokenCommand, Result<bool>>, RevokeRefreshTokenCommandHandler>();
+        services.AddScoped<ICommandHandler<RegisterCommand, Result<AuthenticationResponse>>, RegisterCommandHandler>();
         services.AddScoped<ICommandHandler<CreateCourseCommand, Result<CourseResponse>>, CreateCourseCommandHandler>();
         services.AddScoped<ICommandHandler<UpdateCourseCommand, Result<CourseResponse>>, UpdateCourseCommandHandler>();
         services.AddScoped<ICommandHandler<PublishCourseCommand, Result<CourseResponse>>, PublishCourseCommandHandler>();
@@ -116,6 +120,14 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetSkills, Result<IReadOnlyList<SkillResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
         services.AddScoped<ICommandHandler<RecalculateInstructorEligibility, Result<IReadOnlyList<InstructorEligibilityResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
         services.AddScoped<ICommandHandler<AssignCourseInstructor, Result<CourseResponse>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
+        services.AddScoped<IAiTutorContextBuilder, AiTutorContextBuilder>();
+        services.AddScoped<AiTutorHandler>();
+        services.AddScoped<ICommandHandler<StartAiTutorConversation, Result<AiTutorConversationResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<ICommandHandler<SendAiTutorMessage, Result<AiTutorReplyResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<ICommandHandler<ArchiveAiTutorConversation, Result<AiTutorConversationResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<IQueryHandler<GetMyAiTutorConversations, Result<IReadOnlyList<AiTutorConversationListItemResponse>>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<IQueryHandler<GetAiTutorConversation, Result<AiTutorConversationResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
+        services.AddScoped<IQueryHandler<CheckOllamaHealth, Result<OllamaHealthResponse>>>(p => p.GetRequiredService<AiTutorHandler>());
 
         return services;
     }

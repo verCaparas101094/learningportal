@@ -269,6 +269,77 @@
     text-align: left;
 }
 
+.guest-actions {
+    align-items: center;
+    display: flex;
+    gap: .5rem;
+}
+
+.guest-register {
+    background: transparent;
+}
+
+.account-menu-container {
+    position: relative;
+    z-index: 51;
+}
+
+.account-menu-dismiss {
+    background: transparent;
+    border: 0;
+    inset: 0;
+    position: fixed;
+    z-index: 50;
+}
+
+.account-menu {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: .65rem;
+    box-shadow: var(--shadow-large);
+    display: grid;
+    min-width: 15rem;
+    padding: .5rem;
+    position: absolute;
+    right: 0;
+    top: calc(100% + .5rem);
+    z-index: 52;
+}
+
+.account-menu a,
+.account-menu button {
+    background: transparent;
+    border: 0;
+    border-radius: .4rem;
+    color: inherit;
+    cursor: pointer;
+    display: block;
+    font: inherit;
+    padding: .65rem .75rem;
+    text-align: left;
+    text-decoration: none;
+    width: 100%;
+}
+
+.account-menu a:hover,
+.account-menu a:focus-visible,
+.account-menu button:hover,
+.account-menu button:focus-visible {
+    background: var(--color-surface-muted);
+}
+
+.account-menu-identity {
+    border-bottom: 1px solid var(--color-border);
+    display: grid;
+    margin-bottom: .35rem;
+    padding: .5rem .75rem .75rem;
+}
+
+.account-menu-identity small {
+    color: var(--color-text-muted);
+    margin-top: .2rem;
+}
+
 .profile-copy strong {
     font-size: .82rem;
     overflow: hidden;
@@ -386,6 +457,10 @@
         border-left: 0;
         margin-left: 0;
         padding-left: 0;
+    }
+
+    .guest-register {
+        display: none;
     }
 
     .page-content {

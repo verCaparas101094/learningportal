@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using LearningPortal.Infrastructure.Identity;
 using LearningPortal.Shared.Results;
+using LearningPortal.Application.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -11,6 +12,46 @@ namespace LearningPortal.Infrastructure.Tests.Authentication;
 /// </summary>
 public sealed class IdentityServiceTests
 {
+    /// <summary>Verifies public registration creates only a standard student.</summary>
+    [Fact]
+    public async Task RegisterAsync_WithValidDetails_CreatesStudentAndIssuesTokens()
+    {
+        await using var context = await AuthenticationTestContext.CreateAsync();
+
+        var result = await context.IdentityService.RegisterAsync(
+            "New",
+            "Learner",
+            "new.learner@example.com",
+            "AnotherStrongPassword!123");
+
+        Assert.True(result.IsSuccess);
+        var user = await context.UserManager.FindByEmailAsync("new.learner@example.com");
+        Assert.NotNull(user);
+        Assert.Equal("New Learner", user.DisplayName);
+        Assert.True(await context.UserManager.IsInRoleAsync(user, ApplicationRoles.Student));
+        Assert.False(await context.UserManager.IsInRoleAsync(user, ApplicationRoles.Administrator));
+    }
+
+    /// <summary>Verifies duplicate registration does not disclose account existence.</summary>
+    [Fact]
+    public async Task RegisterAsync_WithDuplicateEmail_ReturnsSafeFailure()
+    {
+        await using var context = await AuthenticationTestContext.CreateAsync();
+
+        var result = await context.IdentityService.RegisterAsync(
+            "Duplicate",
+            "Learner",
+            AuthenticationTestContext.Email,
+            "AnotherStrongPassword!123");
+
+        Assert.True(result.IsFailure);
+        Assert.Equal("Authentication.RegistrationFailed", result.Error?.Code);
+        Assert.DoesNotContain(
+            AuthenticationTestContext.Email,
+            result.Error?.Message ?? string.Empty,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>Verifies that valid credentials issue and persist a token pair.</summary>
     [Fact]
     public async Task LoginAsync_WithValidCredentials_IssuesTokenPair()

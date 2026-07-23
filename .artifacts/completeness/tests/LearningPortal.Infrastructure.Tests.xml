@@ -1,0 +1,346 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LearningPortal.Infrastructure.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests">
+            <summary>
+            Verifies authentication, refresh-token lifecycle, replay protection, and JWT claims.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.RegisterAsync_WithValidDetails_CreatesStudentAndIssuesTokens">
+            <summary>Verifies public registration creates only a standard student.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.RegisterAsync_WithDuplicateEmail_ReturnsSafeFailure">
+            <summary>Verifies duplicate registration does not disclose account existence.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.LoginAsync_WithValidCredentials_IssuesTokenPair">
+            <summary>Verifies that valid credentials issue and persist a token pair.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.LoginAsync_WithInvalidCredentials_ReturnsInvalidCredentials">
+            <summary>Verifies that invalid credentials return a stable non-disclosing failure.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.LoginAsync_WithLockedUser_ReturnsUserLocked">
+            <summary>Verifies that a locked user with valid credentials receives the locked-user failure.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.LoginAsync_PersistsOnlyRefreshTokenHash">
+            <summary>Verifies that persistence contains only a hash and never the raw refresh token.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.RefreshAsync_WithActiveToken_RotatesToken">
+            <summary>Verifies successful refresh-token rotation and replacement linkage.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.RefreshAsync_WithRotatedToken_ReturnsReplayDetected">
+            <summary>Verifies that the previous token cannot be used after successful rotation.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.RefreshAsync_WhenReplayDetected_RevokesActiveTokens">
+            <summary>Verifies that replay detection revokes the user's replacement token.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.RefreshAsync_WithExpiredToken_ReturnsExpiredFailure">
+            <summary>Verifies that expired refresh tokens are rejected and revoked.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.RevokeAsync_WhenRepeated_RemainsSuccessful">
+            <summary>Verifies that revocation succeeds repeatedly without revealing token existence.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.RefreshAsync_WithSameTokenTwice_OnlyFirstRotationSucceeds">
+            <summary>Verifies that the same token can produce at most one successful rotation.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authentication.IdentityServiceTests.LoginAsync_GeneratedJwtContainsRequiredClaims">
+            <summary>Verifies that generated JWTs contain every required authentication claim.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Authorization.ApplicationRolesTests">
+            <summary>
+            Verifies the immutable application role allowlist.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authorization.ApplicationRolesTests.IsValid_AcceptsOnlyApplicationRoles">
+            <summary>Verifies that only the three supported role names are accepted.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Authorization.AuthorizationEndpointExtensionsTests">
+            <summary>
+            Verifies the strongly named Minimal API authorization conventions.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authorization.AuthorizationEndpointExtensionsTests.AuthorizationHelpers_AddExpectedPolicies">
+            <summary>Verifies that each helper adds the expected named policy metadata.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Authorization.AuthorizationPolicyTests">
+            <summary>
+            Verifies registration and role composition for every named authorization policy.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authorization.AuthorizationPolicyTests.AddApplicationAuthorization_RegistersExpectedPolicies">
+            <summary>Verifies the authenticated fallback policy and all role policies.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Authorization.CurrentUserServiceTests">
+            <summary>
+            Verifies claim projection and role helpers for the current authenticated principal.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authorization.CurrentUserServiceTests.AuthenticatedPrincipal_ExposesIdentityClaimsAndRoles">
+            <summary>Verifies that authenticated JWT claims are exposed without duplicates.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authorization.CurrentUserServiceTests.UnauthenticatedPrincipal_ExposesNoIdentityData">
+            <summary>Verifies that unauthenticated principals expose no current-user data.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Authorization.IdentityRoleSeederTests">
+            <summary>
+            Verifies idempotent role seeding and Identity role-name validation.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authorization.IdentityRoleSeederTests.SeedAsync_WhenRepeated_CreatesOnlyMissingRoles">
+            <summary>Verifies that repeated seeding creates each supported role exactly once.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authorization.IdentityRoleSeederTests.Identity_WithUnknownRole_RejectsCreationAndAssignment">
+            <summary>Verifies that Identity rejects role creation and assignment outside the allowlist.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Authorization.IdentityRoleSeederTests.SeedAsync_WithBootstrapAdministrator_CreatesEnabledAdministratorOnce">
+            <summary>Verifies configured bootstrap administration is idempotent.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Courses.CourseApiClientTests">
+            <summary>Verifies typed course API requests and safe problem parsing.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApiClientTests.GetCoursesAsync_ConstructsSearchFilterAndPagination">
+            <summary>Verifies list filter and pagination query construction.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApiClientTests.CreateCourseAsync_ReturnsCreatedCourse">
+            <summary>Verifies successful course creation.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApiClientTests.CreateCourseAsync_ParsesValidationFailure">
+            <summary>Verifies API validation problem parsing.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApiClientTests.CourseFormModel_RejectsMissingRequiredValues">
+            <summary>Verifies client-side form validation.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApiClientTests.UpdateCourseAsync_SendsConcurrencyProtectedRequest">
+            <summary>Verifies Draft update method, route, and rowversion body.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApiClientTests.CourseActions_UseExpectedRoutes(System.String,System.String)">
+            <summary>Verifies lifecycle and delete API routes.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApiClientTests.UpdateCourseAsync_ParsesConcurrencyConflict">
+            <summary>Verifies concurrency conflict parsing.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests">
+            <summary>Verifies course ownership, conflicts, state rules, and pagination.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.Administrator_CanCreateForInstructor">
+            <summary>Verifies administrator instructor assignment.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.InstructorCreate_IgnoresRequestedInstructor">
+            <summary>Verifies instructor self-assignment.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.Instructor_CannotViewOrEditAnotherInstructorsCourse">
+            <summary>Verifies instructor ownership.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.ListQuery_FiltersInstructorOwnedCourses">
+            <summary>Verifies server-side ownership filtering.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.DuplicateSlug_IsRejected">
+            <summary>Verifies duplicate slug rejection.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.ListQuery_Paginates">
+            <summary>Verifies course pagination.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.Publish_RequiresDraft">
+            <summary>Verifies publication state requirements.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.Archive_RequiresPublished">
+            <summary>Verifies archival state requirements.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.Update_MapsRowVersionConflict">
+            <summary>Verifies concurrency result mapping.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseApplicationTests.Student_IsForbidden">
+            <summary>Verifies Student denial.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Courses.CourseDomainTests">
+            <summary>Verifies course aggregate lifecycle rules.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseDomainTests.Create_NormalizesValuesAndStartsDraft">
+            <summary>Verifies normalized Draft creation.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseDomainTests.DraftCourse_CanBeUpdated">
+            <summary>Verifies Draft editing.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseDomainTests.PublishedCourse_CannotBeEdited">
+            <summary>Verifies Published edit protection.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseDomainTests.DraftCourse_CanBePublished">
+            <summary>Verifies Draft publication.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseDomainTests.PublishedCourse_CanBeArchived">
+            <summary>Verifies Published archival.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseDomainTests.DraftCourse_CanBePreparedForSoftDeletion">
+            <summary>Verifies Draft deletion preparation.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseDomainTests.DraftCourse_CannotBeArchived">
+            <summary>Verifies Draft archive rejection.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Courses.CourseDomainTests.ArchivedCourse_CannotReturnToPublished">
+            <summary>Verifies Archived publication rejection.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Enrollments.EnrollInCourseCommandHandlerTests">
+            <summary>Verifies employee enrollment application rules.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollInCourseCommandHandlerTests.Handle_PublishedCourse_UsesCurrentUserAndPersists">
+            <summary>Verifies successful enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollInCourseCommandHandlerTests.Handle_DraftCourse_ReturnsCourseNotPublished">
+            <summary>Verifies draft rejection.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollInCourseCommandHandlerTests.Handle_ArchivedCourse_ReturnsCourseNotPublished">
+            <summary>Verifies archived courses cannot receive new enrollments.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollInCourseCommandHandlerTests.Handle_DuplicateActiveEnrollment_ReturnsConflict">
+            <summary>Verifies duplicate rejection.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApiClientTests">
+            <summary>Verifies authenticated enrollment API request construction.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApiClientTests.GetMyEnrollmentsAsync_ConstructsFiltersAndPagination">
+            <summary>Verifies My Learning filter and pagination parameters.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApiClientTests.GetCourseEnrollmentsAsync_ConstructsFiltersAndPagination">
+            <summary>Verifies course enrollment administration parameters.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests">
+            <summary>Verifies enrollment ownership, withdrawal, and student-safe projections.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests.Withdraw_OwnedActiveEnrollment_Succeeds">
+            <summary>Verifies an owner can withdraw an active enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests.Withdraw_CompletedEnrollment_ReturnsInvalidState">
+            <summary>Verifies completed enrollment withdrawal is rejected.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests.Withdraw_ForeignEnrollment_ReturnsForbidden">
+            <summary>Verifies a different student cannot withdraw an enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests.Withdraw_Administrator_CanWithdrawAnotherStudentsEnrollment">
+            <summary>Verifies administrators can withdraw another student's active enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests.EnrollmentDetails_ForeignStudent_ReturnsForbidden">
+            <summary>Verifies enrollment details enforce ownership.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests.Catalog_ReturnsPublishedCoursesOnly">
+            <summary>Verifies the catalog requests and returns published courses only.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests.Catalog_IncludesCurrentStudentsEnrollmentState">
+            <summary>Verifies catalog cards contain the current student's enrollment state.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests.MyLearning_UsesCurrentStudentAndHidesUnpublishedCourses">
+            <summary>Verifies My Learning is scoped to the current user and published content.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentApplicationQueryTests.CourseEnrollments_NonOwningInstructor_ReturnsForbidden">
+            <summary>Verifies a non-owning instructor cannot list course enrollments.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentDomainTests">
+            <summary>Verifies enrollment lifecycle invariants.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentDomainTests.Create_InitializesEnrolledState">
+            <summary>Verifies initial state.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentDomainTests.Start_FromEnrolled_SucceedsAndSetsTimestamp">
+            <summary>Verifies starting.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentDomainTests.Complete_FromActiveState_Succeeds(System.Boolean)">
+            <summary>Verifies completion from active states.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentDomainTests.Withdraw_FromActiveState_Succeeds(System.Boolean)">
+            <summary>Verifies withdrawal from active states.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentDomainTests.Completed_CannotBeWithdrawn">
+            <summary>Verifies completed enrollment immutability.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.EnrollmentDomainTests.Withdrawn_CannotBeRestarted">
+            <summary>Verifies withdrawn enrollments cannot restart.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Enrollments.PublishedLessonProjectionTests">
+            <summary>Verifies catalog-facing lesson projections exclude unpublished content.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Enrollments.PublishedLessonProjectionTests.GetPublishedByCourseAsync_ExcludesDraftLessons">
+            <summary>Verifies published lesson retrieval does not include draft lessons.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Learning.LessonProgressDomainTests">
+            <summary>Verifies lesson progress lifecycle invariants.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Learning.LessonProgressDomainTests.Start_CreatesInProgressProgress">
+            <summary>Verifies first access creates in-progress state.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Learning.LessonProgressDomainTests.Access_UpdatesLastAccessedAtUtc">
+            <summary>Verifies repeated access updates access time.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Learning.LessonProgressDomainTests.Complete_IsIdempotentAndAccessDoesNotRegress">
+            <summary>Verifies completion is idempotent and cannot regress.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Learning.LessonProgressDomainTests.Start_RejectsNonUtcTimestamp">
+            <summary>Verifies domain timestamps reject non-UTC values.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Lessons.LessonApiClientTests">
+            <summary>Verifies lesson client routes and form validation.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Lessons.LessonApiClientTests.GetLessons_SendsCourseSearchAndPaging">
+            <summary>Verifies course lesson search and pagination.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Lessons.LessonApiClientTests.Actions_SendExpectedRoutes(System.String,System.String)">
+            <summary>Verifies lifecycle and reorder routes.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Lessons.LessonApiClientTests.Form_RejectsRequiredAndNumericValues">
+            <summary>Verifies create/edit form constraints.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Lessons.LessonApiClientTests.Preview_SendsContentAndParsesVideoMetadata">
+            <summary>Verifies preview request and playback metadata parsing.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Lessons.LessonApplicationTests">
+            <summary>Verifies lesson query ownership, search, and pagination flow.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Lessons.LessonApplicationTests.Create_SupportedType_Succeeds(System.String,System.String,System.String,System.String)">
+            <summary>Verifies each supported content type can be created through the handler.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Lessons.LessonApplicationTests.GetByCourse_Owner_ReturnsPage">
+            <summary>Verifies an owning instructor receives the repository page.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.Lessons.LessonApplicationTests.GetByCourse_NonOwner_IsForbidden">
+            <summary>Verifies a different instructor is forbidden.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Lessons.LessonContentPreviewServiceTests">
+            <summary>Verifies application lesson preview behavior.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Lessons.LessonDomainTests">
+            <summary>Verifies lesson content and lifecycle rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Lessons.LessonValidationTests">
+            <summary>Verifies lesson command validation.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Lessons.MarkdownRendererTests">
+            <summary>Verifies Markdown rendering and sanitization.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.Lessons.VideoEmbedResolverTests">
+            <summary>Verifies deterministic video source resolution.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Tests.UserManagement.UserManagementServiceTests">
+            <summary>
+            Verifies the essential Identity-backed administrator user-management behavior.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.UserManagement.UserManagementServiceTests.GetUsersAsync_WithSearch_ReturnsRequestedPage">
+            <summary>Verifies filtered pagination and the maximum page-size rule.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.UserManagement.UserManagementServiceTests.GetUserByIdAsync_WithUnknownUser_ReturnsNotFound">
+            <summary>Verifies the stable not-found Result for an unknown user.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.UserManagement.UserManagementServiceTests.SetEnabledAsync_ChangesEnabledState">
+            <summary>Verifies that a user can be disabled and enabled again.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.UserManagement.UserManagementServiceTests.AssignRoleAsync_WithValidRole_AddsRole">
+            <summary>Verifies additive assignment of one valid application role.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.UserManagement.UserManagementServiceTests.AssignRoleAsync_WithInvalidRole_ReturnsValidationFailure">
+            <summary>Verifies that roles outside the application allowlist are rejected.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Tests.UserManagement.UserManagementServiceTests.AssignRoleAsync_WithExistingRole_RemainsIdempotent">
+            <summary>Verifies that repeated assignment does not create duplicate user roles.</summary>
+        </member>
+    </members>
+</doc>

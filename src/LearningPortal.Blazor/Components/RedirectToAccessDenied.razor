@@ -8,10 +8,17 @@
     protected override async Task OnInitializedAsync()
     {
         var authenticationState = await AuthenticationStateTask;
-        var reason = authenticationState.User.Identity?.IsAuthenticated == true
-            ? "forbidden"
-            : "unauthenticated";
+        var isAuthenticated =
+            authenticationState.User.Identity?.IsAuthenticated == true;
+        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var returnUrl = string.IsNullOrWhiteSpace(relativePath)
+            ? "/"
+            : $"/{relativePath}";
 
-        Navigation.NavigateTo($"/access-denied?reason={reason}", replace: true);
+        Navigation.NavigateTo(
+            AuthenticationNavigation.BuildAccessDeniedUrl(
+                isAuthenticated,
+                returnUrl),
+            replace: true);
     }
 }

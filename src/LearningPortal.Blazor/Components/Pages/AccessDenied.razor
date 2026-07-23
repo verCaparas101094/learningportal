@@ -6,10 +6,21 @@
 <div class="access-denied">
     <AppCard AdditionalClass="access-denied-card">
         <div class="denied-icon" aria-hidden="true">!</div>
-        <p class="eyebrow">Access restricted</p>
+        <p class="eyebrow">@Eyebrow</p>
         <h1>@Heading</h1>
         <p>@Message</p>
-        <a class="button button-primary" href="/">Return to dashboard</a>
+        @if (IsUnauthenticated)
+        {
+            <div class="access-actions">
+                <a class="button button-primary" href="@SignInUrl">Sign in</a>
+                <a class="button" href="@RegisterUrl">Register</a>
+                <a class="button" href="/">Return to home</a>
+            </div>
+        }
+        else
+        {
+            <a class="button button-primary" href="/">Return to dashboard</a>
+        }
     </AppCard>
 </div>
 
@@ -18,12 +29,24 @@
     [SupplyParameterFromQuery(Name = "reason")]
     public string? Reason { get; set; }
 
+    /// <summary>Gets or sets the original local page requested by the guest.</summary>
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
     private bool IsUnauthenticated =>
         string.Equals(Reason, "unauthenticated", StringComparison.OrdinalIgnoreCase);
+
+    private string Eyebrow => IsUnauthenticated ? "Authentication required" : "Access restricted";
 
     private string Heading => IsUnauthenticated ? "Sign in required" : "You do not have access";
 
     private string Message => IsUnauthenticated
         ? "Authentication is required to view this area of the learning portal."
         : "Your account does not have the role required to view this page.";
+
+    private string SignInUrl =>
+        AuthenticationNavigation.BuildSignInUrl(ReturnUrl);
+
+    private string RegisterUrl =>
+        AuthenticationNavigation.BuildRegisterUrl(ReturnUrl);
 }

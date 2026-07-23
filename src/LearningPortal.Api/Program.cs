@@ -13,12 +13,13 @@ builder.Logging.AddDebug();
 
 builder.Services
     .AddApplication()
-    .AddInfrastructure(builder.Configuration)
+    .AddInfrastructure(builder.Configuration, builder.Environment)
     .AddApi(builder.Configuration);
 
 var app = builder.Build();
 
 await app.SeedIdentityRolesAsync();
+await app.InitializeDevelopmentDataAsync();
 
 app.UseApiPipeline();
 app.MapIdentityEndpoints();
@@ -28,6 +29,7 @@ app.MapEnrollmentEndpoints();
 app.MapLearningEndpoints();
 app.MapQuizEndpoints();
 app.MapInstructorEligibilityEndpoints();
+app.MapAiTutorEndpoints();
 app.MapUserManagementEndpoints();
 app.MapPortalHealthChecks();
 

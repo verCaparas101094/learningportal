@@ -1,0 +1,93 @@
+@page "/register"
+@rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Registration | Learning Portal</PageTitle>
+
+<div class="authentication-page">
+    <AppCard AdditionalClass="authentication-card">
+        <p class="eyebrow">Learning Portal</p>
+        <h1>Create your account</h1>
+        <p>Register as a learner. Privileged roles can only be assigned by an administrator.</p>
+
+        @if (ErrorMessage is not null)
+        {
+            <div class="feedback error" role="alert">@ErrorMessage</div>
+        }
+
+        <form method="post" action="/auth/register">
+            <AntiforgeryToken />
+            <input type="hidden" name="returnUrl" value="@SafeReturnUrl" />
+            <div class="name-fields">
+                <label>
+                    First name
+                    <input name="firstName" autocomplete="given-name" maxlength="100" required />
+                </label>
+                <label>
+                    Last name
+                    <input name="lastName" autocomplete="family-name" maxlength="100" required />
+                </label>
+            </div>
+            <label>
+                Email
+                <input name="email" type="email" autocomplete="username" maxlength="256" required />
+            </label>
+            <label>
+                Password
+                <input name="password" type="@(_showPasswords ? "text" : "password")"
+                       autocomplete="new-password" minlength="12" required />
+            </label>
+            <label>
+                Confirm password
+                <input name="confirmPassword" type="@(_showPasswords ? "text" : "password")"
+                       autocomplete="new-password" minlength="12" required />
+            </label>
+            <p class="password-guidance">
+                Use at least 12 characters with uppercase, lowercase, number, and symbol.
+            </p>
+            <button type="button" class="button" @onclick="TogglePasswords">
+                @(_showPasswords ? "Hide passwords" : "Show passwords")
+            </button>
+            <button class="button button-primary" type="submit">Create account</button>
+        </form>
+
+        <p class="authentication-footer">
+            Already registered? <a href="@SignInUrl">Sign in</a>
+        </p>
+    </AppCard>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
+
+    private bool _showPasswords;
+
+    private string SafeReturnUrl =>
+        AuthenticationNavigation.NormalizeLocalReturnUrl(ReturnUrl);
+
+    private string SignInUrl =>
+        AuthenticationNavigation.BuildSignInUrl(SafeReturnUrl);
+
+    private string? ErrorMessage => Error switch
+    {
+        "invalid" => "Registration failed. Review your details and password requirements.",
+        "unavailable" => "Registration is temporarily unavailable. Please try again.",
+        _ => null
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            Navigation.NavigateTo(SafeReturnUrl);
+        }
+    }
+
+    private void TogglePasswords() => _showPasswords = !_showPasswords;
+}

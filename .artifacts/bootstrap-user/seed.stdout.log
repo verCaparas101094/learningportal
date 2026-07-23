@@ -1,0 +1,166 @@
+dbug: Microsoft.EntityFrameworkCore.Infrastructure[10401]
+      An 'IServiceProvider' was created for internal use by Entity Framework.
+warn: Microsoft.AspNetCore.DataProtection.Repositories.EphemeralXmlRepository[50]
+      Using an in-memory repository. Keys will not be persisted to storage.
+warn: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[59]
+      Neither user profile nor HKLM registry available. Using an ephemeral key repository. Protected data will be unavailable when application exits.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'ConversationId'} was not created on entity type 'AiTutorMessage' as the properties are already covered by the index {'ConversationId', 'Sequence'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'CourseId'} was not created on entity type 'Enrollment' as the properties are already covered by the index {'CourseId', 'StudentId'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'EnrollmentId'} was not created on entity type 'LessonProgress' as the properties are already covered by the index {'EnrollmentId', 'LessonId'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'CourseId'} was not created on entity type 'Lesson' as the properties are already covered by the index {'CourseId', 'Order'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'CourseId'} was not created on entity type 'Lesson' as the properties are already covered by the index {'CourseId', 'Status'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'SkillId'} was not created on entity type 'Quiz' as the properties are already covered by the index {'SkillId', 'IsInstructorAssessment', 'Status'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'QuestionId'} was not created on entity type 'QuizAnswerChoice' as the properties are already covered by the index {'QuestionId', 'Order'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'QuizId'} was not created on entity type 'QuizAttempt' as the properties are already covered by the index {'QuizId', 'StudentId'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'QuizId'} was not created on entity type 'QuizAttempt' as the properties are already covered by the index {'QuizId', 'StudentId', 'AttemptNumber'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'AttemptId'} was not created on entity type 'QuizAttemptAnswer' as the properties are already covered by the index {'AttemptId', 'QuestionId'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'QuizId'} was not created on entity type 'QuizQuestion' as the properties are already covered by the index {'QuizId', 'Order'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'SkillId'} was not created on entity type 'InstructorEligibility' as the properties are already covered by the index {'SkillId', 'IsEligible'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'UserId'} was not created on entity type 'InstructorEligibility' as the properties are already covered by the index {'UserId', 'SkillId'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'UserId'} was not created on entity type 'RefreshToken' as the properties are already covered by the index {'UserId', 'ExpiresAtUtc'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'UserId'} was not created on entity type 'IdentityUserRole<Guid>' as the properties are already covered by the index {'UserId', 'RoleId'}.
+dbug: Microsoft.EntityFrameworkCore.Model[10601]
+      The index {'UserId'} was not created on entity type 'IdentityUserToken<Guid>' as the properties are already covered by the index {'UserId', 'LoginProvider', 'Name'}.
+dbug: Microsoft.EntityFrameworkCore.Infrastructure[10403]
+      Entity Framework Core 10.0.10 initialized 'ApplicationDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:10.0.10' with options: MigrationsAssembly=LearningPortal.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null EngineType=SqlServer 
+dbug: Microsoft.EntityFrameworkCore.Query[10111]
+      Compiling query expression: 
+      'DbSet<IdentityRole<Guid>>()
+          .FirstOrDefault(r => r.NormalizedName == @normalizedName)'
+dbug: Microsoft.EntityFrameworkCore.Query[10107]
+      Generated query execution expression: 
+      'queryContext => ShapedQueryCompilingExpressionVisitor.SingleOrDefaultAsync<IdentityRole<Guid>>(
+          asyncEnumerable: SingleQueryingEnumerable.Create<IdentityRole<Guid>>(
+              relationalQueryContext: (RelationalQueryContext)queryContext, 
+              relationalCommandResolver: parameters => [LIFTABLE Constant: RelationalCommandCache.QueryExpression(
+                  Projection Mapping:
+                      EmptyProjectionMember -> Dictionary<IPropertyBase, int> { [Property: IdentityRole<Guid>.Id (Guid) Required PK AfterSave:Throw ValueGenerated.OnAdd, 0], [Property: IdentityRole<Guid>.ConcurrencyStamp (string) Concurrency, 1], [Property: IdentityRole<Guid>.Name (string) MaxLength(256), 2], [Property: IdentityRole<Guid>.NormalizedName (string) Index MaxLength(256), 3] }
+                  SELECT TOP(1) a.Id, a.ConcurrencyStamp, a.Name, a.NormalizedName
+                  FROM AspNetRoles AS a
+                  WHERE a.NormalizedName == @normalizedName) | Resolver: c => new RelationalCommandCache(
+                  c.Dependencies.MemoryCache, 
+                  c.RelationalDependencies.QuerySqlGeneratorFactory, 
+                  c.RelationalDependencies.RelationalParameterBasedSqlProcessorFactory, 
+                  Projection Mapping:
+                      EmptyProjectionMember -> Dictionary<IPropertyBase, int> { [Property: IdentityRole<Guid>.Id (Guid) Required PK AfterSave:Throw ValueGenerated.OnAdd, 0], [Property: IdentityRole<Guid>.ConcurrencyStamp (string) Concurrency, 1], [Property: IdentityRole<Guid>.Name (string) MaxLength(256), 2], [Property: IdentityRole<Guid>.NormalizedName (string) Index MaxLength(256), 3] }
+                  SELECT TOP(1) a.Id, a.ConcurrencyStamp, a.Name, a.NormalizedName
+                  FROM AspNetRoles AS a
+                  WHERE a.NormalizedName == @normalizedName, 
+                  False, 
+                  MultipleParameters
+              )].GetRelationalCommandTemplate(parameters), 
+              readerColumns: [LIFTABLE Constant: ReaderColumn[] { ReaderColumn<Guid>, ReaderColumn<object>, ReaderColumn<object>, ReaderColumn<object> } | Resolver: namelessParameter{0} => new ReaderColumn[]
+              { 
+                  new ReaderColumn<Guid>(
+                      False, 
+                      null, 
+                      namelessParameter{0}.Dependencies.Model.FindEntityType("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>").FindProperty("Id"), 
+                      (dataReader, indexMap) => dataReader.GetGuid(0)
+                  ), 
+                  new ReaderColumn<object>(
+                      True, 
+                      null, 
+                      namelessParameter{0}.Dependencies.Model.FindEntityType("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>").FindProperty("ConcurrencyStamp"), 
+                      (dataReader, indexMap) => (object)dataReader.GetString(1)
+                  ), 
+                  new ReaderColumn<object>(
+                      True, 
+                      null, 
+                      namelessParameter{0}.Dependencies.Model.FindEntityType("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>").FindProperty("Name"), 
+                      (dataReader, indexMap) => (object)dataReader.GetString(2)
+                  ), 
+                  new ReaderColumn<object>(
+                      True, 
+                      null, 
+                      namelessParameter{0}.Dependencies.Model.FindEntityType("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>").FindProperty("NormalizedName"), 
+                      (dataReader, indexMap) => (object)dataReader.GetString(3)
+                  ) 
+              }], 
+              shaper: (queryContext, dataReader, resultContext, resultCoordinator) => 
+              {
+                  IdentityRole<Guid> entity;
+                  entity = 
+                  {
+                      MaterializationContext materializationContext1;
+                      IEntityType entityType1;
+                      IdentityRole<Guid> instance1;
+                      InternalEntityEntry entry1;
+                      bool hasNullKey1;
+                      materializationContext1 = new MaterializationContext(
+                          [LIFTABLE Constant: ValueBuffer | Resolver: _ => (object)ValueBuffer.Empty], 
+                          queryContext.Context
+                      );
+                      instance1 = default(IdentityRole<Guid>);
+                      entry1 = queryContext.TryGetEntry(
+                          key: [LIFTABLE Constant: Key: IdentityRole<Guid>.Id PK | Resolver: c => c.Dependencies.Model.FindEntityType("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>").FindPrimaryKey()], 
+                          keyValues: new object[]{ (object)dataReader.GetGuid(0) }, 
+                          throwOnNullKey: True, 
+                          hasNullKey: hasNullKey1);
+                      !(hasNullKey1) ? entry1 != default(InternalEntityEntry) ? 
+                      {
+                          entityType1 = entry1.EntityType;
+                          return instance1 = (IdentityRole<Guid>)entry1.Entity;
+                      } : 
+                      {
+                          ISnapshot shadowSnapshot1;
+                          shadowSnapshot1 = [LIFTABLE Constant: Snapshot | Resolver: _ => Snapshot.Empty];
+                          entityType1 = [LIFTABLE Constant: EntityType: IdentityRole<Guid> | Resolver: namelessParameter{1} => namelessParameter{1}.Dependencies.Model.FindEntityType("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>")];
+                          instance1 = switch (entityType1)
+                          {
+                              case [LIFTABLE Constant: EntityType: IdentityRole<Guid> | Resolver: namelessParameter{2} => namelessParameter{2}.Dependencies.Model.FindEntityType("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>")]: 
+                                  {
+                                      return 
+                                      {
+                                          IdentityRole<Guid> instance;
+                                          instance = new IdentityRole<Guid>();
+                                          instance.<Id>k__BackingField = dataReader.GetGuid(0);
+                                          instance.<ConcurrencyStamp>k__BackingField = dataReader.IsDBNull(1) ? default(string) : (string)dataReader.GetFieldValue<object>(1);
+                                          instance.<Name>k__BackingField = dataReader.IsDBNull(2) ? default(string) : (string)dataReader.GetFieldValue<object>(2);
+                                          instance.<NormalizedName>k__BackingField = dataReader.IsDBNull(3) ? default(string) : (string)dataReader.GetFieldValue<object>(3);
+                                          (instance is IInjectableService) ? ((IInjectableService)instance).Injected(
+                                              context: materializationContext1.Context, 
+                                              entity: instance, 
+                                              queryTrackingBehavior: TrackAll, 
+                                              structuralType: [LIFTABLE Constant: EntityType: IdentityRole<Guid> | Resolver: namelessParameter{3} => namelessParameter{3}.Dependencies.Model.FindEntityType("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>")]) : default(void);
+                                          return instance;
+                                      }}
+                              default: 
+                                  default(IdentityRole<Guid>)
+                          }
+                          ;
+                          entry1 = entityType1 == default(IEntityType) ? default(InternalEntityEntry) : queryContext.StartTracking(
+                              entityType: entityType1, 
+                              entity: instance1, 
+                              snapshot: shadowSnapshot1);
+                          return instance1;
+                      } : default(void);
+                      return instance1;
+                  };
+                  return entity;
+              }, 
+              contextType: LearningPortal.Infrastructure.Persistence.ApplicationDbContext, 
+              standAloneStateManager: False, 
+              detailedErrorsEnabled: False, 
+              threadSafetyChecksEnabled: True), 
+          cancellationToken: queryContext.CancellationToken)'
+dbug: Microsoft.EntityFrameworkCore.Database.Connection[20005]
+      Creating DbConnection.
+dbug: Microsoft.EntityFrameworkCore.Database.Connection[20006]
+      Created DbConnection. (14ms).
+dbug: Microsoft.EntityFrameworkCore.Database.Connection[20000]
+      Opening connection to database 'LearningPortal' on server '(localdb)\MSSQLLocalDB'.

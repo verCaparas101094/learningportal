@@ -4,7 +4,8 @@
 
 <PageTitle>Dashboard | Learning Portal</PageTitle>
 
-<AuthenticatedContent>
+<AuthorizeView>
+<Authorized>
 <PageHeader Eyebrow="Learning workspace"
             Title="Welcome back, Alex"
             Description="Continue your learning journey and keep your goals moving forward." />
@@ -75,7 +76,21 @@
         }
     </div>
 </section>
-</AuthenticatedContent>
+</Authorized>
+<NotAuthorized>
+    <PageHeader Eyebrow="Enterprise learning"
+                Title="Build skills with Learning Portal"
+                Description="Learn from published courses, track progress, take assessments, and get course-grounded help from the local AI Tutor." />
+    <AppCard>
+        <h2>Start learning</h2>
+        <p>Sign in with your enterprise account or create a learner account.</p>
+        <div class="course-actions">
+            <a class="button button-primary" href="/login?returnUrl=%2F">Sign in</a>
+            <a class="button" href="/register?returnUrl=%2Fcatalog">Register</a>
+        </div>
+    </AppCard>
+</NotAuthorized>
+</AuthorizeView>
 
 @code {
     private static readonly CourseSample[] Courses =

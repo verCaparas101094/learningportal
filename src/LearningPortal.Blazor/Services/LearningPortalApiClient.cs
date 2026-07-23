@@ -8,6 +8,8 @@ using LearningPortal.Shared.Learning;
 using LearningPortal.Shared.UserManagement;
 using LearningPortal.Shared.Quizzes;
 using LearningPortal.Shared.InstructorEligibility;
+using LearningPortal.Shared.AiTutor;
+using LearningPortal.Shared.Identity;
 
 namespace LearningPortal.Blazor.Services;
 
@@ -428,6 +430,82 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
     public Task<CourseResponse> AssignCourseInstructorAsync(
         Guid courseId, AssignCourseInstructorRequest request, CancellationToken cancellationToken = default) =>
         PutAsync<CourseResponse>($"api/courses/{courseId:D}/instructor", request, cancellationToken);
+
+    /// <summary>Starts a learner-owned AI Tutor conversation.</summary>
+    public async Task<AiTutorConversationResponse> StartAiTutorConversationAsync(
+        StartAiTutorConversationRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync(
+            "api/ai-tutor/conversations", request, cancellationToken);
+        return await ReadResponseAsync<AiTutorConversationResponse>(
+            response, cancellationToken);
+    }
+
+    /// <summary>Gets the signed-in learner's AI Tutor conversations.</summary>
+    public async Task<IReadOnlyList<AiTutorConversationListItemResponse>>
+        GetMyAiTutorConversationsAsync(CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            "api/ai-tutor/conversations", cancellationToken);
+        return await ReadResponseAsync<IReadOnlyList<AiTutorConversationListItemResponse>>(
+            response, cancellationToken);
+    }
+
+    /// <summary>Gets one learner-owned AI Tutor conversation.</summary>
+    public async Task<AiTutorConversationResponse> GetAiTutorConversationAsync(
+        Guid conversationId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/ai-tutor/conversations/{conversationId:D}", cancellationToken);
+        return await ReadResponseAsync<AiTutorConversationResponse>(
+            response, cancellationToken);
+    }
+
+    /// <summary>Sends a question to the local AI Tutor.</summary>
+    public async Task<AiTutorReplyResponse> SendAiTutorMessageAsync(
+        Guid conversationId,
+        SendAiTutorMessageRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync(
+            $"api/ai-tutor/conversations/{conversationId:D}/messages",
+            request,
+            cancellationToken);
+        return await ReadResponseAsync<AiTutorReplyResponse>(
+            response, cancellationToken);
+    }
+
+    /// <summary>Archives a learner-owned AI Tutor conversation.</summary>
+    public async Task<AiTutorConversationResponse> ArchiveAiTutorConversationAsync(
+        Guid conversationId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsync(
+            $"api/ai-tutor/conversations/{conversationId:D}/archive",
+            null,
+            cancellationToken);
+        return await ReadResponseAsync<AiTutorConversationResponse>(
+            response, cancellationToken);
+    }
+
+    /// <summary>Gets administrator-visible local Ollama health.</summary>
+    public async Task<OllamaHealthResponse> GetOllamaHealthAsync(
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            "api/admin/ai-tutor/health", cancellationToken);
+        return await ReadResponseAsync<OllamaHealthResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets the safe profile for the authenticated user.</summary>
+    public async Task<CurrentUserResponse> GetCurrentUserAsync(
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync("api/auth/me", cancellationToken);
+        return await ReadResponseAsync<CurrentUserResponse>(response, cancellationToken);
+    }
 
     private async Task<TResponse> PutAsync<TResponse>(
         string requestUri,

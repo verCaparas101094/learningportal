@@ -1,0 +1,49 @@
+.authentication-page {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: calc(100vh - 9rem);
+}
+
+::deep .authentication-card {
+    max-width: 34rem;
+    padding: clamp(2rem, 5vw, 3rem);
+    width: 100%;
+}
+
+form,
+label {
+    display: grid;
+    gap: .5rem;
+}
+
+form {
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+input {
+    border: 1px solid var(--color-border);
+    border-radius: .5rem;
+    font: inherit;
+    min-height: 2.75rem;
+    padding: .6rem .75rem;
+}
+
+.name-fields {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+}
+
+.password-guidance {
+    color: var(--color-text-muted);
+    font-size: .85rem;
+    margin: 0;
+}
+
+@media (max-width: 36rem) {
+    .name-fields {
+        grid-template-columns: 1fr;
+    }
+}

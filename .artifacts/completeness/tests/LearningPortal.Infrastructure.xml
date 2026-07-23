@@ -1,0 +1,850 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LearningPortal.Infrastructure</name>
+    </assembly>
+    <members>
+        <member name="T:LearningPortal.Infrastructure.AiTutor.OllamaClient">
+            <summary>Calls the configured local Ollama HTTP API without external-provider fallback.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.AiTutor.OllamaClient.#ctor(System.Net.Http.HttpClient,LearningPortal.Application.AiTutor.OllamaOptions,Microsoft.Extensions.Logging.ILogger{LearningPortal.Infrastructure.AiTutor.OllamaClient})">
+            <summary>Calls the configured local Ollama HTTP API without external-provider fallback.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.AiTutor.OllamaClient.GenerateAsync(System.String,System.Collections.Generic.IReadOnlyList{LearningPortal.Domain.AiTutor.AiTutorMessage},System.String,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.AiTutor.OllamaClient.CheckHealthAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Authorization.ApplicationRoleValidator">
+            <summary>
+            Prevents ASP.NET Identity from creating roles outside the application role allowlist.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Authorization.ApplicationRoleValidator.ValidateAsync(Microsoft.AspNetCore.Identity.RoleManager{Microsoft.AspNetCore.Identity.IdentityRole{System.Guid}},Microsoft.AspNetCore.Identity.IdentityRole{System.Guid})">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Authorization.AuthorizationServiceCollectionExtensions">
+            <summary>
+            Registers LearningPortal's role-based authorization policies.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Authorization.AuthorizationServiceCollectionExtensions.AddApplicationAuthorization(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the authenticated fallback policy and every named application policy.
+            </summary>
+            <param name="services">The service collection to configure.</param>
+            <returns>The configured service collection.</returns>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.DependencyInjection">
+            <summary>Registers database, Identity, authentication, and infrastructure implementations.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.DependencyInjection.AddInfrastructure(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Hosting.IHostEnvironment)">
+            <summary>Adds infrastructure services using the supplied application configuration.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.ApplicationUser">
+            <summary>Represents an authenticated portal user persisted by ASP.NET Identity.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.ApplicationUser.DisplayName">
+            <summary>Gets or sets the user's display name.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.ApplicationUser.IsEnabled">
+            <summary>Gets or sets a value indicating whether the user may authenticate.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.BootstrapAdministratorOptions">
+            <summary>Configures an optional idempotent bootstrap administrator account.</summary>
+        </member>
+        <member name="F:LearningPortal.Infrastructure.Identity.BootstrapAdministratorOptions.SectionName">
+            <summary>Gets the configuration section name.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.BootstrapAdministratorOptions.Enabled">
+            <summary>Gets or sets whether bootstrap account creation is enabled.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.BootstrapAdministratorOptions.Email">
+            <summary>Gets or sets the bootstrap administrator email address.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.BootstrapAdministratorOptions.Password">
+            <summary>Gets or sets the bootstrap administrator password.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.BootstrapAdministratorOptions.DisplayName">
+            <summary>Gets or sets the bootstrap administrator display name.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.CurrentUserService">
+            <summary>
+            Resolves the current authenticated user's claims from the active HTTP context.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.CurrentUserService.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Resolves the current authenticated user's claims from the active HTTP context.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.CurrentUserService.UserId">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.CurrentUserService.DisplayName">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.CurrentUserService.Email">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.CurrentUserService.Roles">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.CurrentUserService.IsAuthenticated">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.CurrentUserService.HasRole(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.CurrentUserService.HasClaim(System.String,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.DatabaseInitializationOptions">
+            <summary>Controls explicit development database initialization.</summary>
+        </member>
+        <member name="F:LearningPortal.Infrastructure.Identity.DatabaseInitializationOptions.SectionName">
+            <summary>Gets the configuration section name.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.DatabaseInitializationOptions.ApplyMigrations">
+            <summary>Gets or sets whether migrations are applied automatically in Development.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.DevelopmentDataSeeder">
+            <summary>Seeds a small, repeatable end-to-end learning scenario for local development.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.DevelopmentDataSeeder.#ctor(Microsoft.AspNetCore.Identity.UserManager{LearningPortal.Infrastructure.Identity.ApplicationUser},LearningPortal.Infrastructure.Persistence.ApplicationDbContext,Microsoft.Extensions.Logging.ILogger{LearningPortal.Infrastructure.Identity.DevelopmentDataSeeder})">
+            <summary>Seeds a small, repeatable end-to-end learning scenario for local development.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.DevelopmentDataSeeder.SeedAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.DevelopmentDataSeedingExtensions">
+            <summary>Provides explicit development-only database initialization.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.DevelopmentDataSeedingExtensions.InitializeDevelopmentDataAsync(Microsoft.Extensions.Hosting.IHost,System.Threading.CancellationToken)">
+            <summary>Optionally migrates and seeds the configured development database.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.DevelopmentSeedOptions">
+            <summary>Controls local-development-only users and learning sample data.</summary>
+        </member>
+        <member name="F:LearningPortal.Infrastructure.Identity.DevelopmentSeedOptions.SectionName">
+            <summary>Gets the configuration section name.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.DevelopmentSeedOptions.Enabled">
+            <summary>Gets or sets whether development seeding is enabled.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.IAccessTokenGenerator">
+            <summary>
+            Generates signed JWT access tokens for Identity users.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IAccessTokenGenerator.GenerateAsync(LearningPortal.Infrastructure.Identity.ApplicationUser,System.Threading.CancellationToken)">
+            <summary>Generates a signed access token for the specified user.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.GeneratedAccessToken">
+            <summary>
+            Contains a generated JWT and its UTC expiration timestamp.
+            </summary>
+            <param name="Token">The serialized signed JWT.</param>
+            <param name="ExpiresAtUtc">The access token expiration timestamp.</param>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.GeneratedAccessToken.#ctor(System.String,System.DateTimeOffset)">
+            <summary>
+            Contains a generated JWT and its UTC expiration timestamp.
+            </summary>
+            <param name="Token">The serialized signed JWT.</param>
+            <param name="ExpiresAtUtc">The access token expiration timestamp.</param>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.GeneratedAccessToken.Token">
+            <summary>The serialized signed JWT.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.GeneratedAccessToken.ExpiresAtUtc">
+            <summary>The access token expiration timestamp.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.IdentityRoleSeeder">
+            <summary>
+            Idempotently seeds the fixed LearningPortal role allowlist into ASP.NET Identity.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IdentityRoleSeeder.#ctor(Microsoft.AspNetCore.Identity.RoleManager{Microsoft.AspNetCore.Identity.IdentityRole{System.Guid}},Microsoft.AspNetCore.Identity.UserManager{LearningPortal.Infrastructure.Identity.ApplicationUser},LearningPortal.Infrastructure.Identity.BootstrapAdministratorOptions,Microsoft.Extensions.Logging.ILogger{LearningPortal.Infrastructure.Identity.IdentityRoleSeeder})">
+            <summary>
+            Idempotently seeds the fixed LearningPortal role allowlist into ASP.NET Identity.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IdentityRoleSeeder.SeedAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.IdentityRoleSeedingExtensions">
+            <summary>
+            Provides startup integration for idempotent ASP.NET Identity role seeding.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IdentityRoleSeedingExtensions.SeedIdentityRolesAsync(Microsoft.Extensions.Hosting.IHost,System.Threading.CancellationToken)">
+            <summary>
+            Creates missing application roles using a scoped role manager.
+            </summary>
+            <param name="host">The configured application host.</param>
+            <param name="cancellationToken">Cancels the seeding operation.</param>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.IdentityService">
+            <summary>
+            Authenticates Identity users and manages persisted refresh-token lifecycles.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IdentityService.#ctor(Microsoft.AspNetCore.Identity.UserManager{LearningPortal.Infrastructure.Identity.ApplicationUser},Microsoft.AspNetCore.Identity.SignInManager{LearningPortal.Infrastructure.Identity.ApplicationUser},LearningPortal.Infrastructure.Persistence.ApplicationDbContext,Microsoft.EntityFrameworkCore.IDbContextFactory{LearningPortal.Infrastructure.Persistence.ApplicationDbContext},LearningPortal.Infrastructure.Identity.IAccessTokenGenerator,LearningPortal.Infrastructure.Identity.IRefreshTokenProtector,LearningPortal.Application.Abstractions.Networking.IClientIpAddressProvider,Microsoft.Extensions.Options.IOptions{LearningPortal.Infrastructure.Identity.JwtOptions},LearningPortal.Application.Abstractions.Time.ISystemClock,Microsoft.Extensions.Logging.ILogger{LearningPortal.Infrastructure.Identity.IdentityService})">
+            <summary>
+            Authenticates Identity users and manages persisted refresh-token lifecycles.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IdentityService.RegisterAsync(System.String,System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IdentityService.LoginAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IdentityService.RefreshAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IdentityService.RevokeAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.IDevelopmentDataSeeder">
+            <summary>Seeds local demonstration users and learning data idempotently.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IDevelopmentDataSeeder.SeedAsync(System.Threading.CancellationToken)">
+            <summary>Seeds missing development data.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.IIdentityRoleSeeder">
+            <summary>
+            Ensures that every supported application role exists in ASP.NET Identity.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IIdentityRoleSeeder.SeedAsync(System.Threading.CancellationToken)">
+            <summary>Creates missing application roles without modifying existing roles.</summary>
+            <param name="cancellationToken">Cancels the seeding operation.</param>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.IRefreshTokenProtector">
+            <summary>
+            Generates cryptographically secure refresh tokens and one-way hashes them for persistence.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IRefreshTokenProtector.Generate">
+            <summary>Generates new raw and hashed refresh-token material.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IRefreshTokenProtector.Hash(System.String)">
+            <summary>Computes the stable one-way hash for a raw refresh token.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.IRefreshTokenProtector.Matches(System.String,System.String)">
+            <summary>Compares a raw value with a stored hash using fixed-time comparison.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.GeneratedRefreshToken">
+            <summary>
+            Contains short-lived refresh-token material used while issuing a response.
+            </summary>
+            <param name="RawToken">The opaque token returned to the caller.</param>
+            <param name="TokenHash">The one-way hash stored in the database.</param>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.GeneratedRefreshToken.#ctor(System.String,System.String)">
+            <summary>
+            Contains short-lived refresh-token material used while issuing a response.
+            </summary>
+            <param name="RawToken">The opaque token returned to the caller.</param>
+            <param name="TokenHash">The one-way hash stored in the database.</param>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.GeneratedRefreshToken.RawToken">
+            <summary>The opaque token returned to the caller.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.GeneratedRefreshToken.TokenHash">
+            <summary>The one-way hash stored in the database.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.JwtAccessTokenGenerator">
+            <summary>
+            Generates signed JWT access tokens with the portal's required identity claims.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.JwtAccessTokenGenerator.#ctor(Microsoft.AspNetCore.Identity.UserManager{LearningPortal.Infrastructure.Identity.ApplicationUser},Microsoft.Extensions.Options.IOptions{LearningPortal.Infrastructure.Identity.JwtOptions},LearningPortal.Application.Abstractions.Time.ISystemClock)">
+            <summary>
+            Generates signed JWT access tokens with the portal's required identity claims.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.JwtAccessTokenGenerator.GenerateAsync(LearningPortal.Infrastructure.Identity.ApplicationUser,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.JwtOptions">
+            <summary>Contains settings used to validate and issue JWT access tokens.</summary>
+        </member>
+        <member name="F:LearningPortal.Infrastructure.Identity.JwtOptions.SectionName">
+            <summary>The configuration section name.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.JwtOptions.Issuer">
+            <summary>Gets or sets the expected token issuer.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.JwtOptions.Audience">
+            <summary>Gets or sets the expected token audience.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.JwtOptions.SigningKey">
+            <summary>Gets or sets the symmetric signing key.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.JwtOptions.ExpirationMinutes">
+            <summary>Gets or sets the token lifetime in minutes.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.JwtOptions.RefreshTokenExpirationDays">
+            <summary>Gets or sets the refresh token lifetime in days.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.RefreshToken">
+            <summary>
+            Represents a persisted, hashed refresh token and its rotation state.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.Id">
+            <summary>Gets the persistence identifier.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.UserId">
+            <summary>Gets the owning Identity user identifier.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.TokenHash">
+            <summary>Gets the SHA-256 hash of the refresh token.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.SecurityStampHash">
+            <summary>Gets the hash of the user's security stamp at issuance.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.CreatedAtUtc">
+            <summary>Gets the token creation timestamp in UTC.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.ExpiresAtUtc">
+            <summary>Gets the token expiration timestamp in UTC.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.RevokedAtUtc">
+            <summary>Gets the token revocation timestamp in UTC.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.ReplacedByTokenHash">
+            <summary>Gets the hash of the token that replaced this token during rotation.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.CreatedByIp">
+            <summary>Gets the client IP address that created the token.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.RevokedByIp">
+            <summary>Gets the client IP address that revoked or rotated the token.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.RowVersion">
+            <summary>Gets the SQL Server rowversion used to prevent concurrent rotation.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.RefreshToken.Create(System.Guid,System.String,System.String,System.String,System.DateTimeOffset,System.DateTimeOffset)">
+            <summary>Creates a persisted refresh-token record from a one-way token hash.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.RefreshToken.IsExpired(System.DateTimeOffset)">
+            <summary>Determines whether the token has expired at the supplied UTC timestamp.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Identity.RefreshToken.IsRevoked">
+            <summary>Gets a value indicating whether the token has been revoked.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.RefreshToken.IsActive(System.DateTimeOffset)">
+            <summary>Determines whether the token can currently be used.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.RefreshToken.Revoke(System.DateTimeOffset,System.String)">
+            <summary>Revokes the token without assigning a replacement.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.RefreshToken.Rotate(System.String,System.DateTimeOffset,System.String)">
+            <summary>Revokes the token and records the hash of its rotation replacement.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.RefreshTokenProtector">
+            <summary>
+            Implements secure refresh-token generation and SHA-256 hashing.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.RefreshTokenProtector.Generate">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.RefreshTokenProtector.Hash(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.RefreshTokenProtector.Matches(System.String,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Identity.UserManagementService">
+            <summary>
+            Implements compact administrator user management through ASP.NET Identity.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.UserManagementService.#ctor(Microsoft.AspNetCore.Identity.UserManager{LearningPortal.Infrastructure.Identity.ApplicationUser},Microsoft.Extensions.Logging.ILogger{LearningPortal.Infrastructure.Identity.UserManagementService})">
+            <summary>
+            Implements compact administrator user management through ASP.NET Identity.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.UserManagementService.GetUsersAsync(System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.UserManagementService.GetUserByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.UserManagementService.GetUsersByIdsAsync(System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.UserManagementService.SetEnabledAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Identity.UserManagementService.AssignRoleAsync(System.Guid,System.String,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Lessons.MarkdownRenderer">
+            <summary>Renders advanced Markdown through an explicit HTML allowlist.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Lessons.MarkdownRenderer.Render(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Lessons.VideoEmbedResolver">
+            <summary>Resolves supported external video URLs using exact host rules.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Lessons.VideoEmbedResolver.Resolve(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.DomainFoundation">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.DomainFoundation.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.DomainFoundation.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.DomainFoundation.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.EnterpriseAuthentication">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.EnterpriseAuthentication.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.EnterpriseAuthentication.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.EnterpriseAuthentication.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.CourseManagementFoundation">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.CourseManagementFoundation.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.CourseManagementFoundation.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.CourseManagementFoundation.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.LessonManagementFoundation">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.LessonManagementFoundation.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.LessonManagementFoundation.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.LessonManagementFoundation.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.LessonContentEnhancement">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.LessonContentEnhancement.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.LessonContentEnhancement.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.LessonContentEnhancement.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.AddEnrollmentAndStudentCatalog">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddEnrollmentAndStudentCatalog.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddEnrollmentAndStudentCatalog.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddEnrollmentAndStudentCatalog.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.AddLessonProgress">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddLessonProgress.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddLessonProgress.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddLessonProgress.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.AddQuizPersistence">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddQuizPersistence.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddQuizPersistence.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddQuizPersistence.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.AddQuizAttempts">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddQuizAttempts.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddQuizAttempts.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddQuizAttempts.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.AddInstructorEligibility">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddInstructorEligibility.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddInstructorEligibility.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddInstructorEligibility.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.AddAiTutor">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddAiTutor.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddAiTutor.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AddAiTutor.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Migrations.AllEntitiesIncluded">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AllEntitiesIncluded.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AllEntitiesIncluded.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Migrations.AllEntitiesIncluded.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Networking.ClientIpAddressProvider">
+            <summary>
+            Resolves the current connection's remote IP address through <see cref="T:Microsoft.AspNetCore.Http.IHttpContextAccessor"/>.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Networking.ClientIpAddressProvider.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Resolves the current connection's remote IP address through <see cref="T:Microsoft.AspNetCore.Http.IHttpContextAccessor"/>.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Networking.ClientIpAddressProvider.IpAddress">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.ApplicationDbContext">
+            <summary>Provides the EF Core unit of work for domain data and ASP.NET Identity.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{LearningPortal.Infrastructure.Persistence.ApplicationDbContext})">
+            <summary>Provides the EF Core unit of work for domain data and ASP.NET Identity.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.Courses">
+            <summary>Gets the course data set.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.Lessons">
+            <summary>Gets course lessons.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.Enrollments">
+            <summary>Gets course enrollments.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.LessonProgress">
+            <summary>Gets learner lesson progress records.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.Quizzes">
+            <summary>Gets quizzes.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.QuizQuestions">
+            <summary>Gets quiz questions.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.QuizAnswerChoices">
+            <summary>Gets quiz answer choices.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.QuizAttempts">
+            <summary>Gets owned quiz attempts.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.QuizAttemptAnswers">
+            <summary>Gets submitted answer snapshots.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.Skills">
+            <summary>Gets stable skills.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.InstructorEligibility">
+            <summary>Gets instructor eligibility records.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.AiTutorConversations">
+            <summary>Gets AI tutor conversations.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.AiTutorMessages">
+            <summary>Gets visible AI tutor messages.</summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.RefreshTokens">
+            <summary>Gets the persisted hashed refresh tokens.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.ApplicationDbContext.SaveChangesAsync(System.Boolean,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Configurations.AiTutorConversationConfiguration">
+            <summary>Configures learner-owned AI Tutor conversations.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Configurations.AiTutorConversationConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{LearningPortal.Domain.AiTutor.AiTutorConversation})">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Configurations.AiTutorMessageConfiguration">
+            <summary>Configures ordered, user-visible AI Tutor messages.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Configurations.AiTutorMessageConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{LearningPortal.Domain.AiTutor.AiTutorMessage})">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Configurations.ApplicationUserConfiguration">
+            <summary>
+            Configures infrastructure-owned persistence properties for Identity users.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Configurations.ApplicationUserConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{LearningPortal.Infrastructure.Identity.ApplicationUser})">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Configurations.CourseConfiguration">
+            <summary>Defines SQL Server course mapping.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Configurations.CourseConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{LearningPortal.Domain.Courses.Course})">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Configurations.EnrollmentConfiguration">
+            <summary>Defines SQL Server enrollment mapping and constraints.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Configurations.EnrollmentConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{LearningPortal.Domain.Enrollments.Enrollment})">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Configurations.LessonConfiguration">
+            <summary>Defines SQL Server lesson mapping.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Configurations.LessonConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{LearningPortal.Domain.Lessons.Lesson})">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Configurations.LessonProgressConfiguration">
+            <summary>Defines persistence and uniqueness rules for learner progress.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Configurations.RefreshTokenConfiguration">
+            <summary>
+            Defines secure SQL Server persistence and concurrency mapping for refresh tokens.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Configurations.RefreshTokenConfiguration.Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder{LearningPortal.Infrastructure.Identity.RefreshToken})">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Extensions.ModelBuilderExtensions">
+            <summary>
+            Provides centralized EF Core conventions for domain foundation types.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Extensions.ModelBuilderExtensions.ConfigureDomainFoundation(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            Configures audit columns, SQL Server rowversion concurrency, and soft-delete query filters.
+            </summary>
+            <param name="modelBuilder">The model builder being configured.</param>
+            <returns>The model builder for chaining.</returns>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Interceptors.AuditSaveChangesInterceptor">
+            <summary>
+            Applies audit metadata and converts tracked soft-deletable entities into logical deletions.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Interceptors.AuditSaveChangesInterceptor.#ctor(LearningPortal.Application.Abstractions.Identity.ICurrentUserService,LearningPortal.Application.Abstractions.Time.ISystemClock)">
+            <summary>
+            Applies audit metadata and converts tracked soft-deletable entities into logical deletions.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Interceptors.AuditSaveChangesInterceptor.SavingChanges(Microsoft.EntityFrameworkCore.Diagnostics.DbContextEventData,Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult{System.Int32})">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Interceptors.AuditSaveChangesInterceptor.SavingChangesAsync(Microsoft.EntityFrameworkCore.Diagnostics.DbContextEventData,Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult{System.Int32},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Repositories.AiTutorConversationRepository">
+            <summary>Persists and queries learner-owned AI Tutor conversations.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.AiTutorConversationRepository.#ctor(LearningPortal.Infrastructure.Persistence.ApplicationDbContext)">
+            <summary>Persists and queries learner-owned AI Tutor conversations.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.AiTutorConversationRepository.GetAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.AiTutorConversationRepository.GetByStudentAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.AiTutorConversationRepository.AddAsync(LearningPortal.Domain.AiTutor.AiTutorConversation,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository">
+            <summary>Implements course-specific EF Core persistence.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.#ctor(LearningPortal.Infrastructure.Persistence.ApplicationDbContext)">
+            <summary>Implements course-specific EF Core persistence.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.GetByIdReadOnlyAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.GetPublishedBySlugAsync(System.String,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.GetByIdsReadOnlyAsync(System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.GetPageAsync(System.String,System.Nullable{LearningPortal.Domain.Courses.CourseStatus},System.Nullable{System.Guid},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.SlugExistsAsync(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.AddAsync(LearningPortal.Domain.Courses.Course,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.Remove(LearningPortal.Domain.Courses.Course)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.CourseRepository.SetOriginalRowVersion(LearningPortal.Domain.Courses.Course,System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository">
+            <summary>Implements enrollment persistence with EF Core.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.#ctor(LearningPortal.Infrastructure.Persistence.ApplicationDbContext)">
+            <summary>Implements enrollment persistence with EF Core.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.GetByIdReadOnlyAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.GetByCourseAndStudentAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.GetStudentPageAsync(System.Guid,System.Nullable{LearningPortal.Domain.Enrollments.EnrollmentStatus},System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.GetCoursePageAsync(System.Guid,System.Nullable{LearningPortal.Domain.Enrollments.EnrollmentStatus},System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.GetActiveCourseIdsAsync(System.Guid,System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.GetActiveByStudentAndCoursesAsync(System.Guid,System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.AddAsync(LearningPortal.Domain.Enrollments.Enrollment,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.EnrollmentRepository.SetOriginalRowVersion(LearningPortal.Domain.Enrollments.Enrollment,System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Repositories.LessonProgressRepository">
+            <summary>Persists learner lesson progress.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonProgressRepository.#ctor(LearningPortal.Infrastructure.Persistence.ApplicationDbContext)">
+            <summary>Persists learner lesson progress.</summary>
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository">
+            <summary>Persists and queries lessons.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.#ctor(LearningPortal.Infrastructure.Persistence.ApplicationDbContext)">
+            <summary>Persists and queries lessons.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.GetByIdReadOnlyAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.GetPublishedByCourseAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.GetPublishedByCoursesAsync(System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.GetPageAsync(System.Nullable{System.Guid},System.String,System.Int32,System.Int32,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.OrderExistsAsync(System.Guid,System.Int32,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.AddAsync(LearningPortal.Domain.Lessons.Lesson,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.Remove(LearningPortal.Domain.Lessons.Lesson)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.SetOriginalRowVersion(LearningPortal.Domain.Lessons.Lesson,System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.LessonRepository.MoveAsync(System.Guid,System.Int32,System.Byte[],System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Persistence.Repositories.Repository`1">
+            <summary>Implements aggregate persistence with EF Core.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.Repository`1.#ctor(LearningPortal.Infrastructure.Persistence.ApplicationDbContext)">
+            <summary>Implements aggregate persistence with EF Core.</summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.Repository`1.ListAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Persistence.Repositories.Repository`1.AddAsync(`0,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Infrastructure.Time.SystemClock">
+            <summary>
+            Provides UTC time from the platform <see cref="T:System.TimeProvider"/>.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Infrastructure.Time.SystemClock.#ctor(System.TimeProvider)">
+            <summary>
+            Provides UTC time from the platform <see cref="T:System.TimeProvider"/>.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Infrastructure.Time.SystemClock.UtcNow">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,836 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LearningPortal.Application</name>
+    </assembly>
+    <members>
+        <member name="T:LearningPortal.Application.Abstractions.Identity.ICurrentUserService">
+            <summary>
+            Provides the authenticated user's identity without coupling application code to HTTP.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Application.Abstractions.Identity.ICurrentUserService.UserId">
+            <summary>
+            Gets the authenticated user's identifier, or <see langword="null"/> when unavailable.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Application.Abstractions.Identity.ICurrentUserService.DisplayName">
+            <summary>
+            Gets the authenticated user's display name, or <see langword="null"/> when unavailable.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Application.Abstractions.Identity.ICurrentUserService.Email">
+            <summary>
+            Gets the authenticated user's email address, or <see langword="null"/> when unavailable.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Application.Abstractions.Identity.ICurrentUserService.Roles">
+            <summary>
+            Gets the authenticated user's distinct assigned roles.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Application.Abstractions.Identity.ICurrentUserService.IsAuthenticated">
+            <summary>
+            Gets a value indicating whether the current principal is authenticated.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.ICurrentUserService.HasRole(System.String)">
+            <summary>
+            Determines whether the current user belongs to the specified application role.
+            </summary>
+            <param name="role">The application role to test.</param>
+            <returns><see langword="true"/> when the current user has the role.</returns>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.ICurrentUserService.HasClaim(System.String,System.String)">
+            <summary>
+            Determines whether the current user has a claim and, optionally, a specific value.
+            </summary>
+            <param name="claimType">The claim type to find.</param>
+            <param name="claimValue">An optional claim value to match.</param>
+            <returns><see langword="true"/> when a matching claim exists.</returns>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Identity.IIdentityService">
+            <summary>Defines authentication operations without exposing ASP.NET Identity.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.IIdentityService.LoginAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>Validates credentials and issues an access and refresh token pair.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.IIdentityService.RefreshAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Rotates an active refresh token and issues a new token pair.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.IIdentityService.RevokeAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Revokes a refresh token when it exists.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Identity.IUserManagementService">
+            <summary>
+            Defines administrator user-management operations without exposing ASP.NET Identity types.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.IUserManagementService.GetUsersAsync(System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>Returns one filtered and paginated user page.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.IUserManagementService.GetUserByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Returns one user by identifier.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.IUserManagementService.GetUsersByIdsAsync(System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <summary>Returns safe user projections for the requested identifiers.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.IUserManagementService.SetEnabledAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>Enables or disables one user.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Identity.IUserManagementService.AssignRoleAsync(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>Adds one valid application role without removing existing roles.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Lessons.IMarkdownRenderer">
+            <summary>Renders Markdown source into sanitized HTML.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Lessons.IMarkdownRenderer.Render(System.String)">
+            <summary>Renders safe HTML from Markdown source.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Lessons.IVideoEmbedResolver">
+            <summary>Validates video source URLs and produces trusted playback data.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Lessons.IVideoEmbedResolver.Resolve(System.String)">
+            <summary>Resolves a source URL without performing network access.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Lessons.VideoEmbedResult">
+            <summary>Contains normalized, server-derived video playback data.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Lessons.VideoEmbedResult.#ctor(System.String,System.String,System.String,System.Boolean)">
+            <summary>Contains normalized, server-derived video playback data.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Messaging.ICommand`1">
+            <summary>Marks a request that changes application state.</summary>
+            <typeparam name="TResponse">The command response type.</typeparam>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Messaging.ICommandDispatcher">
+            <summary>
+            Dispatches commands through the configured application pipeline before invoking their handlers.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Messaging.ICommandDispatcher.SendAsync``2(``0,System.Threading.CancellationToken)">
+            <summary>
+            Dispatches a command through its pipeline and returns its result.
+            </summary>
+            <typeparam name="TCommand">The command type.</typeparam>
+            <typeparam name="TValue">The successful result value type.</typeparam>
+            <param name="command">The command to dispatch.</param>
+            <param name="cancellationToken">The token used to cancel the operation.</param>
+            <returns>The result produced by the command pipeline.</returns>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Messaging.ICommandHandler`2">
+            <summary>Handles a state-changing request.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Messaging.ICommandHandler`2.HandleAsync(`0,System.Threading.CancellationToken)">
+            <summary>Executes the command asynchronously.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Messaging.ICommandPipelineBehavior`2">
+            <summary>
+            Defines a component that runs before and/or after a command handler.
+            </summary>
+            <typeparam name="TCommand">The command type.</typeparam>
+            <typeparam name="TValue">The successful result value type.</typeparam>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Messaging.ICommandPipelineBehavior`2.HandleAsync(`0,LearningPortal.Application.Abstractions.Messaging.CommandHandlerDelegate{`1},System.Threading.CancellationToken)">
+            <summary>
+            Processes a command and optionally invokes the next pipeline component.
+            </summary>
+            <param name="command">The command being processed.</param>
+            <param name="next">The next component in the command pipeline.</param>
+            <param name="cancellationToken">The token used to cancel the operation.</param>
+            <returns>The command result.</returns>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Messaging.CommandHandlerDelegate`1">
+            <summary>
+            Represents the next executable component in a Result-based command pipeline.
+            </summary>
+            <typeparam name="TValue">The successful result value type.</typeparam>
+            <returns>The asynchronous command result.</returns>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Messaging.IQuery`1">
+            <summary>Marks a request that reads application state.</summary>
+            <typeparam name="TResponse">The query response type.</typeparam>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Messaging.IQueryHandler`2">
+            <summary>Handles a read-only request.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Abstractions.Messaging.IQueryHandler`2.HandleAsync(`0,System.Threading.CancellationToken)">
+            <summary>Executes the query asynchronously.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Networking.IClientIpAddressProvider">
+            <summary>
+            Provides the current client IP address without exposing HTTP abstractions to Application.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Application.Abstractions.Networking.IClientIpAddressProvider.IpAddress">
+            <summary>
+            Gets the normalized client IP address or a stable fallback when no client address exists.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Application.Abstractions.Time.ISystemClock">
+            <summary>
+            Provides the current time through an abstraction suitable for deterministic testing.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Application.Abstractions.Time.ISystemClock.UtcNow">
+            <summary>
+            Gets the current UTC date and time.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Application.AiTutor.IAiTutorContextBuilder">
+            <summary>Centralizes authorization and privacy-safe course context construction.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.AiTutor.IAiTutorContextBuilder.BuildAsync(System.Guid,System.Guid,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>Validates learner scope and builds bounded learner-visible context.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.AiTutor.AiTutorContextResult">
+            <summary>Represents safe context construction.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.AiTutor.AiTutorContextResult.#ctor(System.Boolean,System.String,System.String,System.String,LearningPortal.Shared.Results.Error)">
+            <summary>Represents safe context construction.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.AiTutor.IOllamaClient">
+            <summary>Calls only the configured local Ollama service.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.AiTutor.IOllamaClient.GenerateAsync(System.String,System.Collections.Generic.IReadOnlyList{LearningPortal.Domain.AiTutor.AiTutorMessage},System.String,System.Threading.CancellationToken)">
+            <summary>Generates a non-streaming tutor reply.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.AiTutor.IOllamaClient.CheckHealthAsync(System.Threading.CancellationToken)">
+            <summary>Checks endpoint and configured model availability.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.AiTutor.OllamaGenerationResult">
+            <summary>Represents a safe generation outcome.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.AiTutor.OllamaGenerationResult.#ctor(System.Boolean,System.String,System.String)">
+            <summary>Represents a safe generation outcome.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.AiTutor.OllamaHealthResult">
+            <summary>Represents safe local service health.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.AiTutor.OllamaHealthResult.#ctor(System.Boolean,System.Boolean,System.Boolean,System.String)">
+            <summary>Represents safe local service health.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.AiTutor.OllamaOptions">
+            <summary>Configures the local Ollama tutor connection and safety bounds.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.AiTutor.OllamaOptions.SectionName">
+            <summary>Gets configuration section name.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.AiTutor.OllamaOptions.BaseUrl">
+            <summary>Gets or sets local endpoint.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.AiTutor.OllamaOptions.Model">
+            <summary>Gets or sets model.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.AiTutor.OllamaOptions.RequestTimeoutSeconds">
+            <summary>Gets or sets timeout.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.AiTutor.OllamaOptions.MaxContextCharacters">
+            <summary>Gets or sets context bound.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.AiTutor.OllamaOptions.MaxQuestionCharacters">
+            <summary>Gets or sets question bound.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.AiTutor.OllamaOptions.MaxConversationMessages">
+            <summary>Gets or sets history bound.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.AiTutor.OllamaOptions.Temperature">
+            <summary>Gets or sets sampling temperature.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.AiTutor.OllamaOptions.Enabled">
+            <summary>Gets or sets feature state.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Authentication.Commands.Login.LoginCommand">
+            <summary>
+            Requests authentication with an email address and password.
+            </summary>
+            <param name="Email">The user's email address.</param>
+            <param name="Password">The user's password.</param>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Login.LoginCommand.#ctor(System.String,System.String)">
+            <summary>
+            Requests authentication with an email address and password.
+            </summary>
+            <param name="Email">The user's email address.</param>
+            <param name="Password">The user's password.</param>
+        </member>
+        <member name="P:LearningPortal.Application.Authentication.Commands.Login.LoginCommand.Email">
+            <summary>The user's email address.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.Authentication.Commands.Login.LoginCommand.Password">
+            <summary>The user's password.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Authentication.Commands.Login.LoginCommandHandler">
+            <summary>
+            Delegates credential authentication and token issuance to the identity abstraction.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Login.LoginCommandHandler.#ctor(LearningPortal.Application.Abstractions.Identity.IIdentityService)">
+            <summary>
+            Delegates credential authentication and token issuance to the identity abstraction.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Login.LoginCommandHandler.HandleAsync(LearningPortal.Application.Authentication.Commands.Login.LoginCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Authentication.Commands.Login.LoginCommandValidator">
+            <summary>
+            Validates login commands before authentication is attempted.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Login.LoginCommandValidator.#ctor">
+            <summary>Initializes the login validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Authentication.Commands.Refresh.RefreshTokenCommand">
+            <summary>
+            Requests rotation of an active refresh token.
+            </summary>
+            <param name="RefreshToken">The raw refresh token supplied by the caller.</param>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Refresh.RefreshTokenCommand.#ctor(System.String)">
+            <summary>
+            Requests rotation of an active refresh token.
+            </summary>
+            <param name="RefreshToken">The raw refresh token supplied by the caller.</param>
+        </member>
+        <member name="P:LearningPortal.Application.Authentication.Commands.Refresh.RefreshTokenCommand.RefreshToken">
+            <summary>The raw refresh token supplied by the caller.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Authentication.Commands.Refresh.RefreshTokenCommandHandler">
+            <summary>
+            Delegates refresh-token rotation to the identity abstraction.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Refresh.RefreshTokenCommandHandler.#ctor(LearningPortal.Application.Abstractions.Identity.IIdentityService)">
+            <summary>
+            Delegates refresh-token rotation to the identity abstraction.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Refresh.RefreshTokenCommandHandler.HandleAsync(LearningPortal.Application.Authentication.Commands.Refresh.RefreshTokenCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Authentication.Commands.Refresh.RefreshTokenCommandValidator">
+            <summary>
+            Validates refresh-token rotation commands.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Refresh.RefreshTokenCommandValidator.#ctor">
+            <summary>Initializes the refresh-token validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Authentication.Commands.Revoke.RevokeRefreshTokenCommand">
+            <summary>
+            Requests revocation of a refresh token.
+            </summary>
+            <param name="RefreshToken">The raw refresh token supplied by the caller.</param>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Revoke.RevokeRefreshTokenCommand.#ctor(System.String)">
+            <summary>
+            Requests revocation of a refresh token.
+            </summary>
+            <param name="RefreshToken">The raw refresh token supplied by the caller.</param>
+        </member>
+        <member name="P:LearningPortal.Application.Authentication.Commands.Revoke.RevokeRefreshTokenCommand.RefreshToken">
+            <summary>The raw refresh token supplied by the caller.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Authentication.Commands.Revoke.RevokeRefreshTokenCommandHandler">
+            <summary>
+            Delegates refresh-token revocation to the identity abstraction.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Revoke.RevokeRefreshTokenCommandHandler.#ctor(LearningPortal.Application.Abstractions.Identity.IIdentityService)">
+            <summary>
+            Delegates refresh-token revocation to the identity abstraction.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Revoke.RevokeRefreshTokenCommandHandler.HandleAsync(LearningPortal.Application.Authentication.Commands.Revoke.RevokeRefreshTokenCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Authentication.Commands.Revoke.RevokeRefreshTokenCommandValidator">
+            <summary>
+            Validates refresh-token revocation commands.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authentication.Commands.Revoke.RevokeRefreshTokenCommandValidator.#ctor">
+            <summary>Initializes the refresh-token revocation validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Authorization.ApplicationClaimTypes">
+            <summary>
+            Defines stable claim names shared by token generation and authorization consumers.
+            </summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationClaimTypes.UserId">
+            <summary>Identifies the user and maps to the JWT subject claim.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationClaimTypes.DisplayName">
+            <summary>Contains the user's display name.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationClaimTypes.Email">
+            <summary>Contains the user's email address.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationClaimTypes.Role">
+            <summary>Contains one application role per claim.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationClaimTypes.Permission">
+            <summary>Reserved for future permission-based authorization.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationClaimTypes.JwtId">
+            <summary>Identifies an individual JWT.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationClaimTypes.IssuedAt">
+            <summary>Contains the JWT issue time as a NumericDate value.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Authorization.ApplicationRoles">
+            <summary>
+            Defines the application roles recognized by LearningPortal authorization.
+            </summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationRoles.Administrator">
+            <summary>Identifies administrators with full portal access.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationRoles.Instructor">
+            <summary>Identifies instructors who create courses, manage lessons, and view students.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.ApplicationRoles.Student">
+            <summary>Identifies students who enroll, learn, and take quizzes.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.Authorization.ApplicationRoles.All">
+            <summary>Gets every role that may be created or assigned by the application.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Authorization.ApplicationRoles.IsValid(System.String)">
+            <summary>Determines whether a role name belongs to the application role allowlist.</summary>
+            <param name="roleName">The role name to validate.</param>
+            <returns><see langword="true"/> when the role name is recognized.</returns>
+        </member>
+        <member name="T:LearningPortal.Application.Authorization.Policies">
+            <summary>
+            Defines stable names for application authorization policies.
+            </summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.Policies.AdminOnly">
+            <summary>Requires the Administrator role.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.Policies.InstructorOnly">
+            <summary>Requires the Instructor role or the full-access Administrator role.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.Policies.StudentOnly">
+            <summary>Requires the Student role or the full-access Administrator role.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.Authorization.Policies.AdminOrInstructor">
+            <summary>Requires either the Administrator or Instructor role.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Behaviors.ValidationBehavior`2">
+            <summary>
+            Validates commands before their handlers execute and returns failed Results for invalid requests.
+            </summary>
+            <typeparam name="TCommand">The command type.</typeparam>
+            <typeparam name="TValue">The successful result value type.</typeparam>
+        </member>
+        <member name="M:LearningPortal.Application.Behaviors.ValidationBehavior`2.#ctor(System.Collections.Generic.IEnumerable{FluentValidation.IValidator{`0}},Microsoft.Extensions.Logging.ILogger{LearningPortal.Application.Behaviors.ValidationBehavior{`0,`1}})">
+            <summary>
+            Validates commands before their handlers execute and returns failed Results for invalid requests.
+            </summary>
+            <typeparam name="TCommand">The command type.</typeparam>
+            <typeparam name="TValue">The successful result value type.</typeparam>
+        </member>
+        <member name="M:LearningPortal.Application.Behaviors.ValidationBehavior`2.HandleAsync(`0,LearningPortal.Application.Abstractions.Messaging.CommandHandlerDelegate{`1},System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.ArchiveCourse.ArchiveCourseCommand">
+            <summary>Requests archival of a Published course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.ArchiveCourse.ArchiveCourseCommand.#ctor(System.Guid)">
+            <summary>Requests archival of a Published course.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.ArchiveCourse.ArchiveCourseCommandHandler">
+            <summary>Archives an authorized Published course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.ArchiveCourse.ArchiveCourseCommandHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.IUnitOfWork,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,Microsoft.Extensions.Logging.ILogger{LearningPortal.Application.Courses.Commands.ArchiveCourse.ArchiveCourseCommandHandler})">
+            <summary>Archives an authorized Published course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.ArchiveCourse.ArchiveCourseCommandHandler.HandleAsync(LearningPortal.Application.Courses.Commands.ArchiveCourse.ArchiveCourseCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.ArchiveCourse.ArchiveCourseCommandValidator">
+            <summary>Validates archival requests.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.ArchiveCourse.ArchiveCourseCommandValidator.#ctor">
+            <summary>Initializes archival rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.CreateCourse.CreateCourseCommand">
+            <summary>Requests creation of a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.CreateCourse.CreateCourseCommand.#ctor(System.String,System.String,System.String,System.String,System.String,System.Nullable{System.Guid})">
+            <summary>Requests creation of a Draft course.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.CreateCourse.CreateCourseCommandHandler">
+            <summary>Creates an authorized Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.CreateCourse.CreateCourseCommandHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.IUnitOfWork,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,LearningPortal.Application.Abstractions.Identity.IUserManagementService,Microsoft.Extensions.Logging.ILogger{LearningPortal.Application.Courses.Commands.CreateCourse.CreateCourseCommandHandler},LearningPortal.Domain.Repositories.ISkillRepository,LearningPortal.Domain.Repositories.IInstructorEligibilityRepository)">
+            <summary>Creates an authorized Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.CreateCourse.CreateCourseCommandHandler.HandleAsync(LearningPortal.Application.Courses.Commands.CreateCourse.CreateCourseCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.CreateCourse.CreateCourseCommandValidator">
+            <summary>Validates course creation input.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.CreateCourse.CreateCourseCommandValidator.#ctor">
+            <summary>Initializes course creation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.DeleteCourse.DeleteCourseCommand">
+            <summary>Requests soft deletion of a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.DeleteCourse.DeleteCourseCommand.#ctor(System.Guid)">
+            <summary>Requests soft deletion of a Draft course.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.DeleteCourse.DeleteCourseCommandHandler">
+            <summary>Soft deletes an authorized Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.DeleteCourse.DeleteCourseCommandHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.IUnitOfWork,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,Microsoft.Extensions.Logging.ILogger{LearningPortal.Application.Courses.Commands.DeleteCourse.DeleteCourseCommandHandler})">
+            <summary>Soft deletes an authorized Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.DeleteCourse.DeleteCourseCommandHandler.HandleAsync(LearningPortal.Application.Courses.Commands.DeleteCourse.DeleteCourseCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.DeleteCourse.DeleteCourseCommandValidator">
+            <summary>Validates course deletion requests.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.DeleteCourse.DeleteCourseCommandValidator.#ctor">
+            <summary>Initializes deletion rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.PublishCourse.PublishCourseCommand">
+            <summary>Requests publication of a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.PublishCourse.PublishCourseCommand.#ctor(System.Guid)">
+            <summary>Requests publication of a Draft course.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.PublishCourse.PublishCourseCommandHandler">
+            <summary>Publishes an authorized Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.PublishCourse.PublishCourseCommandHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.IUnitOfWork,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,Microsoft.Extensions.Logging.ILogger{LearningPortal.Application.Courses.Commands.PublishCourse.PublishCourseCommandHandler})">
+            <summary>Publishes an authorized Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.PublishCourse.PublishCourseCommandHandler.HandleAsync(LearningPortal.Application.Courses.Commands.PublishCourse.PublishCourseCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.PublishCourse.PublishCourseCommandValidator">
+            <summary>Validates publication requests.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.PublishCourse.PublishCourseCommandValidator.#ctor">
+            <summary>Initializes publication rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.UpdateCourse.UpdateCourseCommand">
+            <summary>Requests an optimistic-concurrency protected Draft course update.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.UpdateCourse.UpdateCourseCommand.#ctor(System.Guid,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>Requests an optimistic-concurrency protected Draft course update.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.UpdateCourse.UpdateCourseCommandHandler">
+            <summary>Updates an owned or administrator-managed Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.UpdateCourse.UpdateCourseCommandHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.IUnitOfWork,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,Microsoft.Extensions.Logging.ILogger{LearningPortal.Application.Courses.Commands.UpdateCourse.UpdateCourseCommandHandler},LearningPortal.Domain.Repositories.ISkillRepository)">
+            <summary>Updates an owned or administrator-managed Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.UpdateCourse.UpdateCourseCommandHandler.HandleAsync(LearningPortal.Application.Courses.Commands.UpdateCourse.UpdateCourseCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Commands.UpdateCourse.UpdateCourseCommandValidator">
+            <summary>Validates Draft course updates.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Commands.UpdateCourse.UpdateCourseCommandValidator.#ctor">
+            <summary>Initializes update rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Queries.GetCourseById.GetCourseByIdQuery">
+            <summary>Requests one authorized course by identifier.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Queries.GetCourseById.GetCourseByIdQuery.#ctor(System.Guid)">
+            <summary>Requests one authorized course by identifier.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Queries.GetCourseById.GetCourseByIdQueryHandler">
+            <summary>Returns one course when the caller may manage it.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Queries.GetCourseById.GetCourseByIdQueryHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Application.Abstractions.Identity.ICurrentUserService)">
+            <summary>Returns one course when the caller may manage it.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Queries.GetCourseById.GetCourseByIdQueryHandler.HandleAsync(LearningPortal.Application.Courses.Queries.GetCourseById.GetCourseByIdQuery,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Queries.GetCourses.GetCoursesQuery">
+            <summary>Requests one authorized, filtered page of courses.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Queries.GetCourses.GetCoursesQuery.#ctor(System.String,System.String,System.Int32,System.Int32)">
+            <summary>Requests one authorized, filtered page of courses.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Queries.GetCourses.GetCoursesQueryHandler">
+            <summary>Returns an ownership-filtered course page.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Queries.GetCourses.GetCoursesQueryHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,FluentValidation.IValidator{LearningPortal.Application.Courses.Queries.GetCourses.GetCoursesQuery})">
+            <summary>Returns an ownership-filtered course page.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Queries.GetCourses.GetCoursesQueryHandler.HandleAsync(LearningPortal.Application.Courses.Queries.GetCourses.GetCoursesQuery,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Courses.Queries.GetCourses.GetCoursesQueryValidator">
+            <summary>Validates course-list filters and pagination.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Courses.Queries.GetCourses.GetCoursesQueryValidator.#ctor">
+            <summary>Initializes list-query rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.DependencyInjection">
+            <summary>Registers application use cases and validators.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.DependencyInjection.AddApplication(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>Adds application-layer services.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Commands.EnrollInCourse.EnrollInCourseCommand">
+            <summary>Enrolls the current employee in a published course.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Commands.EnrollInCourse.EnrollInCourseCommand.#ctor(System.Guid)">
+            <summary>Enrolls the current employee in a published course.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Commands.EnrollInCourse.EnrollInCourseCommandHandler">
+            <summary>Creates employee enrollments.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Commands.EnrollInCourse.EnrollInCourseCommandHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.IEnrollmentRepository,LearningPortal.Domain.Repositories.IUnitOfWork,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,LearningPortal.Application.Abstractions.Time.ISystemClock,Microsoft.Extensions.Logging.ILogger{LearningPortal.Application.Enrollments.Commands.EnrollInCourse.EnrollInCourseCommandHandler})">
+            <summary>Creates employee enrollments.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Commands.EnrollInCourse.EnrollInCourseCommandHandler.HandleAsync(LearningPortal.Application.Enrollments.Commands.EnrollInCourse.EnrollInCourseCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Commands.EnrollInCourse.EnrollInCourseCommandValidator">
+            <summary>Validates enrollment input.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Commands.EnrollInCourse.EnrollInCourseCommandValidator.#ctor">
+            <summary>Creates validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment.WithdrawEnrollmentCommand">
+            <summary>Withdraws an active enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment.WithdrawEnrollmentCommand.#ctor(System.Guid,System.String)">
+            <summary>Withdraws an active enrollment.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment.WithdrawEnrollmentCommandHandler">
+            <summary>Withdraws owned enrollments or administrator-selected enrollments.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment.WithdrawEnrollmentCommandHandler.#ctor(LearningPortal.Domain.Repositories.IEnrollmentRepository,LearningPortal.Domain.Repositories.IUnitOfWork,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,LearningPortal.Application.Abstractions.Time.ISystemClock,Microsoft.Extensions.Logging.ILogger{LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment.WithdrawEnrollmentCommandHandler})">
+            <summary>Withdraws owned enrollments or administrator-selected enrollments.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment.WithdrawEnrollmentCommandHandler.HandleAsync(LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment.WithdrawEnrollmentCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment.WithdrawEnrollmentCommandValidator">
+            <summary>Validates withdrawal input.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Commands.WithdrawEnrollment.WithdrawEnrollmentCommandValidator.#ctor">
+            <summary>Creates validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments.GetCourseEnrollmentsQuery">
+            <summary>Requests an authorized course enrollment page.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments.GetCourseEnrollmentsQuery.#ctor(System.Guid,System.String,System.String,System.Int32,System.Int32)">
+            <summary>Requests an authorized course enrollment page.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments.GetCourseEnrollmentsQueryHandler">
+            <summary>Returns students for an administrator or owning instructor.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments.GetCourseEnrollmentsQueryHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.IEnrollmentRepository,LearningPortal.Application.Abstractions.Identity.IUserManagementService,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,FluentValidation.IValidator{LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments.GetCourseEnrollmentsQuery})">
+            <summary>Returns students for an administrator or owning instructor.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments.GetCourseEnrollmentsQueryHandler.HandleAsync(LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments.GetCourseEnrollmentsQuery,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments.GetCourseEnrollmentsQueryValidator">
+            <summary>Validates course enrollment filters.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetCourseEnrollments.GetCourseEnrollmentsQueryValidator.#ctor">
+            <summary>Creates validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetEnrollmentById.GetEnrollmentByIdQuery">
+            <summary>Requests one authorized enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetEnrollmentById.GetEnrollmentByIdQuery.#ctor(System.Guid)">
+            <summary>Requests one authorized enrollment.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetEnrollmentById.GetEnrollmentByIdQueryHandler">
+            <summary>Enforces enrollment ownership and course ownership.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetEnrollmentById.GetEnrollmentByIdQueryHandler.#ctor(LearningPortal.Domain.Repositories.IEnrollmentRepository,LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Application.Abstractions.Identity.ICurrentUserService)">
+            <summary>Enforces enrollment ownership and course ownership.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetEnrollmentById.GetEnrollmentByIdQueryHandler.HandleAsync(LearningPortal.Application.Enrollments.Queries.GetEnrollmentById.GetEnrollmentByIdQuery,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetMyEnrollments.GetMyEnrollmentsQuery">
+            <summary>Requests the current employee's learning page.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetMyEnrollments.GetMyEnrollmentsQuery.#ctor(System.String,System.String,System.Int32,System.Int32)">
+            <summary>Requests the current employee's learning page.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetMyEnrollments.GetMyEnrollmentsQueryHandler">
+            <summary>Builds the current employee's enrollment page.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetMyEnrollments.GetMyEnrollmentsQueryHandler.#ctor(LearningPortal.Domain.Repositories.IEnrollmentRepository,LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.ILessonRepository,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,FluentValidation.IValidator{LearningPortal.Application.Enrollments.Queries.GetMyEnrollments.GetMyEnrollmentsQuery})">
+            <summary>Builds the current employee's enrollment page.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetMyEnrollments.GetMyEnrollmentsQueryHandler.HandleAsync(LearningPortal.Application.Enrollments.Queries.GetMyEnrollments.GetMyEnrollmentsQuery,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetMyEnrollments.GetMyEnrollmentsQueryValidator">
+            <summary>Validates My Learning filters.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetMyEnrollments.GetMyEnrollmentsQueryValidator.#ctor">
+            <summary>Creates validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog.GetPublishedCourseCatalogQuery">
+            <summary>Requests the published employee catalog.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog.GetPublishedCourseCatalogQuery.#ctor(System.String,System.Int32,System.Int32)">
+            <summary>Requests the published employee catalog.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog.GetPublishedCourseCatalogQueryHandler">
+            <summary>Builds the published catalog without exposing lesson content.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog.GetPublishedCourseCatalogQueryHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.ILessonRepository,LearningPortal.Domain.Repositories.IEnrollmentRepository,LearningPortal.Application.Abstractions.Identity.IUserManagementService,LearningPortal.Application.Abstractions.Identity.ICurrentUserService,FluentValidation.IValidator{LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog.GetPublishedCourseCatalogQuery})">
+            <summary>Builds the published catalog without exposing lesson content.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog.GetPublishedCourseCatalogQueryHandler.HandleAsync(LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog.GetPublishedCourseCatalogQuery,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog.GetPublishedCourseCatalogQueryValidator">
+            <summary>Validates catalog paging and search.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog.GetPublishedCourseCatalogQueryValidator.#ctor">
+            <summary>Creates validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseDetails.GetPublishedCourseDetailsQuery">
+            <summary>Requests published course details by slug.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseDetails.GetPublishedCourseDetailsQuery.#ctor(System.String)">
+            <summary>Requests published course details by slug.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseDetails.GetPublishedCourseDetailsQueryHandler">
+            <summary>Builds employee-safe published course details.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseDetails.GetPublishedCourseDetailsQueryHandler.#ctor(LearningPortal.Domain.Repositories.ICourseRepository,LearningPortal.Domain.Repositories.ILessonRepository,LearningPortal.Domain.Repositories.IEnrollmentRepository,LearningPortal.Application.Abstractions.Identity.IUserManagementService,LearningPortal.Application.Abstractions.Identity.ICurrentUserService)">
+            <summary>Builds employee-safe published course details.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Enrollments.Queries.GetPublishedCourseDetails.GetPublishedCourseDetailsQueryHandler.HandleAsync(LearningPortal.Application.Enrollments.Queries.GetPublishedCourseDetails.GetPublishedCourseDetailsQuery,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.InstructorEligibility.InstructorEligibilityOptions">
+            <summary>Configures automatic instructor qualification.</summary>
+        </member>
+        <member name="F:LearningPortal.Application.InstructorEligibility.InstructorEligibilityOptions.SectionName">
+            <summary>Gets the configuration section name.</summary>
+        </member>
+        <member name="P:LearningPortal.Application.InstructorEligibility.InstructorEligibilityOptions.QualificationThreshold">
+            <summary>Gets or sets the minimum qualifying percentage.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Lessons.ILessonContentPreviewService">
+            <summary>Builds safe, non-persisted lesson content previews.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Lessons.ILessonContentPreviewService.Preview(LearningPortal.Shared.Lessons.LessonContentPreviewRequest)">
+            <summary>Validates source content and returns safe preview data.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.Lessons.LessonContentPreviewService">
+            <summary>Builds server-derived previews for supported lesson types.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Lessons.LessonContentPreviewService.#ctor(LearningPortal.Application.Abstractions.Lessons.IVideoEmbedResolver,LearningPortal.Application.Abstractions.Lessons.IMarkdownRenderer)">
+            <summary>Builds server-derived previews for supported lesson types.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.Lessons.LessonContentPreviewService.Preview(LearningPortal.Shared.Lessons.LessonContentPreviewRequest)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.Messaging.CommandDispatcher">
+            <summary>
+            Resolves command handlers and composes their registered pipeline behaviors.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Messaging.CommandDispatcher.#ctor(System.IServiceProvider)">
+            <summary>
+            Resolves command handlers and composes their registered pipeline behaviors.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Application.Messaging.CommandDispatcher.SendAsync``2(``0,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Commands.AssignUserRole.AssignUserRoleCommand">
+            <summary>Requests one additive application-role assignment.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Commands.AssignUserRole.AssignUserRoleCommand.#ctor(System.Guid,System.String)">
+            <summary>Requests one additive application-role assignment.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Commands.AssignUserRole.AssignUserRoleCommandHandler">
+            <summary>Delegates additive role assignments to the Identity-neutral application port.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Commands.AssignUserRole.AssignUserRoleCommandHandler.#ctor(LearningPortal.Application.Abstractions.Identity.IUserManagementService)">
+            <summary>Delegates additive role assignments to the Identity-neutral application port.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Commands.AssignUserRole.AssignUserRoleCommandHandler.HandleAsync(LearningPortal.Application.UserManagement.Commands.AssignUserRole.AssignUserRoleCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Commands.AssignUserRole.AssignUserRoleCommandValidator">
+            <summary>Validates additive role-assignment commands.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Commands.AssignUserRole.AssignUserRoleCommandValidator.#ctor">
+            <summary>Initializes role-assignment validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Commands.SetUserEnabled.SetUserEnabledCommand">
+            <summary>Requests an enabled-state change for one Identity user.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Commands.SetUserEnabled.SetUserEnabledCommand.#ctor(System.Guid,System.Boolean)">
+            <summary>Requests an enabled-state change for one Identity user.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Commands.SetUserEnabled.SetUserEnabledCommandHandler">
+            <summary>Delegates enabled-state changes to the Identity-neutral application port.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Commands.SetUserEnabled.SetUserEnabledCommandHandler.#ctor(LearningPortal.Application.Abstractions.Identity.IUserManagementService)">
+            <summary>Delegates enabled-state changes to the Identity-neutral application port.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Commands.SetUserEnabled.SetUserEnabledCommandHandler.HandleAsync(LearningPortal.Application.UserManagement.Commands.SetUserEnabled.SetUserEnabledCommand,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Commands.SetUserEnabled.SetUserEnabledCommandValidator">
+            <summary>Validates enabled-state change commands.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Commands.SetUserEnabled.SetUserEnabledCommandValidator.#ctor">
+            <summary>Initializes enabled-state validation rules.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Queries.GetUserById.GetUserByIdQuery">
+            <summary>Requests one Identity user by identifier.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Queries.GetUserById.GetUserByIdQuery.#ctor(System.Guid)">
+            <summary>Requests one Identity user by identifier.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Queries.GetUserById.GetUserByIdQueryHandler">
+            <summary>Delegates a user-by-identifier read to the Identity-neutral application port.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Queries.GetUserById.GetUserByIdQueryHandler.#ctor(LearningPortal.Application.Abstractions.Identity.IUserManagementService)">
+            <summary>Delegates a user-by-identifier read to the Identity-neutral application port.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Queries.GetUserById.GetUserByIdQueryHandler.HandleAsync(LearningPortal.Application.UserManagement.Queries.GetUserById.GetUserByIdQuery,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Queries.GetUsers.GetUsersQuery">
+            <summary>Requests one filtered, paginated page of Identity users.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Queries.GetUsers.GetUsersQuery.#ctor(System.String,System.Int32,System.Int32)">
+            <summary>Requests one filtered, paginated page of Identity users.</summary>
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Queries.GetUsers.GetUsersQueryHandler">
+            <summary>Validates and delegates paginated Identity user reads.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Queries.GetUsers.GetUsersQueryHandler.#ctor(LearningPortal.Application.Abstractions.Identity.IUserManagementService,FluentValidation.IValidator{LearningPortal.Application.UserManagement.Queries.GetUsers.GetUsersQuery})">
+            <summary>Validates and delegates paginated Identity user reads.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Queries.GetUsers.GetUsersQueryHandler.HandleAsync(LearningPortal.Application.UserManagement.Queries.GetUsers.GetUsersQuery,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Application.UserManagement.Queries.GetUsers.GetUsersQueryValidator">
+            <summary>Validates administrator user-list pagination.</summary>
+        </member>
+        <member name="M:LearningPortal.Application.UserManagement.Queries.GetUsers.GetUsersQueryValidator.#ctor">
+            <summary>Initializes user-list validation rules.</summary>
+        </member>
+    </members>
+</doc>

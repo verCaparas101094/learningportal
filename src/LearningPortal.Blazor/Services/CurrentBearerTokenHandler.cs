@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Authentication;
 
 namespace LearningPortal.Blazor.Services;
 
@@ -9,7 +10,7 @@ public sealed class CurrentBearerTokenHandler(IHttpContextAccessor httpContextAc
     : DelegatingHandler
 {
     /// <inheritdoc />
-    protected override Task<HttpResponseMessage> SendAsync(
+    protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
@@ -17,7 +18,8 @@ public sealed class CurrentBearerTokenHandler(IHttpContextAccessor httpContextAc
 
         if (request.Headers.Authorization is null)
         {
-            var authorizationHeader = httpContextAccessor.HttpContext?
+            var httpContext = httpContextAccessor.HttpContext;
+            var authorizationHeader = httpContext?
                 .Request
                 .Headers
                 .Authorization
@@ -34,8 +36,18 @@ public sealed class CurrentBearerTokenHandler(IHttpContextAccessor httpContextAc
                     "Bearer",
                     parsedHeader.Parameter);
             }
+            else if (httpContext is not null)
+            {
+                var accessToken = await httpContext.GetTokenAsync("access_token");
+                if (!string.IsNullOrWhiteSpace(accessToken))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue(
+                        "Bearer",
+                        accessToken);
+                }
+            }
         }
 
-        return base.SendAsync(request, cancellationToken);
+        return await base.SendAsync(request, cancellationToken);
     }
 }
