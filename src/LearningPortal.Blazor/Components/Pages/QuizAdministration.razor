@@ -1,0 +1,76 @@
+@page "/courses/{CourseId:guid}/quizzes"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Quiz administration | Learning Portal</PageTitle>
+<AuthenticatedContent Roles="Administrator,Instructor">
+    <PageHeader Eyebrow="Course management" Title="Quizzes" Description="Author, validate, publish, and archive course quizzes." />
+    @if (_error is not null) { <div class="feedback error" role="alert">@_error</div> }
+    <section class="app-card">
+        <h2>@(_editing is null ? "Create quiz" : "Edit quiz")</h2>
+        <label>Title <input @bind="_title" /></label>
+        <label>Description <textarea @bind="_description"></textarea></label>
+        <label>Passing percentage <input type="number" min="1" max="100" @bind="_passing" /></label>
+        <label>Maximum attempts <input type="number" min="1" @bind="_maximumAttempts" /></label>
+        <label><input type="checkbox" @bind="_required" /> Required for completion</label>
+        <button class="button button-primary" @onclick="SaveQuizAsync">Save draft</button>
+    </section>
+    @foreach (var quiz in _quizzes)
+    {
+        <section class="app-card">
+            <h2>@quiz.Title</h2>
+            <p>@quiz.Status · pass @quiz.PassingPercentage% · @quiz.Questions.Count question(s)</p>
+            <button @onclick="() => Edit(quiz)">Edit</button>
+            @if (quiz.Status == "Draft")
+            {
+                <button @onclick="() => SelectQuestionEditor(quiz)">Add question</button>
+                <button @onclick="() => PublishAsync(quiz.Id)">Publish</button>
+                @foreach (var question in quiz.Questions)
+                {
+                    <button @onclick="() => EditQuestion(quiz, question)">Edit Q@question.Order</button>
+                }
+            }
+            @if (quiz.Status == "Published") { <button @onclick="() => ArchiveAsync(quiz.Id)">Archive</button> }
+            @if (_questionQuizId == quiz.Id)
+            {
+                <div>
+                    <h3>Add question</h3>
+                    <input placeholder="Question text" @bind="_questionText" />
+                    <select @bind="_questionType"><option>SingleChoice</option><option>MultipleChoice</option><option>TrueFalse</option></select>
+                    <input type="number" min="1" @bind="_points" />
+                    @for (var index = 0; index < _choices.Count; index++)
+                    {
+                        var choice = _choices[index];
+                        <div><input placeholder="Answer" @bind="choice.Text" /><label><input type="checkbox" @bind="choice.IsCorrect" /> Correct</label></div>
+                    }
+                    <button @onclick="AddChoice">Add answer</button>
+                    <button class="button button-primary" @onclick="SaveQuestionAsync">Save question</button>
+                </div>
+            }
+        </section>
+    }
+</AuthenticatedContent>
+
+@code {
+    [Parameter] public Guid CourseId { get; set; }
+    private IReadOnlyList<QuizAdministrationResponse> _quizzes = [];
+    private QuizAdministrationResponse? _editing;
+    private string _title = string.Empty, _description = string.Empty, _questionText = string.Empty, _questionType = "SingleChoice";
+    private decimal _passing = 80, _points = 1;
+    private int? _maximumAttempts;
+    private bool _required;
+    private Guid? _questionQuizId, _editingQuestionId;
+    private string? _error;
+    private readonly List<ChoiceModel> _choices = [new(), new()];
+    protected override Task OnParametersSetAsync() => LoadAsync();
+    private async Task LoadAsync() { try { _quizzes = await ApiClient.GetCourseQuizzesAsync(CourseId); } catch (ApiProblemException e) { _error = e.Message; } }
+    private void Edit(QuizAdministrationResponse quiz) { _editing=quiz; _title=quiz.Title; _description=quiz.Description; _passing=quiz.PassingPercentage; _maximumAttempts=quiz.MaximumAttempts; _required=quiz.IsRequired; }
+    private async Task SaveQuizAsync() { try { var request=new SaveQuizRequest(null,_title,_description,_passing,_maximumAttempts,_required); if(_editing is null) await ApiClient.CreateQuizAsync(CourseId,request); else await ApiClient.UpdateQuizAsync(_editing.Id,request); _editing=null; await LoadAsync(); } catch(ApiProblemException e){_error=e.Message;} }
+    private void SelectQuestionEditor(QuizAdministrationResponse quiz) { _questionQuizId=quiz.Id; _editingQuestionId=null; _questionText=string.Empty; _questionType="SingleChoice"; _points=1; _choices.Clear(); _choices.Add(new()); _choices.Add(new()); }
+    private void EditQuestion(QuizAdministrationResponse quiz, QuizAdminQuestionResponse question) { _questionQuizId=quiz.Id; _editingQuestionId=question.Id; _questionText=question.Text; _questionType=question.QuestionType; _points=question.Points; _choices.Clear(); _choices.AddRange(question.Choices.Select(x=>new ChoiceModel{Text=x.Text,IsCorrect=x.IsCorrect})); }
+    private void AddChoice() => _choices.Add(new());
+    private async Task SaveQuestionAsync() { if(_questionQuizId is not Guid id)return; try { var quiz=_quizzes.First(x=>x.Id==id); var order=_editingQuestionId is Guid qid ? quiz.Questions.First(x=>x.Id==qid).Order : quiz.Questions.Count+1; var request=new SaveQuizQuestionRequest(_questionText,_questionType,_points,order,null,true,_choices.Select((x,i)=>new SaveQuizChoiceRequest(x.Text,x.IsCorrect,i+1)).ToArray()); if(_editingQuestionId is Guid questionId) await ApiClient.UpdateQuizQuestionAsync(id,questionId,request); else await ApiClient.AddQuizQuestionAsync(id,request); _questionQuizId=null; _editingQuestionId=null; await LoadAsync(); } catch(ApiProblemException e){_error=e.Message;} }
+    private async Task PublishAsync(Guid id) { try { await ApiClient.PublishQuizAsync(id); await LoadAsync(); } catch(ApiProblemException e){_error=e.Message;} }
+    private async Task ArchiveAsync(Guid id) { try { await ApiClient.ArchiveQuizAsync(id); await LoadAsync(); } catch(ApiProblemException e){_error=e.Message;} }
+    private sealed class ChoiceModel { public string Text { get; set; } = string.Empty; public bool IsCorrect { get; set; } }
+}

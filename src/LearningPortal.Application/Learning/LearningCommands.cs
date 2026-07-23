@@ -27,7 +27,16 @@ public sealed class AccessLessonCommandHandler(IEnrollmentRepository enrollments
         return Result<CourseProgressResponse>.Success(LearningMappings.ToCourseProgress(enrollment, published, all));
     }
 }
-public sealed class CompleteLessonCommandHandler(IEnrollmentRepository enrollments, ICourseRepository courses, ILessonRepository lessons, ILessonProgressRepository progress, IUnitOfWork unit, ICurrentUserService user, ISystemClock clock) : ICommandHandler<CompleteLessonCommand, Result<CompleteLessonResponse>>
+public sealed class CompleteLessonCommandHandler(
+    IEnrollmentRepository enrollments,
+    ICourseRepository courses,
+    ILessonRepository lessons,
+    ILessonProgressRepository progress,
+    IQuizRepository quizzes,
+    IQuizAttemptRepository attempts,
+    IUnitOfWork unit,
+    ICurrentUserService user,
+    ISystemClock clock) : ICommandHandler<CompleteLessonCommand, Result<CompleteLessonResponse>>
 {
     public async Task<Result<CompleteLessonResponse>> HandleAsync(CompleteLessonCommand command, CancellationToken ct = default)
     {
@@ -38,7 +47,22 @@ public sealed class CompleteLessonCommandHandler(IEnrollmentRepository enrollmen
         if (record is null) { record = LessonProgress.Start(enrollment.Id, command.LessonId, enrollment.StudentId, clock.UtcNow); await progress.AddAsync(record, ct); }
         record.Complete(clock.UtcNow);
         var all = (await progress.GetByEnrollmentAsync(enrollment.Id, ct)).Append(record).GroupBy(x => x.LessonId).Select(x => x.Last()).ToArray();
-        if (published.Count > 0 && published.All(x => all.Any(p => p.LessonId == x.Id && p.Status == LessonProgressStatus.Completed))) enrollment.TryComplete(clock.UtcNow);
+        var lessonsComplete = published.Count > 0
+            && published.All(x => all.Any(p => p.LessonId == x.Id && p.Status == LessonProgressStatus.Completed));
+        if (lessonsComplete)
+        {
+            var requiredQuizzes = await quizzes.GetRequiredPublishedByCourseAsync(enrollment.CourseId, ct);
+            var quizzesComplete = true;
+            foreach (var quiz in requiredQuizzes)
+            {
+                if (!await attempts.HasPassedAsync(quiz.Id, enrollment.Id, ct))
+                {
+                    quizzesComplete = false;
+                    break;
+                }
+            }
+            if (quizzesComplete) enrollment.TryComplete(clock.UtcNow);
+        }
         await unit.SaveChangesAsync(ct);
         var summary = LearningMappings.ToCourseProgress(enrollment, published, all);
         var idx = published.ToList().FindIndex(x => x.Id == command.LessonId);

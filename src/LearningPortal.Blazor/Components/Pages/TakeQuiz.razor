@@ -1,0 +1,49 @@
+@page "/learn/{CourseSlug}/quizzes/{QuizId:guid}"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Quiz | Learning Portal</PageTitle>
+@if (_error is not null) { <div class="feedback error" role="alert">@_error</div> }
+else if (_quiz is null) { <LoadingState Message="Loading quiz…" /> }
+else
+{
+    <PageHeader Eyebrow="Assessment" Title="@_quiz.Title" Description="@_quiz.Description" />
+    @if (_result is not null)
+    {
+        <div class="feedback @(_result.Passed == true ? "success" : "error")">
+            Score: @_result.Score / @_result.MaximumScore (@_result.Percentage%) — @(_result.Passed == true ? "Passed" : "Not passed")
+        </div>
+        @foreach (var answer in _result.Answers)
+        {
+            <section class="app-card"><h3>@answer.QuestionText</h3><p>@(answer.IsCorrect ? "Correct" : "Incorrect") · @answer.PointsAwarded / @answer.MaximumPoints</p><p>@answer.Explanation</p></section>
+        }
+    }
+    else
+    {
+        @foreach (var question in _quiz.Questions)
+        {
+            <fieldset class="app-card">
+                <legend>@question.Order. @question.Text (@question.Points points)</legend>
+                @foreach (var choice in question.Choices)
+                {
+                    <label><input type="checkbox" checked="@IsSelected(question.Id, choice.Id)" @onchange="e => Select(question, choice.Id, (bool)(e.Value ?? false))" /> @choice.Text</label>
+                }
+            </fieldset>
+        }
+        <button class="button button-primary" disabled="@_submitting" @onclick="SubmitAsync">Submit quiz</button>
+    }
+    <h2>Attempt history</h2>
+    @foreach (var attempt in _history) { <p>Attempt @attempt.AttemptNumber — @attempt.Status @if(attempt.Percentage is not null){<span>· @attempt.Percentage%</span>}</p> }
+}
+
+@code {
+    [Parameter] public string CourseSlug { get; set; } = string.Empty;
+    [Parameter] public Guid QuizId { get; set; }
+    private QuizResponse? _quiz; private Guid _attemptId; private QuizAttemptResponse? _result;
+    private IReadOnlyList<QuizAttemptResponse> _history=[]; private readonly Dictionary<Guid,HashSet<Guid>> _answers=[];
+    private string? _error; private bool _submitting;
+    protected override async Task OnParametersSetAsync() { try { _quiz=await ApiClient.GetQuizAsync(QuizId); var started=await ApiClient.StartQuizAttemptAsync(QuizId); _attemptId=started.AttemptId; _history=await ApiClient.GetMyQuizAttemptsAsync(QuizId); } catch(ApiProblemException e){_error=e.Message;} }
+    private bool IsSelected(Guid questionId,Guid choiceId)=>_answers.TryGetValue(questionId,out var values)&&values.Contains(choiceId);
+    private void Select(QuizQuestionResponse question,Guid choiceId,bool selected) { if(!_answers.TryGetValue(question.Id,out var values)){values=[];_answers[question.Id]=values;} if(question.QuestionType!="MultipleChoice")values.Clear(); if(selected)values.Add(choiceId);else values.Remove(choiceId); }
+    private async Task SubmitAsync() { if(_quiz is null)return; _submitting=true; try { var answers=_quiz.Questions.Select(q=>new SubmitQuizAnswerRequest(q.Id,_answers.TryGetValue(q.Id,out var values)?values.ToArray():[])).ToArray(); _result=await ApiClient.SubmitQuizAttemptAsync(_attemptId,new(answers)); _history=await ApiClient.GetMyQuizAttemptsAsync(QuizId); } catch(ApiProblemException e){_error=e.Message;} finally{_submitting=false;} }
+}
