@@ -8,6 +8,7 @@ using LearningPortal.Shared.Learning;
 using LearningPortal.Shared.UserManagement;
 using LearningPortal.Shared.Quizzes;
 using LearningPortal.Shared.InstructorEligibility;
+using LearningPortal.Shared.Certificates;
 
 namespace LearningPortal.Blazor.Services;
 
@@ -428,6 +429,25 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
     public Task<CourseResponse> AssignCourseInstructorAsync(
         Guid courseId, AssignCourseInstructorRequest request, CancellationToken cancellationToken = default) =>
         PutAsync<CourseResponse>($"api/courses/{courseId:D}/instructor", request, cancellationToken);
+
+    /// <summary>Issues or returns the certificate for a completed enrollment.</summary>
+    public async Task<IssueCertificateResponse> IssueCertificateAsync(Guid enrollmentId,CancellationToken ct=default)
+    {using var response=await httpClient.PostAsync($"api/enrollments/{enrollmentId:D}/certificate",null,ct);return await ReadResponseAsync<IssueCertificateResponse>(response,ct);}
+    /// <summary>Gets the current student's certificates.</summary>
+    public async Task<IReadOnlyList<CertificateListItemResponse>> GetMyCertificatesAsync(CancellationToken ct=default)
+    {using var response=await httpClient.GetAsync("api/certificates/me",ct);return await ReadResponseAsync<IReadOnlyList<CertificateListItemResponse>>(response,ct);}
+    /// <summary>Gets a public safe verification result.</summary>
+    public async Task<CertificateVerificationResponse> VerifyCertificateAsync(string code,CancellationToken ct=default)
+    {using var response=await httpClient.GetAsync($"api/public/certificates/verify/{Uri.EscapeDataString(code)}",ct);return await ReadResponseAsync<CertificateVerificationResponse>(response,ct);}
+    /// <summary>Downloads authenticated PDF bytes.</summary>
+    public async Task<byte[]> DownloadCertificateAsync(Guid id,CancellationToken ct=default)
+    {using var response=await httpClient.GetAsync($"api/certificates/{id:D}/download",ct);await EnsureSuccessAsync(response,ct);return await response.Content.ReadAsByteArrayAsync(ct);}
+    /// <summary>Gets administrator certificates for a user.</summary>
+    public async Task<IReadOnlyList<CertificateResponse>> GetUserCertificatesAsync(Guid id,CancellationToken ct=default)
+    {using var response=await httpClient.GetAsync($"api/users/{id:D}/certificates",ct);return await ReadResponseAsync<IReadOnlyList<CertificateResponse>>(response,ct);}
+    /// <summary>Revokes a certificate.</summary>
+    public async Task<CertificateResponse> RevokeCertificateAsync(Guid id,RevokeCertificateRequest request,CancellationToken ct=default)
+    {using var response=await httpClient.PostAsJsonAsync($"api/certificates/{id:D}/revoke",request,ct);return await ReadResponseAsync<CertificateResponse>(response,ct);}
 
     private async Task<TResponse> PutAsync<TResponse>(
         string requestUri,

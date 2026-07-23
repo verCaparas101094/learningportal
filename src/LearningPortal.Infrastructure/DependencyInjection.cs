@@ -5,6 +5,8 @@ using LearningPortal.Application.Abstractions.Networking;
 using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Application.Authorization;
 using LearningPortal.Application.InstructorEligibility;
+using LearningPortal.Application.Certificates;
+using LearningPortal.Infrastructure.Certificates;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Authorization;
 using LearningPortal.Infrastructure.Identity;
@@ -81,6 +83,11 @@ public static class DependencyInjection
         if (eligibilityOptions.QualificationThreshold is < 1 or > 100)
             throw new InvalidOperationException("Instructor eligibility threshold must be between 1 and 100.");
         services.AddSingleton(eligibilityOptions);
+        var certificateOptions=configuration.GetSection(CertificateOptions.SectionName).Get<CertificateOptions>()??new();
+        if(!Uri.TryCreate(certificateOptions.VerificationBaseUrl,UriKind.Absolute,out _))
+            throw new InvalidOperationException("Certificate verification base URL must be absolute.");
+        services.AddSingleton(certificateOptions);
+        services.AddSingleton<ICertificatePdfGenerator,CertificatePdfGenerator>();
 
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
             ?? throw new InvalidOperationException("JWT configuration is missing.");
@@ -115,6 +122,7 @@ public static class DependencyInjection
         services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IInstructorEligibilityRepository, InstructorEligibilityRepository>();
+        services.AddScoped<ICertificateRepository, CertificateRepository>();
         services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IIdentityService, IdentityService>();

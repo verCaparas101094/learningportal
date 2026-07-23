@@ -35,6 +35,10 @@ else
                             <button class="button button-primary" disabled="@_mutating" @onclick="() => ContinueAsync(item.EnrollmentId)">Continue learning</button>
                             <button class="button button-danger" @onclick="() => OpenWithdraw(item.EnrollmentId)">Withdraw</button>
                         }
+                        @if (item.Status == "Completed")
+                        {
+                            <button class="button button-primary" disabled="@_mutating" @onclick="() => IssueCertificateAsync(item.EnrollmentId)">Get certificate</button>
+                        }
                     </div>
                 </article>
             </AppCard>
@@ -86,5 +90,11 @@ else
         _mutating = true;
         try { var destination = await ApiClient.GetContinueLearningAsync(enrollmentId); if (destination is null) _error = "This course has no published lessons yet."; else Navigation.NavigateTo($"/learn/{destination.CourseSlug}/lessons/{destination.LessonId}"); }
         catch (ApiProblemException exception) { _error = exception.Message; } finally { _mutating = false; }
+    }
+    private async Task IssueCertificateAsync(Guid enrollmentId)
+    {
+        _mutating=true;
+        try { await ApiClient.IssueCertificateAsync(enrollmentId); Navigation.NavigateTo("/certificates"); }
+        catch(ApiProblemException exception){_error=exception.Message;} finally{_mutating=false;}
     }
 }

@@ -1,0 +1,17 @@
+@page "/admin/certificates"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Certificate administration | Learning Portal</PageTitle>
+<AuthenticatedContent Roles="Administrator">
+ <PageHeader Eyebrow="Administration" Title="Certificates" Description="Look up user certificates and revoke invalid credentials." />
+ @if(_message is not null){<div class="feedback success">@_message</div>}@if(_error is not null){<div class="feedback error">@_error</div>}
+ <section class="app-card"><input placeholder="User ID" @bind="_userId" /><button @onclick="LoadAsync">Find certificates</button></section>
+ @if(_items.Count==0){<EmptyState Title="No certificates" Description="No matching certificates were found." />}
+ else{<table><thead><tr><th>Certificate</th><th>Student</th><th>Course</th><th>Status</th><th>Action</th></tr></thead><tbody>@foreach(var item in _items){<tr><td>@item.CertificateNumber</td><td>@item.StudentDisplayName</td><td>@item.CourseTitle</td><td><StatusBadge Text="@item.Status" /></td><td>@if(item.Status=="Active"){<input placeholder="Revocation reason" @bind="_reason" /><button @onclick="()=>RevokeAsync(item.Id)">Revoke</button>}</td></tr>}</tbody></table>}
+</AuthenticatedContent>
+@code{
+ private string _userId="",_reason="";private IReadOnlyList<CertificateResponse> _items=[];private string? _error,_message;
+ private async Task LoadAsync(){if(!Guid.TryParse(_userId,out var id)){_error="Enter a valid user ID.";return;}try{_items=await ApiClient.GetUserCertificatesAsync(id);_error=null;}catch(ApiProblemException e){_error=e.Message;}}
+ private async Task RevokeAsync(Guid id){try{await ApiClient.RevokeCertificateAsync(id,new(_reason));_message="Certificate revoked.";await LoadAsync();}catch(ApiProblemException e){_error=e.Message;}}
+}

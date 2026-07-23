@@ -44,6 +44,8 @@ using LearningPortal.Application.Quizzes;
 using LearningPortal.Shared.Quizzes;
 using LearningPortal.Application.InstructorEligibility;
 using LearningPortal.Shared.InstructorEligibility;
+using LearningPortal.Application.Certificates;
+using LearningPortal.Shared.Certificates;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LearningPortal.Application;
@@ -116,6 +118,16 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetSkills, Result<IReadOnlyList<SkillResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
         services.AddScoped<ICommandHandler<RecalculateInstructorEligibility, Result<IReadOnlyList<InstructorEligibilityResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
         services.AddScoped<ICommandHandler<AssignCourseInstructor, Result<CourseResponse>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
+        services.AddScoped<CertificateHandler>();
+        services.AddScoped<ICommandHandler<IssueCertificate, Result<IssueCertificateResponse>>>(p=>p.GetRequiredService<CertificateHandler>());
+        services.AddScoped<ICommandHandler<RevokeCertificate, Result<CertificateResponse>>>(p=>p.GetRequiredService<CertificateHandler>());
+        services.AddScoped<IQueryHandler<GetMyCertificates, Result<IReadOnlyList<CertificateListItemResponse>>>>(p=>p.GetRequiredService<CertificateHandler>());
+        services.AddScoped<IQueryHandler<GetCertificateById, Result<CertificateResponse>>>(p=>p.GetRequiredService<CertificateHandler>());
+        services.AddScoped<IQueryHandler<GetCertificateByEnrollment, Result<CertificateResponse>>>(p=>p.GetRequiredService<CertificateHandler>());
+        services.AddScoped<IQueryHandler<DownloadCertificate, Result<CertificateFile>>>(p=>p.GetRequiredService<CertificateHandler>());
+        services.AddScoped<IQueryHandler<VerifyCertificate, Result<CertificateVerificationResponse>>>(p=>p.GetRequiredService<CertificateHandler>());
+        services.AddScoped<IQueryHandler<GetCourseCertificates, Result<IReadOnlyList<CertificateResponse>>>>(p=>p.GetRequiredService<CertificateHandler>());
+        services.AddScoped<IQueryHandler<GetUserCertificates, Result<IReadOnlyList<CertificateResponse>>>>(p=>p.GetRequiredService<CertificateHandler>());
 
         return services;
     }

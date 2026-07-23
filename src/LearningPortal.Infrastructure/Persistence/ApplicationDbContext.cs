@@ -7,6 +7,7 @@ using LearningPortal.Domain.Enrollments.Exceptions;
 using LearningPortal.Domain.Learning;
 using LearningPortal.Domain.Quizzes;
 using LearningPortal.Domain.Skills;
+using LearningPortal.Domain.Certificates;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
 using LearningPortal.Infrastructure.Persistence.Configurations;
@@ -44,6 +45,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Skill> Skills => Set<Skill>();
     /// <summary>Gets instructor eligibility records.</summary>
     public DbSet<InstructorEligibility> InstructorEligibility => Set<InstructorEligibility>();
+    /// <summary>Gets issued certificates.</summary>
+    public DbSet<Certificate> Certificates => Set<Certificate>();
 
     /// <summary>Gets the persisted hashed refresh tokens.</summary>
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -52,6 +55,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.HasSequence<long>("CertificateNumberSequence").StartsAt(1).IncrementsBy(1);
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         builder.ConfigureDomainFoundation();
     }
@@ -94,6 +98,13 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             when (IsEnrollmentUniqueIndexViolation(exception))
         {
             throw new DuplicateActiveEnrollmentException(exception);
+        }
+        catch (DbUpdateException exception)
+            when (exception.Entries.Any(entry => entry.Entity is Certificate)
+                && exception.InnerException is SqlException { Number: 2601 or 2627 } sql
+                && sql.Message.Contains("IX_Certificates_EnrollmentId", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new DuplicateCertificateEnrollmentException(exception);
         }
     }
 

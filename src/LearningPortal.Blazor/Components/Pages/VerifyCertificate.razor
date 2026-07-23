@@ -1,0 +1,14 @@
+@page "/verify-certificate/{VerificationCode}"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Verify certificate | Learning Portal</PageTitle>
+<PageHeader Eyebrow="Public verification" Title="Certificate Verification" Description="Validate an ERNI Learning Portal credential." />
+@if(_loading){<LoadingState Message="Verifying certificate…" />}
+else if(_notFound){<EmptyState Title="Certificate not found" Description="The verification code is unknown." />}
+else if(_value is not null){<section class="app-card"><StatusBadge Text="@_value.Status" /><h2>@_value.StudentDisplayName</h2><p>Completed <strong>@_value.CourseTitle</strong></p><p>@_value.CourseCategory</p><p>Completed: @_value.CompletedAtUtc.ToString("yyyy-MM-dd") · Issued: @_value.IssuedAtUtc.ToString("yyyy-MM-dd")</p><p>Certificate: @_value.CertificateNumber</p>@if(_value.Status=="Revoked"){<div class="feedback error">This certificate has been revoked.</div>}</section>}
+
+@code {
+ [Parameter]public string VerificationCode{get;set;}=string.Empty;private CertificateVerificationResponse? _value;private bool _loading=true,_notFound;
+ protected override async Task OnParametersSetAsync(){_loading=true;try{_value=await ApiClient.VerifyCertificateAsync(VerificationCode);}catch(ApiProblemException e)when(e.StatusCode==System.Net.HttpStatusCode.NotFound){_notFound=true;}finally{_loading=false;}}
+}
