@@ -1,0 +1,21 @@
+@if (IsDirectVideo)
+{
+    <video controls preload="metadata" title="@Title">
+        <source src="@SourceUrl" type="video/mp4" />
+        Your browser cannot play this video.
+    </video>
+}
+else if (!string.IsNullOrWhiteSpace(EmbedUrl))
+{
+    <div class="responsive-media">
+        <iframe src="@EmbedUrl" title="@Title" loading="lazy" allowfullscreen></iframe>
+    </div>
+}
+<p><a href="@SourceUrl" target="_blank" rel="noopener noreferrer">Open video</a></p>
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string VideoProvider { get; set; } = string.Empty;
+    [Parameter] public string? EmbedUrl { get; set; }
+    [Parameter, EditorRequired] public string SourceUrl { get; set; } = string.Empty;
+    [Parameter] public bool IsDirectVideo { get; set; }
+}

@@ -188,6 +188,13 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
         using var response = await httpClient.DeleteAsync($"api/lessons/{lessonId:D}", cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
     }
+    /// <summary>Builds a non-persisted safe lesson preview.</summary>
+    public async Task<LessonContentPreviewResponse> PreviewLessonAsync(
+        LessonContentPreviewRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync("api/lessons/preview", request, cancellationToken);
+        return await ReadResponseAsync<LessonContentPreviewResponse>(response, cancellationToken);
+    }
 
     private async Task<TResponse> PutAsync<TResponse>(
         string requestUri,

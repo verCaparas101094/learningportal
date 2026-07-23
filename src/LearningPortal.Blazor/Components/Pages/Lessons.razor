@@ -16,7 +16,30 @@
     @if (_error is not null) { <div class="feedback error">@_error</div> }
     @if (_showForm)
     {
-        <LessonForm Model="_model" OnSubmit="SaveAsync" OnCancel="CloseForm" />
+        <LessonForm Model="_model" OnSubmit="SaveAsync" OnCancel="CloseForm" OnPreview="PreviewAsync" />
+        @if (_preview is not null)
+        {
+            <section class="lesson-preview">
+                <h3>Preview</h3>
+                @if (_preview.LessonType == "Article")
+                {
+                    <div class="markdown-preview">@((MarkupString)(_preview.SanitizedHtml ?? string.Empty))</div>
+                }
+                else if (_preview.LessonType == "Video" && _preview.ExternalUrl is not null)
+                {
+                    <LessonVideoPlayer Title="@_model.Title" VideoProvider="@_preview.VideoProvider"
+                        EmbedUrl="@_preview.EmbedUrl" SourceUrl="@_preview.ExternalUrl" IsDirectVideo="@_preview.IsDirectVideo" />
+                }
+                else if (_preview.LessonType == "Pdf" && _preview.ExternalUrl is not null)
+                {
+                    <LessonPdfViewer SourceUrl="@_preview.ExternalUrl" />
+                }
+                else if (_preview.ExternalUrl is not null)
+                {
+                    <a href="@_preview.ExternalUrl" target="_blank" rel="noopener noreferrer">Open resource</a>
+                }
+            </section>
+        }
     }
     @if (_page is not null)
     {
@@ -54,23 +77,41 @@
     private CourseResponse? _course; private PagedLessonsResponse? _page; private string? _search; private int _pageSize = 10;
     private int _pageNumber = 1; private string? _error; private bool _showForm; private Guid? _editingId;
     private LessonFormModel _model = new();
+    private LessonContentPreviewResponse? _preview;
     private LessonListItemResponse? _confirmation; private bool _deleteConfirmation;
     protected override async Task OnParametersSetAsync()
     { try { _course = await ApiClient.GetCourseByIdAsync(CourseId); await LoadAsync(); } catch (ApiProblemException e) { _error = e.Message; } }
     private async Task LoadAsync()
     { _page = await ApiClient.GetLessonsAsync(CourseId, new() { Search = _search, PageNumber = _pageNumber, PageSize = _pageSize }); }
-    private void OpenCreate() { _editingId = null; _model = new() { Order = (_page?.TotalCount ?? 0) + 1 }; _showForm = true; }
-    private void CloseForm() => _showForm = false;
+    private void OpenCreate() { _editingId = null; _preview = null; _model = new() { Order = (_page?.TotalCount ?? 0) + 1 }; _showForm = true; }
+    private void CloseForm() { _showForm = false; _preview = null; }
     private async Task EditAsync(Guid id)
-    { var x = await ApiClient.GetLessonAsync(id); _editingId = id; _model = new() { Title=x.Title, Description=x.Description,
-      Content=x.Content, Order=x.Order, EstimatedMinutes=x.EstimatedMinutes, LessonType=x.LessonType, RowVersion=x.RowVersion }; _showForm=true; }
+    { var x = await ApiClient.GetLessonAsync(id); _editingId = id; _preview = null; _model = new() { Title=x.Title, Description=x.Description,
+      MarkdownContent=x.MarkdownContent, ExternalUrl=x.ExternalUrl, Order=x.Order, EstimatedMinutes=x.EstimatedMinutes,
+      LessonType=x.LessonType, RowVersion=x.RowVersion }; _showForm=true; }
     private async Task SaveAsync()
     {
         try {
-            if (_editingId is null) await ApiClient.CreateLessonAsync(CourseId, new(_model.Title,_model.Description,_model.Content,_model.Order,_model.EstimatedMinutes,_model.LessonType));
-            else await ApiClient.UpdateLessonAsync(_editingId.Value, new(_model.Title,_model.Description,_model.Content,_model.Order,_model.EstimatedMinutes,_model.LessonType,_model.RowVersion));
-            _showForm=false; await LoadAsync();
+            NormalizeModel();
+            if (_editingId is null) await ApiClient.CreateLessonAsync(CourseId, new(_model.Title,_model.Description,_model.Order,_model.EstimatedMinutes,_model.LessonType,_model.MarkdownContent,_model.ExternalUrl));
+            else await ApiClient.UpdateLessonAsync(_editingId.Value, new(_model.Title,_model.Description,_model.Order,_model.EstimatedMinutes,_model.LessonType,_model.MarkdownContent,_model.ExternalUrl,_model.RowVersion));
+            _showForm=false; _preview=null; await LoadAsync();
         } catch(ApiProblemException e) { _error=e.Message; }
+    }
+    private async Task PreviewAsync()
+    {
+        try
+        {
+            NormalizeModel();
+            _preview = await ApiClient.PreviewLessonAsync(new(_model.LessonType, _model.MarkdownContent, _model.ExternalUrl));
+            _error = null;
+        }
+        catch (ApiProblemException e) { _preview = null; _error = e.Message; }
+    }
+    private void NormalizeModel()
+    {
+        if (_model.LessonType == "Article") _model.ExternalUrl = null;
+        else _model.MarkdownContent = null;
     }
     private void Confirm(LessonListItemResponse lesson, bool delete) { _confirmation=lesson; _deleteConfirmation=delete; }
     private void CancelConfirmation() => _confirmation=null;

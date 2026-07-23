@@ -1,14 +1,31 @@
 @using LearningPortal.Blazor.Models
+@inject IJSRuntime JavaScript
 <EditForm Model="Model" OnValidSubmit="OnSubmit">
     <DataAnnotationsValidator />
     <label>Title <InputText @bind-Value="Model.Title" /><ValidationMessage For="() => Model.Title" /></label>
     <label>Description <InputTextArea @bind-Value="Model.Description" /></label>
-    <label>Lesson type <InputSelect @bind-Value="Model.LessonType">
-        <option>Video</option><option>Article</option><option>PDF</option><option>QuizPlaceholder</option>
-    </InputSelect></label>
+    <label>Lesson type
+        <select value="@Model.LessonType" @onchange="ChangeTypeAsync">
+            <option>Article</option><option>Video</option><option>Pdf</option><option>ExternalLink</option>
+        </select>
+    </label>
     <label>Estimated minutes <InputNumber @bind-Value="Model.EstimatedMinutes" /></label>
     <label>Order <InputNumber @bind-Value="Model.Order" /></label>
-    <label>Content <InputTextArea @bind-Value="Model.Content" /><ValidationMessage For="() => Model.Content" /></label>
+    @if (Model.LessonType == "Article")
+    {
+        <label>Markdown content
+            <InputTextArea @bind-Value="Model.MarkdownContent" />
+            <ValidationMessage For="() => Model.MarkdownContent" />
+        </label>
+    }
+    else
+    {
+        <label>@UrlLabel
+            <InputText @bind-Value="Model.ExternalUrl" />
+            <ValidationMessage For="() => Model.ExternalUrl" />
+        </label>
+    }
+    <button class="button" type="button" @onclick="OnPreview">Preview</button>
     <button class="button button-primary" type="submit">Save lesson</button>
     <button class="button" type="button" @onclick="OnCancel">Cancel</button>
 </EditForm>
@@ -16,4 +33,17 @@
     [Parameter, EditorRequired] public LessonFormModel Model { get; set; } = default!;
     [Parameter] public EventCallback OnSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnPreview { get; set; }
+    private string UrlLabel => Model.LessonType switch
+    { "Video" => "Video URL", "Pdf" => "PDF URL", _ => "Resource URL" };
+    private async Task ChangeTypeAsync(ChangeEventArgs args)
+    {
+        var type = args.Value?.ToString() ?? "Article";
+        var hasContent = !string.IsNullOrWhiteSpace(Model.MarkdownContent) || !string.IsNullOrWhiteSpace(Model.ExternalUrl);
+        if (hasContent && !await JavaScript.InvokeAsync<bool>("confirm", "Changing lesson type clears incompatible content. Continue?"))
+            return;
+        Model.LessonType = type;
+        if (type == "Article") Model.ExternalUrl = null;
+        else Model.MarkdownContent = null;
+    }
 }

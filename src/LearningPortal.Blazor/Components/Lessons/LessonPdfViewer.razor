@@ -1,0 +1,7 @@
+<object data="@SourceUrl" type="application/pdf" class="pdf-preview">
+    <p>PDF preview is unavailable in this browser.</p>
+</object>
+<p><a href="@SourceUrl" target="_blank" rel="noopener noreferrer">Open PDF</a></p>
+@code {
+    [Parameter, EditorRequired] public string SourceUrl { get; set; } = string.Empty;
+}

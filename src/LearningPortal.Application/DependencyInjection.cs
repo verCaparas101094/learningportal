@@ -25,6 +25,7 @@ using LearningPortal.Application.Lessons.Queries.GetLessonById;
 using LearningPortal.Application.Lessons.Queries.GetLessonsByCourse;
 using LearningPortal.Application.Lessons.Queries.GetLessons;
 using LearningPortal.Shared.Lessons;
+using LearningPortal.Application.Lessons;
 using LearningPortal.Shared.Courses;
 using LearningPortal.Shared.Identity;
 using LearningPortal.Shared.Results;
@@ -64,6 +65,7 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetLessonByIdQuery, Result<LessonResponse>>, GetLessonByIdQueryHandler>();
         services.AddScoped<IQueryHandler<GetLessonsByCourseQuery, Result<PagedLessonsResponse>>, GetLessonsByCourseQueryHandler>();
         services.AddScoped<IQueryHandler<GetLessonsQuery, Result<PagedLessonsResponse>>, GetLessonsQueryHandler>();
+        services.AddScoped<ILessonContentPreviewService, LessonContentPreviewService>();
 
         return services;
     }

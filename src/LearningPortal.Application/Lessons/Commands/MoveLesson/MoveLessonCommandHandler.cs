@@ -1,11 +1,13 @@
 #pragma warning disable CS1591
 using LearningPortal.Application.Abstractions.Identity;
+using LearningPortal.Application.Abstractions.Lessons;
 using LearningPortal.Application.Abstractions.Messaging;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Shared.Lessons;
 using LearningPortal.Shared.Results;
 namespace LearningPortal.Application.Lessons.Commands.MoveLesson;
-public sealed class MoveLessonCommandHandler(ILessonRepository lessons, ICourseRepository courses, ICurrentUserService user)
+public sealed class MoveLessonCommandHandler(ILessonRepository lessons, ICourseRepository courses, ICurrentUserService user,
+    IVideoEmbedResolver videos, IMarkdownRenderer markdown)
     : ICommandHandler<MoveLessonCommand, Result<LessonResponse>>
 {
     public async Task<Result<LessonResponse>> HandleAsync(MoveLessonCommand c, CancellationToken ct = default)
@@ -22,6 +24,6 @@ public sealed class MoveLessonCommandHandler(ILessonRepository lessons, ICourseR
                 ? Errors.LessonManagement.ConcurrencyConflict() : Errors.LessonManagement.InvalidOrder());
         var updated = await lessons.GetByIdReadOnlyAsync(c.LessonId, ct);
         return updated is null ? Result<LessonResponse>.Failure(Errors.LessonManagement.NotFound(c.LessonId))
-            : Result<LessonResponse>.Success(updated.ToResponse());
+            : Result<LessonResponse>.Success(updated.ToResponse(videos, markdown));
     }
 }

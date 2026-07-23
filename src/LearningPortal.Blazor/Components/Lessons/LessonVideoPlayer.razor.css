@@ -1,0 +1,2 @@
+.responsive-media { position: relative; aspect-ratio: 16 / 9; width: 100%; }
+.responsive-media iframe, video { border: 0; height: 100%; width: 100%; }

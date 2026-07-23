@@ -293,5 +293,7 @@ public static class Errors
         public static Error InvalidOrder() => new("Lesson.InvalidOrder", "The requested lesson order is invalid.", ErrorType.Validation);
         /// <summary>Creates a concurrency conflict error.</summary>
         public static Error ConcurrencyConflict() => new("Lesson.ConcurrencyConflict", "The lesson was modified by another request. Reload it and try again.", ErrorType.Conflict);
+        /// <summary>Creates a lesson content validation error.</summary>
+        public static Error InvalidContent(string message) => new("Lesson.InvalidContent", message, ErrorType.Validation);
     }
 }

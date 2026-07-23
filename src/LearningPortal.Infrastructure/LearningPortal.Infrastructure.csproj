@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Markdig" />
+    <PackageReference Include="databinding.WebSecurity.HtmlSanitizer" />
     <ProjectReference Include="..\LearningPortal.Application\LearningPortal.Application.csproj" />
     <ProjectReference Include="..\LearningPortal.Domain\LearningPortal.Domain.csproj" />
   </ItemGroup>

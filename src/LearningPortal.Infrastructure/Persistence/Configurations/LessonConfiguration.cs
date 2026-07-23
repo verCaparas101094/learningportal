@@ -17,7 +17,9 @@ public sealed class LessonConfiguration : IEntityTypeConfiguration<Lesson>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Title).HasMaxLength(200).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(2_000).IsRequired();
-        builder.Property(x => x.Content).HasMaxLength(100_000).IsRequired();
+        builder.Property(x => x.MarkdownContent).HasMaxLength(100_000);
+        builder.Property(x => x.ExternalUrl).HasMaxLength(2_048);
+        builder.Property(x => x.VideoProvider).HasConversion<string>().HasMaxLength(30).IsRequired();
         builder.Property(x => x.LessonType).HasConversion<string>().HasMaxLength(30);
         builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
         builder.Property(x => x.RowVersion).IsRowVersion().IsConcurrencyToken();

@@ -30,8 +30,8 @@ public sealed class LessonApiClientTests
     public async Task Actions_SendExpectedRoutes(string action, string method)
     {
         var id = Guid.NewGuid();
-        var response = new LessonResponse(id, Guid.NewGuid(), "Title", "", "Content", 1, 10, "Article", "Draft",
-            DateTimeOffset.UtcNow, null, "AQ==");
+        var response = new LessonResponse(id, Guid.NewGuid(), "Title", "", 1, 10, "Article", "# Content", null,
+            "None", null, false, "<h1>Content</h1>", "Draft", DateTimeOffset.UtcNow, null, "AQ==");
         var handler = new Handler(_ => action == "delete" ? new(HttpStatusCode.NoContent) : Json(response));
         var client = Client(handler);
         if (action == "publish") await client.PublishLessonAsync(id);
@@ -49,8 +49,19 @@ public sealed class LessonApiClientTests
         var errors = new List<ValidationResult>();
         Assert.False(Validator.TryValidateObject(model, new(model), errors, true));
         Assert.Contains(errors, x => x.MemberNames.Contains(nameof(model.Title)));
-        Assert.Contains(errors, x => x.MemberNames.Contains(nameof(model.Content)));
         Assert.Contains(errors, x => x.MemberNames.Contains(nameof(model.Order)));
+    }
+
+    /// <summary>Verifies preview request and playback metadata parsing.</summary>
+    [Fact]
+    public async Task Preview_SendsContentAndParsesVideoMetadata()
+    {
+        var preview = new LessonContentPreviewResponse("Video", null, "https://youtu.be/abc12345",
+            "YouTube", "https://www.youtube-nocookie.com/embed/abc12345", false);
+        var handler = new Handler(_ => Json(preview));
+        var result = await Client(handler).PreviewLessonAsync(new("Video", null, "https://youtu.be/abc12345"));
+        Assert.Equal("/api/lessons/preview", handler.Uri?.AbsolutePath);
+        Assert.Equal("YouTube", result.VideoProvider);
     }
 
     private static LearningPortalApiClient Client(Handler handler) =>
