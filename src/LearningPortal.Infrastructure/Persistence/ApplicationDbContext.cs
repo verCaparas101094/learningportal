@@ -1,9 +1,12 @@
 using LearningPortal.Domain.Courses;
+using LearningPortal.Domain.Courses.Exceptions;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
+using LearningPortal.Infrastructure.Persistence.Configurations;
 using LearningPortal.Infrastructure.Persistence.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace LearningPortal.Infrastructure.Persistence;
@@ -25,4 +28,32 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         builder.ConfigureDomainFoundation();
     }
+
+    /// <inheritdoc />
+    public override async Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException exception)
+            when (exception.Entries.Any(entry => entry.Entity is Course))
+        {
+            throw new CourseConcurrencyException(exception);
+        }
+        catch (DbUpdateException exception)
+            when (IsCourseSlugUniqueIndexViolation(exception))
+        {
+            throw new DuplicateCourseSlugException(exception);
+        }
+    }
+
+    private static bool IsCourseSlugUniqueIndexViolation(DbUpdateException exception) =>
+        exception.Entries.Any(entry => entry.Entity is Course)
+        && exception.InnerException is SqlException { Number: 2601 or 2627 } sqlException
+        && sqlException.Message.Contains(
+            CourseConfiguration.SlugUniqueIndexName,
+            StringComparison.OrdinalIgnoreCase);
 }

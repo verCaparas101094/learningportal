@@ -245,4 +245,38 @@ public static class Errors
             "The role could not be assigned to the user.",
             ErrorType.Conflict);
     }
+
+    /// <summary>Provides course-management errors.</summary>
+    public static class CourseManagement
+    {
+        /// <summary>Creates an error for an unknown course.</summary>
+        public static Error NotFound(Guid courseId) => new(
+            "Course.NotFound",
+            $"The course with identifier '{courseId}' was not found.",
+            ErrorType.NotFound);
+
+        /// <summary>Creates an error for a duplicate normalized slug.</summary>
+        public static Error DuplicateSlug() => new(
+            "Course.DuplicateSlug",
+            "A course with the specified slug already exists.",
+            ErrorType.Conflict);
+
+        /// <summary>Creates an error for an invalid assigned instructor.</summary>
+        public static Error InvalidInstructor() => new(
+            "Course.InvalidInstructor",
+            "A valid enabled Instructor is required.",
+            ErrorType.Validation);
+
+        /// <summary>Creates an error for an invalid lifecycle operation.</summary>
+        public static Error InvalidState(string operation) => new(
+            "Course.InvalidState",
+            $"The course cannot be {operation} in its current state.",
+            ErrorType.Conflict);
+
+        /// <summary>Creates an optimistic-concurrency conflict.</summary>
+        public static Error ConcurrencyConflict() => new(
+            "Course.ConcurrencyConflict",
+            "The course was modified by another request. Reload it and try again.",
+            ErrorType.Conflict);
+    }
 }

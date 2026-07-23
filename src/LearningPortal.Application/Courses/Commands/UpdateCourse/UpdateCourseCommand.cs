@@ -2,14 +2,15 @@ using LearningPortal.Application.Abstractions.Messaging;
 using LearningPortal.Shared.Courses;
 using LearningPortal.Shared.Results;
 
-namespace LearningPortal.Application.Courses.Commands.CreateCourse;
+namespace LearningPortal.Application.Courses.Commands.UpdateCourse;
 
-/// <summary>Requests creation of a Draft course.</summary>
-public sealed record CreateCourseCommand(
+/// <summary>Requests an optimistic-concurrency protected Draft course update.</summary>
+public sealed record UpdateCourseCommand(
+    Guid CourseId,
     string Title,
     string Slug,
     string Description,
     string Category,
     string? ThumbnailUrl,
-    Guid? InstructorId)
+    string RowVersion)
     : ICommand<Result<CourseResponse>>;
