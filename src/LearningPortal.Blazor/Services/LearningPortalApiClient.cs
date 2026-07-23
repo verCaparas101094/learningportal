@@ -1,5 +1,7 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using LearningPortal.Blazor.Models;
+using LearningPortal.Shared.Courses;
 using LearningPortal.Shared.UserManagement;
 
 namespace LearningPortal.Blazor.Services;
@@ -69,6 +71,87 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
         return PutAsync<UserResponse>($"api/users/{userId:D}/roles", request, cancellationToken);
     }
 
+    /// <summary>Gets one filtered course page.</summary>
+    public async Task<PagedCoursesResponse> GetCoursesAsync(
+        GetCoursesRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var values = new List<string>();
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            values.Add($"Search={Uri.EscapeDataString(request.Search.Trim())}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Status))
+        {
+            values.Add($"Status={Uri.EscapeDataString(request.Status.Trim())}");
+        }
+
+        values.Add($"PageNumber={request.PageNumber}");
+        values.Add($"PageSize={request.PageSize}");
+
+        using var response = await httpClient.GetAsync(
+            $"api/courses?{string.Join('&', values)}",
+            cancellationToken);
+        return await ReadResponseAsync<PagedCoursesResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets one course by identifier.</summary>
+    public async Task<CourseResponse> GetCourseByIdAsync(
+        Guid courseId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/courses/{courseId:D}",
+            cancellationToken);
+        return await ReadResponseAsync<CourseResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Creates a Draft course.</summary>
+    public async Task<CourseResponse> CreateCourseAsync(
+        CreateCourseRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        using var response = await httpClient.PostAsJsonAsync(
+            "api/courses",
+            request,
+            cancellationToken);
+        return await ReadResponseAsync<CourseResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Updates a Draft course.</summary>
+    public Task<CourseResponse> UpdateCourseAsync(
+        Guid courseId,
+        UpdateCourseRequest request,
+        CancellationToken cancellationToken = default) =>
+        PutAsync<CourseResponse>($"api/courses/{courseId:D}", request, cancellationToken);
+
+    /// <summary>Publishes a Draft course.</summary>
+    public Task<CourseResponse> PublishCourseAsync(
+        Guid courseId,
+        CancellationToken cancellationToken = default) =>
+        PutAsync<CourseResponse>($"api/courses/{courseId:D}/publish", null, cancellationToken);
+
+    /// <summary>Archives a Published course.</summary>
+    public Task<CourseResponse> ArchiveCourseAsync(
+        Guid courseId,
+        CancellationToken cancellationToken = default) =>
+        PutAsync<CourseResponse>($"api/courses/{courseId:D}/archive", null, cancellationToken);
+
+    /// <summary>Deletes a Draft course.</summary>
+    public async Task DeleteCourseAsync(
+        Guid courseId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.DeleteAsync(
+            $"api/courses/{courseId:D}",
+            cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
     private async Task<TResponse> PutAsync<TResponse>(
         string requestUri,
         object? request,
@@ -78,9 +161,58 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
             ? await httpClient.PutAsync(requestUri, content: null, cancellationToken)
             : await httpClient.PutAsJsonAsync(requestUri, request, cancellationToken);
 
-        response.EnsureSuccessStatusCode();
+        return await ReadResponseAsync<TResponse>(response, cancellationToken);
+    }
 
+    private static async Task<TResponse> ReadResponseAsync<TResponse>(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        await EnsureSuccessAsync(response, cancellationToken);
         var result = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken);
         return result ?? throw new InvalidOperationException("The API returned an empty response.");
+    }
+
+    private static async Task EnsureSuccessAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            return;
+        }
+
+        var message = "The API request could not be completed.";
+        string? errorCode = null;
+
+        try
+        {
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                using var document = JsonDocument.Parse(content);
+                var root = document.RootElement;
+                if (root.TryGetProperty("title", out var title)
+                    && !string.IsNullOrWhiteSpace(title.GetString()))
+                {
+                    message = title.GetString()!;
+                }
+
+                if (root.TryGetProperty("code", out var code))
+                {
+                    errorCode = code.GetString();
+                }
+                else if (root.TryGetProperty("errorCode", out var legacyCode))
+                {
+                    errorCode = legacyCode.GetString();
+                }
+            }
+        }
+        catch (JsonException)
+        {
+            // Preserve the safe fallback for a malformed error response.
+        }
+
+        throw new ApiProblemException(response.StatusCode, message, errorCode);
     }
 }

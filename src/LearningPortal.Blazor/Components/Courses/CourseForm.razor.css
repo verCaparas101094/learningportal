@@ -1,0 +1,80 @@
+.form-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+label {
+    display: grid;
+    gap: .4rem;
+}
+
+label > span:first-child {
+    color: var(--color-text);
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+label small {
+    color: var(--color-text-subtle);
+    font-weight: 500;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+::deep input,
+::deep textarea {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    color: var(--color-text);
+    min-height: 2.65rem;
+    padding: .6rem .75rem;
+    width: 100%;
+}
+
+::deep textarea {
+    min-height: 7rem;
+    resize: vertical;
+}
+
+::deep input:focus,
+::deep textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
+    outline: 0;
+}
+
+::deep .validation-message,
+.field-error {
+    color: var(--color-danger);
+    font-size: .7rem;
+}
+
+.form-error {
+    background: var(--color-danger-soft);
+    border-radius: var(--radius-small);
+    color: #991b1b;
+    font-size: .78rem;
+    margin: 1rem 0 0;
+    padding: .7rem .8rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: .65rem;
+    justify-content: flex-end;
+    margin-top: 1.25rem;
+}
+
+@media (max-width: 38rem) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: auto;
+    }
+}

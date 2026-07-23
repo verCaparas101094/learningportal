@@ -1,0 +1,15 @@
+<StatusBadge Text="@Status" Tone="@Tone" />
+
+@code {
+    /// <summary>Gets or sets the course status.</summary>
+    [Parameter, EditorRequired]
+    public required string Status { get; set; }
+
+    private string Tone => Status.ToLowerInvariant() switch
+    {
+        "draft" => "warning",
+        "published" => "success",
+        "archived" => "neutral",
+        _ => "neutral"
+    };
+}

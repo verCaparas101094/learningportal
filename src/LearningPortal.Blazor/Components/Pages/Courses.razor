@@ -1,0 +1,655 @@
+@page "/courses"
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+@inject LearningPortalApiClient ApiClient
+@inject ILogger<Courses> Logger
+
+<PageTitle>Courses | Learning Portal</PageTitle>
+
+<AuthenticatedContent Roles="@ManagerRoles">
+    <PageHeader Eyebrow="Course management"
+                Title="Courses"
+                Description="Create, maintain, and manage the lifecycle of instructor-owned courses.">
+        <Actions>
+            <button class="button button-primary"
+                    type="button"
+                    disabled="@_isMutating"
+                    @onclick="OpenCreateForm">
+                Create course
+            </button>
+        </Actions>
+    </PageHeader>
+
+    @if (!string.IsNullOrWhiteSpace(_successMessage))
+    {
+        <div class="feedback success" role="status">
+            <span>@_successMessage</span>
+            <button type="button" aria-label="Dismiss success message" @onclick="DismissSuccess">×</button>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="feedback error" role="alert">
+            <span>@_errorMessage</span>
+            <button type="button" @onclick="ReloadAsync">Try again</button>
+        </div>
+    }
+
+    <div class="course-filters">
+        <label class="course-search">
+            <span class="visually-hidden">Search courses</span>
+            <span aria-hidden="true">⌕</span>
+            <input type="search"
+                   value="@_search"
+                   @oninput="HandleSearchInputAsync"
+                   placeholder="Search title, slug, or category"
+                   autocomplete="off" />
+        </label>
+
+        <label>
+            <span>Status</span>
+            <select value="@_status" @onchange="StatusChangedAsync">
+                <option value="">All statuses</option>
+                <option value="Draft">Draft</option>
+                <option value="Published">Published</option>
+                <option value="Archived">Archived</option>
+            </select>
+        </label>
+
+        <label>
+            <span>Page size</span>
+            <select value="@_pageSize" @onchange="PageSizeChangedAsync">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </label>
+
+        <button class="clear-filters"
+                type="button"
+                disabled="@(!HasFilters || _isLoading)"
+                @onclick="ClearFiltersAsync">
+            Clear filters
+        </button>
+    </div>
+
+    <div class="courses-card">
+        <AppCard>
+            @if (_isLoading)
+            {
+                <LoadingState Message="Loading courses…" />
+            }
+            else if (_page is null)
+            {
+                <EmptyState Icon="!"
+                            Title="Courses are unavailable"
+                            Description="Retry when the API is available." />
+            }
+            else if (_page.Items.Count == 0)
+            {
+                <EmptyState Icon="▤"
+                            Title="No courses found"
+                            Description="Create a course or clear the current search and filters." />
+            }
+            else
+            {
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Title</th>
+                                <th scope="col">Slug</th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Instructor</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Created</th>
+                                <th scope="col"><span class="visually-hidden">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var course in _page.Items)
+                            {
+                                <tr @key="course.Id">
+                                    <td data-label="Title">
+                                        <strong>@course.Title</strong>
+                                    </td>
+                                    <td data-label="Slug"><code>@course.Slug</code></td>
+                                    <td data-label="Category">@course.Category</td>
+                                    <td data-label="Instructor">
+                                        <span class="instructor-id" title="@course.InstructorId">
+                                            @course.InstructorId
+                                        </span>
+                                    </td>
+                                    <td data-label="Status">
+                                        <CourseStatusBadge Status="@course.Status" />
+                                    </td>
+                                    <td data-label="Created">
+                                        <time datetime="@course.CreatedAtUtc.ToString("O")">
+                                            @course.CreatedAtUtc.ToString("MMM d, yyyy")
+                                        </time>
+                                    </td>
+                                    <td data-label="Actions">
+                                        <div class="course-actions">
+                                            @if (IsDraft(course))
+                                            {
+                                                <button type="button"
+                                                        disabled="@_isMutating"
+                                                        @onclick="() => EditCourseAsync(course)">
+                                                    Edit
+                                                </button>
+                                                <button type="button"
+                                                        disabled="@_isMutating"
+                                                        @onclick="() => Confirm(course, CourseOperation.Publish)">
+                                                    Publish
+                                                </button>
+                                                <button class="danger"
+                                                        type="button"
+                                                        disabled="@_isMutating"
+                                                        @onclick="() => Confirm(course, CourseOperation.Delete)">
+                                                    Delete
+                                                </button>
+                                            }
+                                            else if (IsPublished(course))
+                                            {
+                                                <button type="button"
+                                                        disabled="@_isMutating"
+                                                        @onclick="() => Confirm(course, CourseOperation.Archive)">
+                                                    Archive
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="no-actions">No actions</span>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <footer class="courses-footer">
+                    <span>@_page.TotalCount course@(_page.TotalCount == 1 ? string.Empty : "s")</span>
+                    <PaginationControls PageNumber="@_page.PageNumber"
+                                        TotalPages="@_page.TotalPages"
+                                        Disabled="@(_isLoading || _isMutating)"
+                                        AriaLabel="Course list pagination"
+                                        PageChanged="ChangePageAsync" />
+                </footer>
+            }
+        </AppCard>
+    </div>
+</AuthenticatedContent>
+
+@if (_showForm)
+{
+    <div class="form-backdrop">
+        <section class="course-form-dialog"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="course-form-title">
+            <header>
+                <div>
+                    <p>@(_editingCourse is null ? "New course" : "Draft course")</p>
+                    <h2 id="course-form-title">@(_editingCourse is null ? "Create course" : "Edit course")</h2>
+                </div>
+                <button type="button"
+                        aria-label="Close course form"
+                        disabled="@_isMutating"
+                        @onclick="CloseForm">
+                    ×
+                </button>
+            </header>
+            <CourseForm Course="@_editingCourse"
+                        ShowInstructorId="@(_isAdministrator && _editingCourse is null)"
+                        IsSubmitting="@_isMutating"
+                        ErrorMessage="@_formError"
+                        SubmitText="@(_editingCourse is null ? "Create course" : "Save changes")"
+                        OnSubmit="SaveCourseAsync"
+                        OnCancel="CloseForm" />
+        </section>
+    </div>
+}
+
+<ConfirmDialog IsOpen="@(_confirmationCourse is not null)"
+               Title="@ConfirmationTitle"
+               Message="@ConfirmationMessage"
+               ConfirmText="@ConfirmationButtonText"
+               IsDestructive="@(_confirmationOperation == CourseOperation.Delete)"
+               IsBusy="@_isMutating"
+               OnConfirm="ExecuteConfirmedOperationAsync"
+               OnCancel="CancelConfirmation" />
+
+@code {
+    private const string ManagerRoles =
+        ApplicationRoles.Administrator + "," + ApplicationRoles.Instructor;
+    private static readonly TimeSpan SearchDebounce = TimeSpan.FromMilliseconds(400);
+
+    private readonly CancellationTokenSource _lifetimeCancellation = new();
+    private CancellationTokenSource? _searchCancellation;
+    private CancellationTokenSource? _loadCancellation;
+    private PagedCoursesResponse? _page;
+    private CourseResponse? _editingCourse;
+    private CourseListItemResponse? _confirmationCourse;
+    private CourseOperation _confirmationOperation;
+    private string _search = string.Empty;
+    private string _status = string.Empty;
+    private string? _errorMessage;
+    private string? _successMessage;
+    private string? _formError;
+    private int _pageNumber = 1;
+    private int _pageSize = 10;
+    private bool _isAdministrator;
+    private bool _isLoading;
+    private bool _isMutating;
+    private bool _showForm;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    private bool HasFilters =>
+        !string.IsNullOrWhiteSpace(_search)
+        || !string.IsNullOrWhiteSpace(_status)
+        || _pageSize != 10;
+
+    private string ConfirmationTitle => _confirmationOperation switch
+    {
+        CourseOperation.Publish => "Publish course?",
+        CourseOperation.Archive => "Archive course?",
+        CourseOperation.Delete => "Delete course?",
+        _ => "Confirm action"
+    };
+
+    private string ConfirmationMessage =>
+        _confirmationCourse is null
+            ? string.Empty
+            : _confirmationOperation switch
+            {
+                CourseOperation.Publish =>
+                    $"Publish “{_confirmationCourse.Title}”? It can no longer be edited.",
+                CourseOperation.Archive =>
+                    $"Archive “{_confirmationCourse.Title}”?",
+                CourseOperation.Delete =>
+                    $"Remove “{_confirmationCourse.Title}” from normal course views?",
+                _ => string.Empty
+            };
+
+    private string ConfirmationButtonText => _confirmationOperation switch
+    {
+        CourseOperation.Publish => "Publish",
+        CourseOperation.Archive => "Archive",
+        CourseOperation.Delete => "Delete",
+        _ => "Confirm"
+    };
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await AuthenticationStateTask;
+        _isAdministrator = authenticationState.User.IsInRole(ApplicationRoles.Administrator);
+        await LoadCoursesAsync();
+    }
+
+    private async Task HandleSearchInputAsync(ChangeEventArgs args)
+    {
+        _search = args.Value?.ToString() ?? string.Empty;
+        _pageNumber = 1;
+        _searchCancellation?.Cancel();
+        _searchCancellation?.Dispose();
+        var currentSearch = CancellationTokenSource.CreateLinkedTokenSource(
+            _lifetimeCancellation.Token);
+        _searchCancellation = currentSearch;
+
+        try
+        {
+            await Task.Delay(SearchDebounce, currentSearch.Token);
+            await LoadCoursesAsync(currentSearch.Token);
+        }
+        catch (OperationCanceledException) when (currentSearch.IsCancellationRequested)
+        {
+        }
+    }
+
+    private Task StatusChangedAsync(ChangeEventArgs args)
+    {
+        _status = args.Value?.ToString() ?? string.Empty;
+        _pageNumber = 1;
+        return LoadCoursesAsync();
+    }
+
+    private Task PageSizeChangedAsync(ChangeEventArgs args)
+    {
+        _pageSize = int.TryParse(args.Value?.ToString(), out var pageSize) ? pageSize : 10;
+        _pageNumber = 1;
+        return LoadCoursesAsync();
+    }
+
+    private async Task ClearFiltersAsync()
+    {
+        _search = string.Empty;
+        _status = string.Empty;
+        _pageSize = 10;
+        _pageNumber = 1;
+        await LoadCoursesAsync();
+    }
+
+    private Task ChangePageAsync(int pageNumber)
+    {
+        _pageNumber = Math.Max(1, pageNumber);
+        return LoadCoursesAsync();
+    }
+
+    private async Task LoadCoursesAsync(CancellationToken cancellationToken = default)
+    {
+        _loadCancellation?.Cancel();
+        _loadCancellation?.Dispose();
+        var currentLoad = CancellationTokenSource.CreateLinkedTokenSource(
+            _lifetimeCancellation.Token,
+            cancellationToken);
+        _loadCancellation = currentLoad;
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            _page = await ApiClient.GetCoursesAsync(
+                new GetCoursesRequest
+                {
+                    Search = string.IsNullOrWhiteSpace(_search) ? null : _search.Trim(),
+                    Status = string.IsNullOrWhiteSpace(_status) ? null : _status,
+                    PageNumber = _pageNumber,
+                    PageSize = _pageSize
+                },
+                currentLoad.Token);
+            _pageNumber = _page.PageNumber;
+        }
+        catch (OperationCanceledException) when (currentLoad.IsCancellationRequested)
+        {
+        }
+        catch (ApiProblemException exception)
+        {
+            LogApiFailure(exception, "Course list");
+            _errorMessage = GetFriendlyMessage(exception);
+        }
+        catch (Exception exception) when (
+            exception is HttpRequestException
+                or InvalidOperationException
+                or System.Text.Json.JsonException)
+        {
+            Logger.LogWarning(exception, "Course list request failed.");
+            _errorMessage = "Courses could not be loaded. Please try again.";
+        }
+        finally
+        {
+            if (ReferenceEquals(_loadCancellation, currentLoad))
+            {
+                _isLoading = false;
+            }
+        }
+    }
+
+    private void OpenCreateForm()
+    {
+        _editingCourse = null;
+        _formError = null;
+        _showForm = true;
+    }
+
+    private async Task EditCourseAsync(CourseListItemResponse course)
+    {
+        if (!IsDraft(course) || _isMutating)
+        {
+            return;
+        }
+
+        _isMutating = true;
+        _errorMessage = null;
+        try
+        {
+            _editingCourse = await ApiClient.GetCourseByIdAsync(
+                course.Id,
+                _lifetimeCancellation.Token);
+            if (!IsDraft(_editingCourse))
+            {
+                _errorMessage = "Only Draft courses can be edited.";
+                await LoadCoursesAsync(_lifetimeCancellation.Token);
+                return;
+            }
+
+            _formError = null;
+            _showForm = true;
+        }
+        catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+        {
+        }
+        catch (ApiProblemException exception)
+        {
+            LogApiFailure(exception, "Load course");
+            _errorMessage = GetFriendlyMessage(exception);
+        }
+        finally
+        {
+            _isMutating = false;
+        }
+    }
+
+    private async Task SaveCourseAsync(Models.CourseFormModel model)
+    {
+        if (_isMutating)
+        {
+            return;
+        }
+
+        _isMutating = true;
+        _formError = null;
+
+        try
+        {
+            if (_editingCourse is null)
+            {
+                _ = await ApiClient.CreateCourseAsync(
+                    new CreateCourseRequest(
+                        model.Title,
+                        model.Slug,
+                        model.Description,
+                        model.Category,
+                        NormalizeOptional(model.ThumbnailUrl),
+                        _isAdministrator ? model.InstructorId : null),
+                    _lifetimeCancellation.Token);
+                _successMessage = "Course created successfully.";
+                _pageNumber = 1;
+            }
+            else
+            {
+                _ = await ApiClient.UpdateCourseAsync(
+                    _editingCourse.Id,
+                    new UpdateCourseRequest(
+                        model.Title,
+                        model.Slug,
+                        model.Description,
+                        model.Category,
+                        NormalizeOptional(model.ThumbnailUrl),
+                        model.RowVersion),
+                    _lifetimeCancellation.Token);
+                _successMessage = "Course updated successfully.";
+            }
+
+            CloseForm();
+            await LoadCoursesAsync(_lifetimeCancellation.Token);
+        }
+        catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+        {
+        }
+        catch (ApiProblemException exception)
+        {
+            LogApiFailure(exception, "Save course");
+            _formError = GetFriendlyMessage(exception);
+            if (exception.StatusCode == System.Net.HttpStatusCode.Conflict
+                && string.Equals(
+                    exception.ErrorCode,
+                    "Course.ConcurrencyConflict",
+                    StringComparison.Ordinal))
+            {
+                CloseForm();
+                _errorMessage = "The course changed while you were editing. The latest data has been loaded.";
+                await LoadCoursesAsync(_lifetimeCancellation.Token);
+            }
+        }
+        finally
+        {
+            _isMutating = false;
+        }
+    }
+
+    private void Confirm(CourseListItemResponse course, CourseOperation operation)
+    {
+        _confirmationCourse = course;
+        _confirmationOperation = operation;
+    }
+
+    private async Task ExecuteConfirmedOperationAsync()
+    {
+        if (_confirmationCourse is null || _isMutating)
+        {
+            return;
+        }
+
+        var course = _confirmationCourse;
+        var operation = _confirmationOperation;
+        _isMutating = true;
+        _errorMessage = null;
+
+        try
+        {
+            switch (operation)
+            {
+                case CourseOperation.Publish:
+                    _ = await ApiClient.PublishCourseAsync(
+                        course.Id,
+                        _lifetimeCancellation.Token);
+                    _successMessage = "Course published successfully.";
+                    break;
+                case CourseOperation.Archive:
+                    _ = await ApiClient.ArchiveCourseAsync(
+                        course.Id,
+                        _lifetimeCancellation.Token);
+                    _successMessage = "Course archived successfully.";
+                    break;
+                case CourseOperation.Delete:
+                    await ApiClient.DeleteCourseAsync(
+                        course.Id,
+                        _lifetimeCancellation.Token);
+                    _successMessage = "Course deleted successfully.";
+                    break;
+            }
+
+            CancelConfirmation();
+            await LoadCoursesAsync(_lifetimeCancellation.Token);
+        }
+        catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+        {
+        }
+        catch (ApiProblemException exception)
+        {
+            LogApiFailure(exception, operation.ToString());
+            _errorMessage = GetFriendlyMessage(exception);
+            CancelConfirmation();
+            if (exception.StatusCode is System.Net.HttpStatusCode.NotFound
+                or System.Net.HttpStatusCode.Conflict)
+            {
+                await LoadCoursesAsync(_lifetimeCancellation.Token);
+            }
+        }
+        finally
+        {
+            _isMutating = false;
+        }
+    }
+
+    private void CloseForm()
+    {
+        _showForm = false;
+        _editingCourse = null;
+        _formError = null;
+    }
+
+    private void CancelConfirmation()
+    {
+        _confirmationCourse = null;
+        _confirmationOperation = default;
+    }
+
+    private void DismissSuccess() => _successMessage = null;
+
+    private Task ReloadAsync() => LoadCoursesAsync();
+
+    private static bool IsDraft(CourseListItemResponse course) =>
+        string.Equals(course.Status, "Draft", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsDraft(CourseResponse course) =>
+        string.Equals(course.Status, "Draft", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsPublished(CourseListItemResponse course) =>
+        string.Equals(course.Status, "Published", StringComparison.OrdinalIgnoreCase);
+
+    private static string? NormalizeOptional(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string GetFriendlyMessage(ApiProblemException exception) =>
+        exception.StatusCode switch
+        {
+            System.Net.HttpStatusCode.BadRequest =>
+                string.IsNullOrWhiteSpace(exception.Message)
+                    ? "Check the course details and try again."
+                    : exception.Message,
+            System.Net.HttpStatusCode.Unauthorized =>
+                "Your session is no longer authorized. Please sign in again.",
+            System.Net.HttpStatusCode.Forbidden =>
+                "You do not have permission to manage this course.",
+            System.Net.HttpStatusCode.NotFound =>
+                "The course no longer exists.",
+            System.Net.HttpStatusCode.Conflict when string.Equals(
+                exception.ErrorCode,
+                "Course.DuplicateSlug",
+                StringComparison.Ordinal) =>
+                "That slug is already used by another course.",
+            System.Net.HttpStatusCode.Conflict when string.Equals(
+                exception.ErrorCode,
+                "Course.ConcurrencyConflict",
+                StringComparison.Ordinal) =>
+                "The course changed in another session. Reload and try again.",
+            System.Net.HttpStatusCode.Conflict =>
+                "The course cannot be changed in its current state.",
+            _ => "The course request could not be completed. Please try again."
+        };
+
+    private void LogApiFailure(ApiProblemException exception, string operation) =>
+        Logger.LogWarning(
+            "Course API operation {Operation} failed with status {StatusCode} and code {ErrorCode}.",
+            operation,
+            exception.StatusCode,
+            exception.ErrorCode);
+
+    /// <inheritdoc />
+    public ValueTask DisposeAsync()
+    {
+        _lifetimeCancellation.Cancel();
+        _searchCancellation?.Cancel();
+        _loadCancellation?.Cancel();
+        _searchCancellation?.Dispose();
+        _loadCancellation?.Dispose();
+        _lifetimeCancellation.Dispose();
+        return ValueTask.CompletedTask;
+    }
+
+    private enum CourseOperation
+    {
+        None,
+        Publish,
+        Archive,
+        Delete
+    }
+}

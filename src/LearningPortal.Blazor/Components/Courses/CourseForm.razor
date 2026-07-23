@@ -1,0 +1,143 @@
+@using LearningPortal.Blazor.Models
+
+<EditForm Model="_model"
+          FormName="@FormName"
+          OnValidSubmit="SubmitAsync">
+    <DataAnnotationsValidator />
+
+    <div class="form-grid">
+        <label>
+            <span>Title</span>
+            <InputText @bind-Value="_model.Title" autocomplete="off" />
+            <ValidationMessage For="() => _model.Title" />
+        </label>
+
+        <label>
+            <span>Slug</span>
+            <InputText @bind-Value="_model.Slug" autocomplete="off" />
+            <ValidationMessage For="() => _model.Slug" />
+        </label>
+
+        <label class="full-width">
+            <span>Description</span>
+            <InputTextArea @bind-Value="_model.Description" rows="5" />
+            <ValidationMessage For="() => _model.Description" />
+        </label>
+
+        <label>
+            <span>Category</span>
+            <InputText @bind-Value="_model.Category" autocomplete="off" />
+            <ValidationMessage For="() => _model.Category" />
+        </label>
+
+        <label>
+            <span>Thumbnail URL <small>Optional</small></span>
+            <InputText @bind-Value="_model.ThumbnailUrl" type="url" />
+            <ValidationMessage For="() => _model.ThumbnailUrl" />
+        </label>
+
+        @if (ShowInstructorId)
+        {
+            <label class="full-width">
+                <span>Instructor ID</span>
+                <InputText @bind-Value="_instructorId" autocomplete="off" />
+                @if (!string.IsNullOrWhiteSpace(_instructorError))
+                {
+                    <span class="field-error">@_instructorError</span>
+                }
+            </label>
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <p class="form-error" role="alert">@ErrorMessage</p>
+    }
+
+    <div class="form-actions">
+        <button class="button button-secondary"
+                type="button"
+                disabled="@IsSubmitting"
+                @onclick="OnCancel">
+            Cancel
+        </button>
+        <button class="button button-primary"
+                type="submit"
+                disabled="@IsSubmitting">
+            @(IsSubmitting ? "Saving…" : SubmitText)
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    private CourseFormModel _model = new();
+    private string _instructorId = string.Empty;
+    private string? _instructorError;
+    private Guid? _loadedCourseId;
+
+    /// <summary>Gets or sets the course being edited.</summary>
+    [Parameter]
+    public CourseResponse? Course { get; set; }
+
+    /// <summary>Gets or sets whether administrators may select ownership.</summary>
+    [Parameter]
+    public bool ShowInstructorId { get; set; }
+
+    /// <summary>Gets or sets whether submission is processing.</summary>
+    [Parameter]
+    public bool IsSubmitting { get; set; }
+
+    /// <summary>Gets or sets the API error message.</summary>
+    [Parameter]
+    public string? ErrorMessage { get; set; }
+
+    /// <summary>Gets or sets the submit button text.</summary>
+    [Parameter]
+    public string SubmitText { get; set; } = "Save course";
+
+    /// <summary>Gets or sets the successful form callback.</summary>
+    [Parameter]
+    public EventCallback<CourseFormModel> OnSubmit { get; set; }
+
+    /// <summary>Gets or sets the cancellation callback.</summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private string FormName => Course is null ? "create-course" : $"edit-course-{Course.Id:N}";
+
+    /// <inheritdoc />
+    protected override void OnParametersSet()
+    {
+        if (Course?.Id == _loadedCourseId)
+        {
+            return;
+        }
+
+        _loadedCourseId = Course?.Id;
+        _model = Course is null ? new CourseFormModel() : CourseFormModel.FromCourse(Course);
+        _instructorId = _model.InstructorId?.ToString("D") ?? string.Empty;
+        _instructorError = null;
+    }
+
+    private Task SubmitAsync()
+    {
+        _instructorError = null;
+        if (ShowInstructorId)
+        {
+            if (!Guid.TryParse(_instructorId, out var instructorId)
+                || instructorId == Guid.Empty)
+            {
+                _instructorError = "A valid Instructor ID is required.";
+                return Task.CompletedTask;
+            }
+
+            _model.InstructorId = instructorId;
+        }
+        else
+        {
+            _model.InstructorId = null;
+        }
+
+        return OnSubmit.InvokeAsync(_model);
+    }
+}
