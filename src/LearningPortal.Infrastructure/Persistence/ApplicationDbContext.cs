@@ -1,5 +1,7 @@
 using LearningPortal.Domain.Courses;
 using LearningPortal.Domain.Courses.Exceptions;
+using LearningPortal.Domain.Lessons;
+using LearningPortal.Domain.Lessons.Exceptions;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Identity;
 using LearningPortal.Infrastructure.Persistence.Configurations;
@@ -17,6 +19,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
 {
     /// <summary>Gets the course data set.</summary>
     public DbSet<Course> Courses => Set<Course>();
+    /// <summary>Gets course lessons.</summary>
+    public DbSet<Lesson> Lessons => Set<Lesson>();
 
     /// <summary>Gets the persisted hashed refresh tokens.</summary>
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -43,10 +47,20 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         {
             throw new CourseConcurrencyException(exception);
         }
+        catch (DbUpdateConcurrencyException exception)
+            when (exception.Entries.Any(entry => entry.Entity is Lesson))
+        {
+            throw new LessonConcurrencyException(exception);
+        }
         catch (DbUpdateException exception)
             when (IsCourseSlugUniqueIndexViolation(exception))
         {
             throw new DuplicateCourseSlugException(exception);
+        }
+        catch (DbUpdateException exception)
+            when (IsLessonOrderUniqueIndexViolation(exception))
+        {
+            throw new DuplicateLessonOrderException(exception);
         }
     }
 
@@ -56,4 +70,9 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
         && sqlException.Message.Contains(
             CourseConfiguration.SlugUniqueIndexName,
             StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsLessonOrderUniqueIndexViolation(DbUpdateException exception) =>
+        exception.Entries.Any(entry => entry.Entity is Lesson)
+        && exception.InnerException is SqlException { Number: 2601 or 2627 } sqlException
+        && sqlException.Message.Contains(LessonConfiguration.CourseOrderIndexName, StringComparison.OrdinalIgnoreCase);
 }

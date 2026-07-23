@@ -1,0 +1,88 @@
+@page "/courses/{CourseId:guid}/lessons"
+@rendermode InteractiveServer
+@using LearningPortal.Blazor.Models
+@using LearningPortal.Blazor.Components.Lessons
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Lessons | Learning Portal</PageTitle>
+<AuthenticatedContent Roles="Administrator,Instructor">
+    <PageHeader Eyebrow="Course management" Title="@(_course?.Title ?? "Lessons")" Description="Manage ordered course lessons.">
+        <Actions><button class="button button-primary" @onclick="OpenCreate">Create lesson</button></Actions>
+    </PageHeader>
+    <div>
+        <input type="search" value="@_search" @onchange="SearchChanged" placeholder="Search lessons" />
+        <select value="@_pageSize" @onchange="PageSizeChanged"><option>10</option><option>25</option><option>50</option></select>
+    </div>
+    @if (_error is not null) { <div class="feedback error">@_error</div> }
+    @if (_showForm)
+    {
+        <LessonForm Model="_model" OnSubmit="SaveAsync" OnCancel="CloseForm" />
+    }
+    @if (_page is not null)
+    {
+        <table>
+            <thead><tr><th>Order</th><th>Title</th><th>Type</th><th>Status</th><th>Duration</th><th>Actions</th></tr></thead>
+            <tbody>
+            @foreach (var lesson in _page.Items)
+            {
+                <tr>
+                    <td>@lesson.Order</td><td>@lesson.Title</td><td>@lesson.LessonType</td>
+                    <td><span class="status-badge">@lesson.Status</span></td><td>@lesson.EstimatedMinutes min</td>
+                    <td>
+                    @if (lesson.Status == "Draft")
+                    {
+                        <button @onclick="() => EditAsync(lesson.Id)">Edit</button>
+                        <button @onclick="() => Confirm(lesson, false)">Publish</button>
+                        <button @onclick="() => Confirm(lesson, true)">Delete</button>
+                        <button disabled="@(lesson.Order <= 1)" @onclick="() => MoveAsync(lesson, lesson.Order - 1)">Move up</button>
+                        <button @onclick="() => MoveAsync(lesson, lesson.Order + 1)">Move down</button>
+                    }
+                    else { <span>Read only</span> }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <PaginationControls CurrentPage="_page.PageNumber" TotalPages="_page.TotalPages" PageChanged="ChangePageAsync" />
+    }
+    <ConfirmDialog IsOpen="@(_confirmation is not null)" Title="@(_deleteConfirmation ? "Delete lesson" : "Publish lesson")"
+                   Message="This action changes lesson availability." ConfirmText="@(_deleteConfirmation ? "Delete" : "Publish")"
+                   IsDestructive="_deleteConfirmation" OnConfirm="ExecuteConfirmationAsync" OnCancel="CancelConfirmation" />
+</AuthenticatedContent>
+@code {
+    [Parameter] public Guid CourseId { get; set; }
+    private CourseResponse? _course; private PagedLessonsResponse? _page; private string? _search; private int _pageSize = 10;
+    private int _pageNumber = 1; private string? _error; private bool _showForm; private Guid? _editingId;
+    private LessonFormModel _model = new();
+    private LessonListItemResponse? _confirmation; private bool _deleteConfirmation;
+    protected override async Task OnParametersSetAsync()
+    { try { _course = await ApiClient.GetCourseByIdAsync(CourseId); await LoadAsync(); } catch (ApiProblemException e) { _error = e.Message; } }
+    private async Task LoadAsync()
+    { _page = await ApiClient.GetLessonsAsync(CourseId, new() { Search = _search, PageNumber = _pageNumber, PageSize = _pageSize }); }
+    private void OpenCreate() { _editingId = null; _model = new() { Order = (_page?.TotalCount ?? 0) + 1 }; _showForm = true; }
+    private void CloseForm() => _showForm = false;
+    private async Task EditAsync(Guid id)
+    { var x = await ApiClient.GetLessonAsync(id); _editingId = id; _model = new() { Title=x.Title, Description=x.Description,
+      Content=x.Content, Order=x.Order, EstimatedMinutes=x.EstimatedMinutes, LessonType=x.LessonType, RowVersion=x.RowVersion }; _showForm=true; }
+    private async Task SaveAsync()
+    {
+        try {
+            if (_editingId is null) await ApiClient.CreateLessonAsync(CourseId, new(_model.Title,_model.Description,_model.Content,_model.Order,_model.EstimatedMinutes,_model.LessonType));
+            else await ApiClient.UpdateLessonAsync(_editingId.Value, new(_model.Title,_model.Description,_model.Content,_model.Order,_model.EstimatedMinutes,_model.LessonType,_model.RowVersion));
+            _showForm=false; await LoadAsync();
+        } catch(ApiProblemException e) { _error=e.Message; }
+    }
+    private void Confirm(LessonListItemResponse lesson, bool delete) { _confirmation=lesson; _deleteConfirmation=delete; }
+    private void CancelConfirmation() => _confirmation=null;
+    private async Task ExecuteConfirmationAsync()
+    {
+        if (_confirmation is null) return;
+        if (_deleteConfirmation) await ApiClient.DeleteLessonAsync(_confirmation.Id);
+        else await ApiClient.PublishLessonAsync(_confirmation.Id);
+        _confirmation=null; await LoadAsync();
+    }
+    private async Task MoveAsync(LessonListItemResponse x,int order) { await ApiClient.MoveLessonAsync(x.Id,new(order,x.RowVersion)); await LoadAsync(); }
+    private async Task SearchChanged(ChangeEventArgs e) { _search=e.Value?.ToString(); _pageNumber=1; await LoadAsync(); }
+    private async Task PageSizeChanged(ChangeEventArgs e) { _pageSize=int.Parse(e.Value?.ToString() ?? "10"); _pageNumber=1; await LoadAsync(); }
+    private async Task ChangePageAsync(int page) { _pageNumber=page; await LoadAsync(); }
+}

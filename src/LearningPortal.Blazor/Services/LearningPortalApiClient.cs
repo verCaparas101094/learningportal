@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using LearningPortal.Blazor.Models;
 using LearningPortal.Shared.Courses;
+using LearningPortal.Shared.Lessons;
 using LearningPortal.Shared.UserManagement;
 
 namespace LearningPortal.Blazor.Services;
@@ -149,6 +150,42 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
         using var response = await httpClient.DeleteAsync(
             $"api/courses/{courseId:D}",
             cancellationToken);
+        await EnsureSuccessAsync(response, cancellationToken);
+    }
+
+    /// <summary>Gets a filtered lesson page for a course.</summary>
+    public async Task<PagedLessonsResponse> GetLessonsAsync(Guid courseId, GetLessonsRequest request, CancellationToken cancellationToken = default)
+    {
+        var uri = $"api/courses/{courseId:D}/lessons?PageNumber={request.PageNumber}&PageSize={request.PageSize}";
+        if (!string.IsNullOrWhiteSpace(request.Search)) uri += $"&Search={Uri.EscapeDataString(request.Search.Trim())}";
+        using var response = await httpClient.GetAsync(uri, cancellationToken);
+        return await ReadResponseAsync<PagedLessonsResponse>(response, cancellationToken);
+    }
+    /// <summary>Gets one lesson.</summary>
+    public async Task<LessonResponse> GetLessonAsync(Guid lessonId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"api/lessons/{lessonId:D}", cancellationToken);
+        return await ReadResponseAsync<LessonResponse>(response, cancellationToken);
+    }
+    /// <summary>Creates a lesson.</summary>
+    public async Task<LessonResponse> CreateLessonAsync(Guid courseId, CreateLessonRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"api/courses/{courseId:D}/lessons", request, cancellationToken);
+        return await ReadResponseAsync<LessonResponse>(response, cancellationToken);
+    }
+    /// <summary>Updates a Draft lesson.</summary>
+    public Task<LessonResponse> UpdateLessonAsync(Guid lessonId, UpdateLessonRequest request, CancellationToken cancellationToken = default) =>
+        PutAsync<LessonResponse>($"api/lessons/{lessonId:D}", request, cancellationToken);
+    /// <summary>Publishes a lesson.</summary>
+    public Task<LessonResponse> PublishLessonAsync(Guid lessonId, CancellationToken cancellationToken = default) =>
+        PutAsync<LessonResponse>($"api/lessons/{lessonId:D}/publish", null, cancellationToken);
+    /// <summary>Moves a Draft lesson.</summary>
+    public Task<LessonResponse> MoveLessonAsync(Guid lessonId, MoveLessonRequest request, CancellationToken cancellationToken = default) =>
+        PutAsync<LessonResponse>($"api/lessons/{lessonId:D}/move", request, cancellationToken);
+    /// <summary>Deletes a Draft lesson.</summary>
+    public async Task DeleteLessonAsync(Guid lessonId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.DeleteAsync($"api/lessons/{lessonId:D}", cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
     }
 

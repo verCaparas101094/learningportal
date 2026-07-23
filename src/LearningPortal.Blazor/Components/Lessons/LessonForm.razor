@@ -1,0 +1,19 @@
+@using LearningPortal.Blazor.Models
+<EditForm Model="Model" OnValidSubmit="OnSubmit">
+    <DataAnnotationsValidator />
+    <label>Title <InputText @bind-Value="Model.Title" /><ValidationMessage For="() => Model.Title" /></label>
+    <label>Description <InputTextArea @bind-Value="Model.Description" /></label>
+    <label>Lesson type <InputSelect @bind-Value="Model.LessonType">
+        <option>Video</option><option>Article</option><option>PDF</option><option>QuizPlaceholder</option>
+    </InputSelect></label>
+    <label>Estimated minutes <InputNumber @bind-Value="Model.EstimatedMinutes" /></label>
+    <label>Order <InputNumber @bind-Value="Model.Order" /></label>
+    <label>Content <InputTextArea @bind-Value="Model.Content" /><ValidationMessage For="() => Model.Content" /></label>
+    <button class="button button-primary" type="submit">Save lesson</button>
+    <button class="button" type="button" @onclick="OnCancel">Cancel</button>
+</EditForm>
+@code {
+    [Parameter, EditorRequired] public LessonFormModel Model { get; set; } = default!;
+    [Parameter] public EventCallback OnSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+}
