@@ -4,6 +4,7 @@ using LearningPortal.Application.Abstractions.Lessons;
 using LearningPortal.Application.Abstractions.Networking;
 using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Application.Authorization;
+using LearningPortal.Application.InstructorEligibility;
 using LearningPortal.Domain.Repositories;
 using LearningPortal.Infrastructure.Authorization;
 using LearningPortal.Infrastructure.Identity;
@@ -74,6 +75,12 @@ public static class DependencyInjection
             .Validate(options => options.ExpirationMinutes is > 0 and <= 1_440, "JWT expiration must be between 1 and 1440 minutes.")
             .Validate(options => options.RefreshTokenExpirationDays is > 0 and <= 90, "Refresh token expiration must be between 1 and 90 days.")
             .ValidateOnStart();
+        var eligibilityOptions = configuration
+            .GetSection(InstructorEligibilityOptions.SectionName)
+            .Get<InstructorEligibilityOptions>() ?? new InstructorEligibilityOptions();
+        if (eligibilityOptions.QualificationThreshold is < 1 or > 100)
+            throw new InvalidOperationException("Instructor eligibility threshold must be between 1 and 100.");
+        services.AddSingleton(eligibilityOptions);
 
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
             ?? throw new InvalidOperationException("JWT configuration is missing.");
@@ -106,6 +113,8 @@ public static class DependencyInjection
         services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
         services.AddScoped<IQuizRepository, QuizRepository>();
         services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
+        services.AddScoped<ISkillRepository, SkillRepository>();
+        services.AddScoped<IInstructorEligibilityRepository, InstructorEligibilityRepository>();
         services.AddScoped<ILessonProgressRepository, LessonProgressRepository>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IIdentityService, IdentityService>();

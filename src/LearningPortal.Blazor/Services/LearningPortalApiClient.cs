@@ -7,6 +7,7 @@ using LearningPortal.Shared.Enrollments;
 using LearningPortal.Shared.Learning;
 using LearningPortal.Shared.UserManagement;
 using LearningPortal.Shared.Quizzes;
+using LearningPortal.Shared.InstructorEligibility;
 
 namespace LearningPortal.Blazor.Services;
 
@@ -380,6 +381,53 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
             $"api/learning/quizzes/{quizId:D}/attempts/me", cancellationToken);
         return await ReadResponseAsync<IReadOnlyList<QuizAttemptResponse>>(response, cancellationToken);
     }
+
+    /// <summary>Gets the signed-in user's skill qualifications.</summary>
+    public async Task<IReadOnlyList<InstructorEligibilityResponse>> GetMyInstructorEligibilityAsync(
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync("api/instructor-eligibility/me", cancellationToken);
+        return await ReadResponseAsync<IReadOnlyList<InstructorEligibilityResponse>>(response, cancellationToken);
+    }
+
+    /// <summary>Gets administrator-visible eligibility for a user.</summary>
+    public async Task<IReadOnlyList<InstructorEligibilityResponse>> GetUserInstructorEligibilityAsync(
+        Guid userId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/users/{userId:D}/instructor-eligibility", cancellationToken);
+        return await ReadResponseAsync<IReadOnlyList<InstructorEligibilityResponse>>(response, cancellationToken);
+    }
+
+    /// <summary>Gets active skills.</summary>
+    public async Task<IReadOnlyList<SkillResponse>> GetSkillsAsync(CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync("api/skills", cancellationToken);
+        return await ReadResponseAsync<IReadOnlyList<SkillResponse>>(response, cancellationToken);
+    }
+
+    /// <summary>Gets enabled eligible instructors for one skill.</summary>
+    public async Task<IReadOnlyList<EligibleInstructorResponse>> GetEligibleInstructorsAsync(
+        Guid skillId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/skills/{skillId:D}/eligible-instructors", cancellationToken);
+        return await ReadResponseAsync<IReadOnlyList<EligibleInstructorResponse>>(response, cancellationToken);
+    }
+
+    /// <summary>Recalculates a user's qualifications from submitted attempts.</summary>
+    public async Task<IReadOnlyList<InstructorEligibilityResponse>> RecalculateInstructorEligibilityAsync(
+        Guid userId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsync(
+            $"api/users/{userId:D}/instructor-eligibility/recalculate", null, cancellationToken);
+        return await ReadResponseAsync<IReadOnlyList<InstructorEligibilityResponse>>(response, cancellationToken);
+    }
+
+    /// <summary>Assigns an eligible instructor to a matching course skill.</summary>
+    public Task<CourseResponse> AssignCourseInstructorAsync(
+        Guid courseId, AssignCourseInstructorRequest request, CancellationToken cancellationToken = default) =>
+        PutAsync<CourseResponse>($"api/courses/{courseId:D}/instructor", request, cancellationToken);
 
     private async Task<TResponse> PutAsync<TResponse>(
         string requestUri,

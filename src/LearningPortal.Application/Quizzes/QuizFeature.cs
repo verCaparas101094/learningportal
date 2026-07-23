@@ -5,6 +5,7 @@ using LearningPortal.Application.Abstractions.Identity;
 using LearningPortal.Application.Abstractions.Messaging;
 using LearningPortal.Application.Abstractions.Time;
 using LearningPortal.Application.Courses;
+using LearningPortal.Application.InstructorEligibility;
 using LearningPortal.Domain.Enrollments;
 using LearningPortal.Domain.Quizzes;
 using LearningPortal.Domain.Repositories;
@@ -148,6 +149,7 @@ public sealed class QuizAdministrationHandler(
     IQuizRepository quizzes,
     ICourseRepository courses,
     ILessonRepository lessons,
+    ISkillRepository skills,
     IUnitOfWork unit,
     ICurrentUserService user)
     : ICommandHandler<CreateQuizCommand, Result<QuizAdministrationResponse>>,
@@ -169,6 +171,8 @@ public sealed class QuizAdministrationHandler(
         var request = command.Request;
         var quiz = Quiz.Create(command.CourseId, request.LessonId, request.Title, request.Description,
             request.PassingPercentage, request.MaximumAttempts, request.IsRequired);
+        var assessmentError = await ConfigureAssessmentAsync(quiz, course!, request, ct);
+        if (assessmentError is not null) return Result<QuizAdministrationResponse>.Failure(assessmentError);
         await quizzes.AddAsync(quiz, ct);
         await unit.SaveChangesAsync(ct);
         return Result<QuizAdministrationResponse>.Success(QuizMappings.ToAdministration(quiz));
@@ -187,6 +191,8 @@ public sealed class QuizAdministrationHandler(
         if (!quiz.TryUpdate(request.Title, request.Description, request.PassingPercentage,
                 request.MaximumAttempts, request.IsRequired))
             return Failure("Quiz.InvalidState", "Only a draft quiz can be updated.");
+        var assessmentError = await ConfigureAssessmentAsync(quiz, course!, request, ct);
+        if (assessmentError is not null) return Result<QuizAdministrationResponse>.Failure(assessmentError);
         await unit.SaveChangesAsync(ct);
         return Result<QuizAdministrationResponse>.Success(QuizMappings.ToAdministration(quiz));
     }
@@ -298,6 +304,19 @@ public sealed class QuizAdministrationHandler(
         return lesson?.CourseId == courseId;
     }
 
+    private async Task<Error?> ConfigureAssessmentAsync(
+        Quiz quiz, LearningPortal.Domain.Courses.Course course, SaveQuizRequest request, CancellationToken ct)
+    {
+        if (!request.IsInstructorAssessment)
+            return quiz.TryConfigureInstructorAssessment(false, null)
+                ? null : Errors.Common.Failure("Quiz.InvalidState", "The assessment configuration cannot be changed.");
+        if (request.SkillId is not Guid skillId || course.SkillId != skillId
+            || await skills.GetByIdAsync(skillId, cancellationToken: ct) is null)
+            return Errors.Validation.Failed("A qualifying assessment must use the course's active skill.");
+        return quiz.TryConfigureInstructorAssessment(true, skillId)
+            ? null : Errors.Common.Failure("Quiz.InvalidState", "The assessment configuration cannot be changed.");
+    }
+
     private static Result<QuizAdministrationResponse> NotFound(Guid id) =>
         Result<QuizAdministrationResponse>.Failure(Errors.Common.NotFound("Quiz", id));
     private static Result<QuizAdministrationResponse> Failure(string code, string message) =>
@@ -307,13 +326,16 @@ public sealed class QuizAdministrationHandler(
 public sealed class QuizAttemptHandler(
     IQuizRepository quizzes,
     IQuizAttemptRepository attempts,
+    IInstructorEligibilityRepository eligibility,
+    ISkillRepository skillRepository,
     IEnrollmentRepository enrollments,
     ICourseRepository courses,
     ILessonRepository lessons,
     ILessonProgressRepository progress,
     IUnitOfWork unit,
     ICurrentUserService user,
-    ISystemClock clock)
+    ISystemClock clock,
+    InstructorEligibilityOptions eligibilityOptions)
     : ICommandHandler<StartQuizAttempt, Result<StartQuizAttemptResponse>>,
       ICommandHandler<SubmitQuizAttempt, Result<QuizAttemptResponse>>,
       IQueryHandler<ResumeQuizAttempt, Result<QuizAttemptResponse>>,
@@ -370,6 +392,12 @@ public sealed class QuizAttemptHandler(
         if (enrollment is not null)
             await CourseCompletion.TryCompleteAsync(
                 enrollment, quizzes, attempts, lessons, progress, clock.UtcNow, attempt, ct);
+        if (quiz.IsInstructorAssessment && quiz.SkillId is Guid skillId
+            && await skillRepository.GetByIdAsync(skillId, cancellationToken: ct) is not null)
+        {
+            await InstructorEligibilityCalculator.ApplyAsync(
+                attempt, quiz, eligibility, eligibilityOptions.QualificationThreshold, clock.UtcNow, ct);
+        }
         await unit.SaveChangesAsync(ct);
         return Result<QuizAttemptResponse>.Success(QuizMappings.ToAttempt(attempt));
     }
@@ -478,7 +506,9 @@ internal static class QuizMappings
             question.Explanation, question.IsActive,
             question.AnswerChoices.OrderBy(choice => choice.Order)
                 .Select(choice => new QuizAdminChoiceResponse(choice.Id, choice.Text, choice.IsCorrect, choice.Order))
-                .ToArray())).ToArray());
+                .ToArray())).ToArray(),
+        quiz.IsInstructorAssessment,
+        quiz.SkillId);
 
     internal static QuizAttemptResponse ToAttempt(QuizAttempt attempt)
     {

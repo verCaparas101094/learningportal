@@ -42,6 +42,8 @@ using LearningPortal.Application.Learning;
 using LearningPortal.Shared.Learning;
 using LearningPortal.Application.Quizzes;
 using LearningPortal.Shared.Quizzes;
+using LearningPortal.Application.InstructorEligibility;
+using LearningPortal.Shared.InstructorEligibility;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LearningPortal.Application;
@@ -106,6 +108,14 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetQuiz, Result<QuizResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
         services.AddScoped<IQueryHandler<GetQuizAttempt, Result<QuizAttemptResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
         services.AddScoped<IQueryHandler<GetMyAttempts, Result<IReadOnlyList<QuizAttemptResponse>>>>(p => p.GetRequiredService<QuizAttemptHandler>());
+        services.AddScoped<InstructorEligibilityHandler>();
+        services.AddScoped<IQueryHandler<GetMyInstructorEligibility, Result<IReadOnlyList<InstructorEligibilityResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
+        services.AddScoped<IQueryHandler<GetUserInstructorEligibility, Result<IReadOnlyList<InstructorEligibilityResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
+        services.AddScoped<IQueryHandler<GetEligibleInstructorsForSkill, Result<IReadOnlyList<EligibleInstructorResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
+        services.AddScoped<IQueryHandler<CheckInstructorEligibility, Result<bool>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
+        services.AddScoped<IQueryHandler<GetSkills, Result<IReadOnlyList<SkillResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
+        services.AddScoped<ICommandHandler<RecalculateInstructorEligibility, Result<IReadOnlyList<InstructorEligibilityResponse>>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
+        services.AddScoped<ICommandHandler<AssignCourseInstructor, Result<CourseResponse>>>(p => p.GetRequiredService<InstructorEligibilityHandler>());
 
         return services;
     }

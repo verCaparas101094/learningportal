@@ -27,6 +27,7 @@ app.MapLessonEndpoints();
 app.MapEnrollmentEndpoints();
 app.MapLearningEndpoints();
 app.MapQuizEndpoints();
+app.MapInstructorEligibilityEndpoints();
 app.MapUserManagementEndpoints();
 app.MapPortalHealthChecks();
 

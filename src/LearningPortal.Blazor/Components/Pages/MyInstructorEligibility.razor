@@ -1,0 +1,25 @@
+@page "/my-instructor-eligibility"
+@rendermode InteractiveServer
+@inject LearningPortalApiClient ApiClient
+
+<PageTitle>Instructor eligibility | Learning Portal</PageTitle>
+<AuthenticatedContent>
+    <PageHeader Eyebrow="My learning" Title="Instructor eligibility"
+                Description="Skills for which your qualifying assessment results permit instructor assignment." />
+    @if (_loading) { <LoadingState Message="Loading eligibility…" /> }
+    else if (_error is not null) { <div class="feedback error" role="alert">@_error</div> }
+    else if (_items.Count == 0) { <EmptyState Title="No instructor qualifications yet" Description="Pass a qualifying skill assessment to become eligible." /> }
+    else
+    {
+        <table>
+            <thead><tr><th>Skill</th><th>Status</th><th>Best score</th><th>Qualified</th></tr></thead>
+            <tbody>@foreach (var item in _items) { <tr><td>@item.SkillName</td><td><StatusBadge Text="@(item.IsEligible ? "Eligible" : "Inactive")" /></td><td>@item.BestPercentage%</td><td>@item.QualifiedAtUtc.ToLocalTime().ToString("d")</td></tr> }</tbody>
+        </table>
+    }
+</AuthenticatedContent>
+
+@code {
+    private IReadOnlyList<InstructorEligibilityResponse> _items=[];
+    private bool _loading=true; private string? _error;
+    protected override async Task OnInitializedAsync() { try { _items=await ApiClient.GetMyInstructorEligibilityAsync(); } catch(ApiProblemException e){_error=e.Message;} finally{_loading=false;} }
+}

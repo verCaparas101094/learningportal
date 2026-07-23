@@ -41,14 +41,18 @@ public sealed record QuizAdministrationResponse(
     bool IsRequired,
     string Status,
     string RowVersion,
-    IReadOnlyList<QuizAdminQuestionResponse> Questions);
+    IReadOnlyList<QuizAdminQuestionResponse> Questions,
+    bool IsInstructorAssessment = false,
+    Guid? SkillId = null);
 public sealed record SaveQuizRequest(
     Guid? LessonId,
     string Title,
     string Description,
     decimal PassingPercentage,
     int? MaximumAttempts,
-    bool IsRequired);
+    bool IsRequired,
+    bool IsInstructorAssessment = false,
+    Guid? SkillId = null);
 public sealed record SaveQuizQuestionRequest(
     string Text,
     string QuestionType,
