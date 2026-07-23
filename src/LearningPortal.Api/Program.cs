@@ -23,6 +23,7 @@ await app.SeedIdentityRolesAsync();
 app.UseApiPipeline();
 app.MapIdentityEndpoints();
 app.MapCourseEndpoints();
+app.MapUserManagementEndpoints();
 app.MapPortalHealthChecks();
 
 await app.RunAsync();

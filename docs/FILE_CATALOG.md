@@ -38,6 +38,10 @@ This project contains stable contracts that both HTTP hosts may reference.
 - `Identity/RefreshTokenRequest.cs` — models a raw token submitted for secure rotation.
 - `Identity/RevokeTokenRequest.cs` — models a raw token submitted for idempotent revocation.
 - `Identity/AuthenticationResponse.cs` — returns access and refresh tokens with their independent UTC expirations.
+- `UserManagement/UserResponse.cs` — exposes only the administrator-safe user fields required by the management API.
+- `UserManagement/PagedUsersResponse.cs` — carries a user page and its pagination metadata.
+- `UserManagement/GetUsersRequest.cs` — binds the supported search and pagination query-string values.
+- `UserManagement/AssignUserRoleRequest.cs` — models one additive role assignment.
 - `Results/ErrorType.cs` — classifies failures without introducing HTTP concerns into lower layers.
 - `Results/Error.cs` — carries stable machine and human-readable failure information.
 - `Results/Errors.cs` — centralizes consistently coded validation, common, authentication, and authorization errors.
@@ -52,6 +56,7 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 - `DependencyInjection.cs` — is the Application composition extension for handlers and FluentValidation validators.
 - `Abstractions/Identity/IIdentityService.cs` — keeps authentication use cases independent from ASP.NET Identity implementation types.
 - `Abstractions/Identity/ICurrentUserService.cs` — exposes authenticated identity, profile claims, roles, and reusable claim/role checks without coupling Application to HTTP.
+- `Abstractions/Identity/IUserManagementService.cs` — keeps user-management use cases independent from ASP.NET Identity and EF Core.
 - `Abstractions/Networking/IClientIpAddressProvider.cs` — supplies request-origin metadata without coupling authentication use cases to `HttpContext`.
 - `Abstractions/Time/ISystemClock.cs` — abstracts UTC time for deterministic auditing and tests.
 - `Authorization/ApplicationRoles.cs` — defines and validates the Administrator, Instructor, and Student role allowlist.
@@ -79,6 +84,10 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 - `Authentication/Commands/Revoke/RevokeRefreshTokenCommandHandler.cs` — delegates idempotent revocation to the identity abstraction.
 - `Behaviors/ValidationBehavior.cs` — runs all command validators before handlers and returns failed Results instead of throwing.
 - `Messaging/CommandDispatcher.cs` — resolves handlers and composes the registered custom command pipeline in deterministic order.
+- `UserManagement/Queries/GetUsers/*` — validates and handles filtered, paginated user-list requests.
+- `UserManagement/Queries/GetUserById/*` — handles administrator user lookup by identifier.
+- `UserManagement/Commands/SetUserEnabled/*` — validates and handles user enable/disable operations.
+- `UserManagement/Commands/AssignUserRole/*` — validates and handles additive allowlisted role assignment.
 
 ## LearningPortal.Infrastructure
 
@@ -100,6 +109,7 @@ This project contains replaceable external-system implementations.
 - `Identity/IIdentityRoleSeeder.cs` — abstracts the asynchronous, idempotent role-seeding operation.
 - `Identity/IdentityRoleSeeder.cs` — creates only missing application roles with UUIDv7 identifiers and never seeds users.
 - `Identity/IdentityRoleSeedingExtensions.cs` — invokes the scoped role seeder from the API composition root during startup.
+- `Identity/UserManagementService.cs` — implements filtered reads, enabled-state changes, and additive role assignment through ASP.NET Identity.
 - `Networking/ClientIpAddressProvider.cs` — captures the remote request IP for refresh-token creation and revocation audit fields.
 - `Time/SystemClock.cs` — implements application time through the platform TimeProvider.
 - `Persistence/ApplicationDbContext.cs` — is the single EF Core unit of work for business aggregates and Identity tables.
@@ -125,6 +135,7 @@ This project is the Minimal API host and composition root.
 - `Endpoints/IdentityEndpoints.cs` — maps anonymous login, refresh, and idempotent revoke endpoints to the custom CQRS dispatcher and Result-to-HTTP conventions.
 - `Endpoints/CourseEndpoints.cs` — maps protected course HTTP routes to CQRS handlers and Result responses.
 - `Endpoints/HealthEndpoints.cs` — exposes distinct liveness and SQL-backed readiness probes.
+- `Endpoints/UserManagementEndpoints.cs` — maps the compact administrator-only user-management API.
 - `Constants/CorrelationIdConstants.cs` — defines the shared request header and context-item keys used for correlation.
 - `Constants/ExceptionErrorCodes.cs` — defines stable machine-readable codes for exception mappings.
 - `Exceptions/NotFoundException.cs` — represents expected missing-resource failures at the API boundary.
@@ -180,6 +191,7 @@ This project verifies authentication behavior against real Identity services and
 - `Authorization/AuthorizationPolicyTests.cs` — verifies the authenticated fallback and role composition of every named policy.
 - `Authorization/AuthorizationEndpointExtensionsTests.cs` — verifies that each Minimal API helper applies the expected policy metadata.
 - `Authorization/IdentityRoleSeederTests.cs` — verifies idempotent role creation and rejection of unsupported role creation/assignment.
+- `UserManagement/UserManagementServiceTests.cs` — verifies pagination, lookup failures, enabled state, and valid/invalid/idempotent role assignment.
 
 ## LearningPortal.Infrastructure.IntegrationTests
 

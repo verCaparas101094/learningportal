@@ -215,4 +215,34 @@ public static class Errors
             "You do not have permission to perform this operation.",
             ErrorType.Forbidden);
     }
+
+    /// <summary>
+    /// Provides reusable administrator user-management errors.
+    /// </summary>
+    public static class UserManagement
+    {
+        /// <summary>Creates an error for an unknown user identifier.</summary>
+        public static Error UserNotFound(Guid userId) => new(
+            "UserManagement.UserNotFound",
+            $"The user with identifier '{userId}' was not found.",
+            ErrorType.NotFound);
+
+        /// <summary>Creates an error for a role outside the application allowlist.</summary>
+        public static Error InvalidRole() => new(
+            "UserManagement.InvalidRole",
+            "The specified role is not a valid application role.",
+            ErrorType.Validation);
+
+        /// <summary>Creates a safe failure for an Identity user update that could not be completed.</summary>
+        public static Error UpdateFailed() => new(
+            "UserManagement.UpdateFailed",
+            "The user could not be updated.",
+            ErrorType.Conflict);
+
+        /// <summary>Creates a safe failure for an Identity role assignment that could not be completed.</summary>
+        public static Error RoleAssignmentFailed() => new(
+            "UserManagement.RoleAssignmentFailed",
+            "The role could not be assigned to the user.",
+            ErrorType.Conflict);
+    }
 }
