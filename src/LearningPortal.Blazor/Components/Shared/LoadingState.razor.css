@@ -1,0 +1,16 @@
+.loading-state {
+    align-items: center;
+    color: var(--color-text-muted);
+    display: flex;
+    gap: .75rem;
+    justify-content: center;
+    min-height: 10rem;
+}
+
+.loading-spinner {
+    border: 3px solid var(--color-primary-soft);
+    border-radius: 50%;
+    border-top-color: var(--color-primary);
+    height: 1.5rem;
+    width: 1.5rem;
+}

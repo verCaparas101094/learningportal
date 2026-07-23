@@ -1,0 +1,29 @@
+@page "/access-denied"
+@rendermode InteractiveServer
+
+<PageTitle>Access Denied | Learning Portal</PageTitle>
+
+<div class="access-denied">
+    <AppCard AdditionalClass="access-denied-card">
+        <div class="denied-icon" aria-hidden="true">!</div>
+        <p class="eyebrow">Access restricted</p>
+        <h1>@Heading</h1>
+        <p>@Message</p>
+        <a class="button button-primary" href="/">Return to dashboard</a>
+    </AppCard>
+</div>
+
+@code {
+    /// <summary>Gets or sets the non-sensitive redirect reason.</summary>
+    [SupplyParameterFromQuery(Name = "reason")]
+    public string? Reason { get; set; }
+
+    private bool IsUnauthenticated =>
+        string.Equals(Reason, "unauthenticated", StringComparison.OrdinalIgnoreCase);
+
+    private string Heading => IsUnauthenticated ? "Sign in required" : "You do not have access";
+
+    private string Message => IsUnauthenticated
+        ? "Authentication is required to view this area of the learning portal."
+        : "Your account does not have the role required to view this page.";
+}

@@ -1,0 +1,240 @@
+::deep .continue-card {
+    align-items: stretch;
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2.25rem);
+    grid-template-columns: minmax(13rem, .8fr) minmax(18rem, 1.4fr);
+    overflow: hidden;
+    padding: 0;
+}
+
+.continue-art {
+    align-items: center;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, .14), transparent),
+        var(--color-primary);
+    display: flex;
+    justify-content: center;
+    min-height: 15rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.continue-art::before,
+.continue-art::after {
+    border: 2px solid rgba(255, 255, 255, .16);
+    border-radius: 50%;
+    content: "";
+    height: 12rem;
+    position: absolute;
+    width: 12rem;
+}
+
+.continue-art::after {
+    height: 7rem;
+    width: 7rem;
+}
+
+.continue-art span {
+    color: var(--color-white);
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -.06em;
+    position: relative;
+    z-index: 1;
+}
+
+.continue-copy {
+    align-self: center;
+    padding: 1.5rem 1.75rem 1.5rem 0;
+}
+
+.continue-eyebrow {
+    color: var(--color-primary);
+    font-size: .72rem;
+    font-weight: 750;
+    letter-spacing: .08em;
+    margin: 1rem 0 .35rem;
+    text-transform: uppercase;
+}
+
+.continue-copy h2 {
+    font-size: clamp(1.35rem, 3vw, 1.8rem);
+    letter-spacing: -.03em;
+    margin: 0;
+}
+
+.continue-copy > p:not(.continue-eyebrow) {
+    color: var(--color-text-muted);
+    margin: .55rem 0 1.25rem;
+}
+
+.progress-row {
+    align-items: center;
+    display: flex;
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+    max-width: 28rem;
+}
+
+.progress-row strong {
+    font-size: .75rem;
+}
+
+.progress-track {
+    background: var(--color-border);
+    border-radius: 999px;
+    height: .4rem;
+    overflow: hidden;
+    width: 100%;
+}
+
+.progress-track span {
+    background: var(--color-primary);
+    border-radius: inherit;
+    display: block;
+    height: 100%;
+}
+
+.dashboard-section {
+    margin-top: 2rem;
+}
+
+.section-heading {
+    align-items: flex-end;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.section-heading h2 {
+    font-size: 1.15rem;
+    margin: 0;
+}
+
+.section-heading p {
+    color: var(--color-text-muted);
+    font-size: .85rem;
+    margin: .3rem 0 0;
+}
+
+.section-heading > a {
+    font-size: .82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.stat-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.course-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+::deep .course-card {
+    overflow: hidden;
+    padding: 0;
+}
+
+.course-cover {
+    align-items: flex-start;
+    background: #e0e7ff;
+    display: flex;
+    height: 8.5rem;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+.course-cover > span:first-child {
+    align-items: center;
+    background: rgba(255, 255, 255, .88);
+    border-radius: .75rem;
+    color: #312e81;
+    display: flex;
+    font-size: 1.25rem;
+    font-weight: 800;
+    height: 3.2rem;
+    justify-content: center;
+    width: 3.2rem;
+}
+
+.cover-violet {
+    background: #ede9fe;
+}
+
+.cover-teal {
+    background: #ccfbf1;
+}
+
+.cover-orange {
+    background: #ffedd5;
+}
+
+.course-body {
+    padding: 1rem;
+}
+
+.course-category {
+    color: var(--color-primary);
+    font-size: .68rem;
+    font-weight: 750;
+    letter-spacing: .08em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.course-body h3 {
+    font-size: .98rem;
+    line-height: 1.35;
+    margin: .4rem 0;
+    min-height: 2.65rem;
+}
+
+.course-meta {
+    color: var(--color-text-muted);
+    font-size: .72rem;
+    margin: 0;
+}
+
+.course-progress {
+    align-items: center;
+    display: flex;
+    gap: .65rem;
+    margin-top: 1rem;
+}
+
+.course-progress small {
+    color: var(--color-text-muted);
+    font-size: .68rem;
+}
+
+@media (max-width: 78rem) {
+    .stat-grid,
+    .course-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 44rem) {
+    ::deep .continue-card {
+        grid-template-columns: 1fr;
+    }
+
+    .continue-art {
+        min-height: 10rem;
+    }
+
+    .continue-copy {
+        padding: 0 1.25rem 1.5rem;
+    }
+
+    .stat-grid,
+    .course-grid {
+        grid-template-columns: 1fr;
+    }
+}

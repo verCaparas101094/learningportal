@@ -1,0 +1,16 @@
+<section class="navigation-section">
+    <h2>@Title</h2>
+    <div class="navigation-links">
+        @ChildContent
+    </div>
+</section>
+
+@code {
+    /// <summary>Gets or sets the navigation group title.</summary>
+    [Parameter, EditorRequired]
+    public required string Title { get; set; }
+
+    /// <summary>Gets or sets the navigation links rendered in the group.</summary>
+    [Parameter, EditorRequired]
+    public required RenderFragment ChildContent { get; set; }
+}

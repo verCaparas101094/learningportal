@@ -1,0 +1,27 @@
+<div class="empty-state">
+    <div class="empty-icon" aria-hidden="true">@Icon</div>
+    <h2>@Title</h2>
+    <p>@Description</p>
+    @if (Action is not null)
+    {
+        <div class="empty-action">@Action</div>
+    }
+</div>
+
+@code {
+    /// <summary>Gets or sets the decorative symbol.</summary>
+    [Parameter]
+    public string Icon { get; set; } = "◇";
+
+    /// <summary>Gets or sets the empty-state heading.</summary>
+    [Parameter, EditorRequired]
+    public required string Title { get; set; }
+
+    /// <summary>Gets or sets the empty-state explanation.</summary>
+    [Parameter, EditorRequired]
+    public required string Description { get; set; }
+
+    /// <summary>Gets or sets an optional recovery action.</summary>
+    [Parameter]
+    public RenderFragment? Action { get; set; }
+}

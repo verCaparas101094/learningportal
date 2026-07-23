@@ -1,0 +1,17 @@
+@inject NavigationManager Navigation
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    /// <inheritdoc />
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await AuthenticationStateTask;
+        var reason = authenticationState.User.Identity?.IsAuthenticated == true
+            ? "forbidden"
+            : "unauthenticated";
+
+        Navigation.NavigateTo($"/access-denied?reason={reason}", replace: true);
+    }
+}
