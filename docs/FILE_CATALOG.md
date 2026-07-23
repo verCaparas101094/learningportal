@@ -163,7 +163,8 @@ This project is the interactive Blazor Web App host.
 - `Program.cs` — configures logging, middleware, static assets, server interactivity, and the host health endpoint.
 - `DependencyInjection.cs` — validates the API URL and registers Razor components, component authorization state, a typed HTTP client, and health checks.
 - `Models/ApiHealthResponse.cs` — models only the health payload consumed by the UI.
-- `Services/LearningPortalApiClient.cs` — encapsulates health plus paginated user listing, enable/disable, and additive role-assignment API calls.
+- `Models/CourseFormModel.cs` — provides DataAnnotations-backed create/edit form values.
+- `Services/LearningPortalApiClient.cs` and `ApiProblemException.cs` — provide authenticated typed user/course API calls and safe RFC 7807 error details.
 - `Components/App.razor` — defines the HTML document shell, asset links, router output, and Blazor reconnect script.
 - `Components/Routes.razor` — owns authorization-aware route discovery, focus behavior, and the default layout.
 - `Components/RedirectToAccessDenied.razor` — redirects unauthenticated or unauthorized component navigation safely.
@@ -171,6 +172,7 @@ This project is the interactive Blazor Web App host.
 - `Components/Pages/Dashboard.razor` and `.css` — demonstrate the authenticated design system with static learning and course samples.
 - `Components/Pages/MyCourses.razor` — provides the scoped learner placeholder.
 - `Components/Pages/Users.razor` and `.css` — provide the administrator-only responsive user table, debounced search, pagination, account-state actions, and additive role panel.
+- `Components/Pages/Courses.razor` and `.css` — provide Administrator/Instructor course filtering, paging, forms, lifecycle actions, feedback, and responsive presentation.
 - `Components/Pages/AccessDenied.razor` and `.css` — explain unauthenticated and role-denied navigation.
 - `Components/Pages/Error.razor` — provides a safe host-level error page with a request identifier.
 - `Components/Pages/NotFound.razor` — provides the route-not-found experience.
@@ -183,6 +185,8 @@ This project is the interactive Blazor Web App host.
 - `Components/Shared/EmptyState.razor` and `.css` — provide a consistent no-content placeholder.
 - `Components/Shared/LoadingState.razor` and `.css` — provide an accessible lightweight loading indicator.
 - `Components/Shared/AuthenticatedContent.razor` — protects component content with the current principal and optional application roles without changing JWT behavior.
+- `Components/Courses/CourseForm.razor` and `CourseStatusBadge.razor` — provide validated course editing and lifecycle presentation.
+- `Components/Shared/ConfirmDialog.razor` and `PaginationControls.razor` — provide reusable confirmation and paging interactions.
 - `Components/Layout/ReconnectModal.razor` — displays interactive-server connection state and retry actions.
 - `Components/Layout/ReconnectModal.razor.css` — scopes reconnect dialog styling.
 - `Components/Layout/ReconnectModal.razor.js` — integrates browser events with Blazor reconnect/reload behavior.
@@ -205,6 +209,7 @@ This project verifies authentication behavior against real Identity services and
 - `Authorization/IdentityRoleSeederTests.cs` — verifies idempotent role creation and rejection of unsupported role creation/assignment.
 - `UserManagement/UserManagementServiceTests.cs` — verifies pagination, lookup failures, enabled state, and valid/invalid/idempotent role assignment.
 - `Courses/CourseDomainTests.cs` and `CourseApplicationTests.cs` — verify lifecycle, slug, ownership, pagination, role, state, duplicate, and concurrency behavior.
+- `Courses/CourseApiClientTests.cs` — verifies course query construction, form validation, mutations, lifecycle routes, and Problem Details conflict parsing.
 
 ## LearningPortal.Infrastructure.IntegrationTests
 

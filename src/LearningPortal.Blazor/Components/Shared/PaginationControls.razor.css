@@ -1,0 +1,23 @@
+.pagination-controls {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+span {
+    color: var(--color-text-muted);
+    font-size: .78rem;
+}
+
+::deep .button {
+    font-size: .76rem;
+    min-height: 2.4rem;
+    padding: .5rem .8rem;
+}
+
+@media (max-width: 30rem) {
+    .pagination-controls {
+        justify-content: space-between;
+    }
+}

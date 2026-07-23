@@ -120,6 +120,16 @@ h1:focus {
     color: var(--color-text);
 }
 
+.button-danger {
+    background: var(--color-danger);
+    color: var(--color-white);
+}
+
+.button-danger:hover {
+    background: #b91c1c;
+    color: var(--color-white);
+}
+
 .app-card.stat-card {
     align-items: center;
     display: flex;

@@ -1,0 +1,41 @@
+<nav class="pagination-controls" aria-label="@AriaLabel">
+    <button class="button button-secondary"
+            type="button"
+            disabled="@(Disabled || PageNumber <= 1)"
+            @onclick="PreviousAsync">
+        Previous
+    </button>
+    <span>Page @PageNumber of @Math.Max(TotalPages, 1)</span>
+    <button class="button button-secondary"
+            type="button"
+            disabled="@(Disabled || PageNumber >= TotalPages)"
+            @onclick="NextAsync">
+        Next
+    </button>
+</nav>
+
+@code {
+    /// <summary>Gets or sets the current page.</summary>
+    [Parameter]
+    public int PageNumber { get; set; } = 1;
+
+    /// <summary>Gets or sets the total pages.</summary>
+    [Parameter]
+    public int TotalPages { get; set; }
+
+    /// <summary>Gets or sets whether navigation is disabled.</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Gets or sets the accessible navigation label.</summary>
+    [Parameter]
+    public string AriaLabel { get; set; } = "Pagination";
+
+    /// <summary>Gets or sets the page-change callback.</summary>
+    [Parameter]
+    public EventCallback<int> PageChanged { get; set; }
+
+    private Task PreviousAsync() => PageChanged.InvokeAsync(PageNumber - 1);
+
+    private Task NextAsync() => PageChanged.InvokeAsync(PageNumber + 1);
+}

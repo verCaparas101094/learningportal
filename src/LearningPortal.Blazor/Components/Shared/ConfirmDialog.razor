@@ -1,0 +1,61 @@
+@if (IsOpen)
+{
+    <div class="dialog-backdrop">
+        <section class="confirm-dialog"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="confirm-dialog-title"
+                 aria-describedby="confirm-dialog-message">
+            <h2 id="confirm-dialog-title">@Title</h2>
+            <p id="confirm-dialog-message">@Message</p>
+            <div class="dialog-actions">
+                <button class="button button-secondary"
+                        type="button"
+                        disabled="@IsBusy"
+                        @onclick="OnCancel">
+                    Cancel
+                </button>
+                <button class="button @(IsDestructive ? "button-danger" : "button-primary")"
+                        type="button"
+                        disabled="@IsBusy"
+                        @onclick="OnConfirm">
+                    @(IsBusy ? "Working…" : ConfirmText)
+                </button>
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    /// <summary>Gets or sets whether the dialog is visible.</summary>
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    /// <summary>Gets or sets the dialog title.</summary>
+    [Parameter, EditorRequired]
+    public required string Title { get; set; }
+
+    /// <summary>Gets or sets the confirmation message.</summary>
+    [Parameter, EditorRequired]
+    public required string Message { get; set; }
+
+    /// <summary>Gets or sets the confirmation button text.</summary>
+    [Parameter]
+    public string ConfirmText { get; set; } = "Confirm";
+
+    /// <summary>Gets or sets whether the action is destructive.</summary>
+    [Parameter]
+    public bool IsDestructive { get; set; }
+
+    /// <summary>Gets or sets whether the action is processing.</summary>
+    [Parameter]
+    public bool IsBusy { get; set; }
+
+    /// <summary>Gets or sets the confirmation callback.</summary>
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+
+    /// <summary>Gets or sets the cancellation callback.</summary>
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+}

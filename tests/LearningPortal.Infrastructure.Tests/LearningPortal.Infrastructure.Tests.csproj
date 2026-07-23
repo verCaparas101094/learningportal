@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\LearningPortal.Api\LearningPortal.Api.csproj" />
+    <ProjectReference Include="..\..\src\LearningPortal.Blazor\LearningPortal.Blazor.csproj" />
     <ProjectReference Include="..\..\src\LearningPortal.Infrastructure\LearningPortal.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\LearningPortal.Application\LearningPortal.Application.csproj" />
     <ProjectReference Include="..\..\src\LearningPortal.Shared\LearningPortal.Shared.csproj" />

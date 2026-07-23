@@ -41,11 +41,11 @@
 
             <AuthorizeView Roles="@ApplicationRoles.Instructor">
                 <NavigationSection Title="Instructor">
+                    <NavLink class="sidebar-link" href="/courses">
+                        <span aria-hidden="true">▤</span><span class="link-label">Courses</span>
+                    </NavLink>
                     <NavLink class="sidebar-link" href="/my-courses">
                         <span aria-hidden="true">▤</span><span class="link-label">My Courses</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/courses/create">
-                        <span aria-hidden="true">＋</span><span class="link-label">Create Course</span>
                     </NavLink>
                     <NavLink class="sidebar-link" href="/analytics">
                         <span aria-hidden="true">⌁</span><span class="link-label">Analytics</span>
