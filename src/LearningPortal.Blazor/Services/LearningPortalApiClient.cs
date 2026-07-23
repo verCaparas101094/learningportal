@@ -4,6 +4,7 @@ using LearningPortal.Blazor.Models;
 using LearningPortal.Shared.Courses;
 using LearningPortal.Shared.Lessons;
 using LearningPortal.Shared.Enrollments;
+using LearningPortal.Shared.Learning;
 using LearningPortal.Shared.UserManagement;
 
 namespace LearningPortal.Blazor.Services;
@@ -260,6 +261,28 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
         if (!string.IsNullOrWhiteSpace(request.Status)) uri += $"&Status={Uri.EscapeDataString(request.Status.Trim())}";
         using var response = await httpClient.GetAsync(uri, cancellationToken);
         return await ReadResponseAsync<PagedEnrollmentsResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets learner-safe lesson player data.</summary>
+    public async Task<LessonPlayerResponse> GetLessonPlayerAsync(string courseSlug, Guid lessonId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"api/learning/courses/{Uri.EscapeDataString(courseSlug)}/lessons/{lessonId:D}", cancellationToken);
+        return await ReadResponseAsync<LessonPlayerResponse>(response, cancellationToken);
+    }
+    /// <summary>Records learner access to a lesson.</summary>
+    public async Task<CourseProgressResponse> AccessLessonAsync(Guid enrollmentId, Guid lessonId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsync($"api/learning/enrollments/{enrollmentId:D}/lessons/{lessonId:D}/access", null, cancellationToken);
+        return await ReadResponseAsync<CourseProgressResponse>(response, cancellationToken);
+    }
+    /// <summary>Completes a lesson idempotently.</summary>
+    public Task<CompleteLessonResponse> CompleteLessonAsync(Guid enrollmentId, Guid lessonId, CancellationToken cancellationToken = default) =>
+        PutAsync<CompleteLessonResponse>($"api/learning/enrollments/{enrollmentId:D}/lessons/{lessonId:D}/complete", null, cancellationToken);
+    /// <summary>Resolves the learner's next appropriate lesson.</summary>
+    public async Task<ContinueLearningDestinationResponse?> GetContinueLearningAsync(Guid enrollmentId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"api/learning/enrollments/{enrollmentId:D}/continue", cancellationToken);
+        return await ReadResponseAsync<ContinueLearningDestinationResponse?>(response, cancellationToken);
     }
 
     private async Task<TResponse> PutAsync<TResponse>(

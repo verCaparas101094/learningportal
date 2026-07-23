@@ -1,0 +1,4 @@
+.learning-player { display:grid; grid-template-columns:minmax(16rem,.7fr) minmax(0,2fr); gap:1rem; }
+.lesson-sidebar { background:var(--color-white); border:1px solid var(--color-border); border-radius:var(--radius-small); padding:1rem; }
+.lesson-sidebar ol { display:grid; gap:.7rem; padding-left:1.25rem; }.lesson-sidebar .current a { font-weight:700; color:var(--color-primary); }.lesson-content { min-width:0; }.course-actions { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1.5rem; }
+@media (max-width: 800px) { .learning-player { grid-template-columns:1fr; } }

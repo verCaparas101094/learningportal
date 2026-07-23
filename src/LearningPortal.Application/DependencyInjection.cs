@@ -38,6 +38,8 @@ using LearningPortal.Application.Enrollments.Queries.GetPublishedCourseCatalog;
 using LearningPortal.Application.Enrollments.Queries.GetPublishedCourseDetails;
 using LearningPortal.Shared.Enrollments;
 using LearningPortal.Shared.UserManagement;
+using LearningPortal.Application.Learning;
+using LearningPortal.Shared.Learning;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LearningPortal.Application;
@@ -81,6 +83,11 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetMyEnrollmentsQuery, Result<PagedMyLearningResponse>>, GetMyEnrollmentsQueryHandler>();
         services.AddScoped<IQueryHandler<GetEnrollmentByIdQuery, Result<EnrollmentResponse>>, GetEnrollmentByIdQueryHandler>();
         services.AddScoped<IQueryHandler<GetCourseEnrollmentsQuery, Result<PagedEnrollmentsResponse>>, GetCourseEnrollmentsQueryHandler>();
+        services.AddScoped<ICommandHandler<AccessLessonCommand, Result<CourseProgressResponse>>, AccessLessonCommandHandler>();
+        services.AddScoped<ICommandHandler<CompleteLessonCommand, Result<CompleteLessonResponse>>, CompleteLessonCommandHandler>();
+        services.AddScoped<IQueryHandler<GetLessonPlayerQuery, Result<LessonPlayerResponse>>, GetLessonPlayerQueryHandler>();
+        services.AddScoped<IQueryHandler<GetCourseProgressQuery, Result<CourseProgressResponse>>, GetCourseProgressQueryHandler>();
+        services.AddScoped<IQueryHandler<GetContinueLearningDestinationQuery, Result<ContinueLearningDestinationResponse?>>, GetContinueLearningDestinationQueryHandler>();
 
         return services;
     }
