@@ -1,18 +1,404 @@
 @page "/users"
 @rendermode InteractiveServer
+@implements IAsyncDisposable
+@using LearningPortal.Shared.UserManagement
+@inject LearningPortalApiClient ApiClient
+@inject ILogger<Users> Logger
 
 <PageTitle>Users | Learning Portal</PageTitle>
 
 <AuthenticatedContent Roles="@ApplicationRoles.Administrator">
-<PageHeader Eyebrow="Administration"
-            Title="Users"
-            Description="Manage learner access, account status, and application roles.">
-    <Actions>
-        <button class="button button-primary" type="button">Invite user</button>
-    </Actions>
-</PageHeader>
+    <PageHeader Eyebrow="Administration"
+                Title="Users"
+                Description="Search accounts, manage access status, and assign application roles." />
 
-<EmptyState Icon="♙"
-            Title="User management UI is coming next"
-            Description="The administrator API already exists. Table functionality is intentionally outside this design-shell phase." />
+    <div class="users-toolbar">
+        <label class="user-search">
+            <span class="visually-hidden">Search users by email or display name</span>
+            <span aria-hidden="true">⌕</span>
+            <input type="search"
+                   value="@_search"
+                   @oninput="HandleSearchInputAsync"
+                   placeholder="Search by email or display name"
+                   autocomplete="off" />
+        </label>
+        @if (_page is not null)
+        {
+            <span class="result-count">@_page.TotalCount user@(_page.TotalCount == 1 ? string.Empty : "s")</span>
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(_errorMessage))
+    {
+        <div class="users-error" role="alert">
+            <span aria-hidden="true">!</span>
+            <span>@_errorMessage</span>
+            <button type="button" @onclick="ReloadAsync">Try again</button>
+        </div>
+    }
+
+    <div class="users-card">
+        <AppCard>
+            @if (_isLoading)
+            {
+                <LoadingState Message="Loading users…" />
+            }
+            else if (_page is null)
+            {
+                <EmptyState Icon="!"
+                            Title="Users are unavailable"
+                            Description="Retry the request when the API is available." />
+            }
+            else if (_page.Items.Count == 0)
+            {
+                <EmptyState Icon="♙"
+                            Title="No users found"
+                            Description="Try a different email address or display name." />
+            }
+            else
+            {
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Display Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Roles</th>
+                                <th scope="col">Status</th>
+                                <th scope="col"><span class="visually-hidden">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in _page.Items)
+                            {
+                                <tr @key="user.Id">
+                                    <td data-label="Display Name">
+                                        <strong class="display-name">@user.DisplayName</strong>
+                                    </td>
+                                    <td data-label="Email">
+                                        <span class="email">@user.Email</span>
+                                    </td>
+                                    <td data-label="Roles">
+                                        <div class="role-list">
+                                            @if (user.Roles.Count == 0)
+                                            {
+                                                <span class="no-roles">No roles</span>
+                                            }
+                                            else
+                                            {
+                                                @foreach (var role in user.Roles)
+                                                {
+                                                    <StatusBadge Text="@role" Tone="primary" />
+                                                }
+                                            }
+                                        </div>
+                                    </td>
+                                    <td data-label="Status">
+                                        <StatusBadge Text="@(user.IsEnabled ? "Enabled" : "Disabled")"
+                                                     Tone="@(user.IsEnabled ? "success" : "danger")" />
+                                    </td>
+                                    <td data-label="Actions">
+                                        <div class="row-actions">
+                                            <button class="table-action"
+                                                    type="button"
+                                                    disabled="@_isOperationRunning"
+                                                    @onclick="() => SetEnabledAsync(user, !user.IsEnabled)">
+                                                @(user.IsEnabled ? "Disable" : "Enable")
+                                            </button>
+                                            <button class="table-action primary"
+                                                    type="button"
+                                                    disabled="@(_isOperationRunning || GetAssignableRoles(user).Count == 0)"
+                                                    aria-expanded="@(_rolePanelUserId == user.Id)"
+                                                    @onclick="() => ToggleRolePanel(user)">
+                                                Assign Role
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                @if (_rolePanelUserId == user.Id)
+                                {
+                                    <tr class="role-panel-row" @key="@($"{user.Id:D}-roles")">
+                                        <td colspan="5">
+                                            <div class="role-panel">
+                                                <div>
+                                                    <strong>Assign a role to @user.DisplayName</strong>
+                                                    <small>Existing roles are preserved.</small>
+                                                </div>
+                                                <label>
+                                                    <span class="visually-hidden">Role</span>
+                                                    <select @bind="_selectedRole" disabled="@_isOperationRunning">
+                                                        @foreach (var role in GetAssignableRoles(user))
+                                                        {
+                                                            <option value="@role">@role</option>
+                                                        }
+                                                    </select>
+                                                </label>
+                                                <div class="role-panel-actions">
+                                                    <button class="button button-secondary"
+                                                            type="button"
+                                                            disabled="@_isOperationRunning"
+                                                            @onclick="CloseRolePanel">
+                                                        Cancel
+                                                    </button>
+                                                    <button class="button button-primary"
+                                                            type="button"
+                                                            disabled="@(_isOperationRunning || string.IsNullOrEmpty(_selectedRole))"
+                                                            @onclick="() => AssignRoleAsync(user)">
+                                                        @(_isOperationRunning ? "Saving…" : "Assign")
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <footer class="pagination" aria-label="User list pagination">
+                    <button class="button button-secondary"
+                            type="button"
+                            disabled="@(_isLoading || _page.PageNumber <= 1)"
+                            @onclick="PreviousPageAsync">
+                        Previous
+                    </button>
+                    <span>Page @_page.PageNumber of @Math.Max(_page.TotalPages, 1)</span>
+                    <button class="button button-secondary"
+                            type="button"
+                            disabled="@(_isLoading || _page.PageNumber >= _page.TotalPages)"
+                            @onclick="NextPageAsync">
+                        Next
+                    </button>
+                </footer>
+            }
+        </AppCard>
+    </div>
 </AuthenticatedContent>
+
+@code {
+    private const int PageSize = 10;
+    private static readonly TimeSpan SearchDebounce = TimeSpan.FromMilliseconds(400);
+
+    private readonly CancellationTokenSource _lifetimeCancellation = new();
+    private CancellationTokenSource? _searchCancellation;
+    private CancellationTokenSource? _loadCancellation;
+    private PagedUsersResponse? _page;
+    private string _search = string.Empty;
+    private string? _errorMessage;
+    private string? _selectedRole;
+    private Guid? _rolePanelUserId;
+    private int _pageNumber = 1;
+    private bool _isLoading;
+    private bool _isOperationRunning;
+
+    /// <inheritdoc />
+    protected override Task OnInitializedAsync() => LoadUsersAsync();
+
+    private async Task HandleSearchInputAsync(ChangeEventArgs args)
+    {
+        _search = args.Value?.ToString() ?? string.Empty;
+        _pageNumber = 1;
+
+        _searchCancellation?.Cancel();
+        _searchCancellation?.Dispose();
+        _searchCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+            _lifetimeCancellation.Token);
+        var currentSearch = _searchCancellation;
+
+        try
+        {
+            await Task.Delay(SearchDebounce, currentSearch.Token);
+            await LoadUsersAsync(currentSearch.Token);
+        }
+        catch (OperationCanceledException) when (currentSearch.IsCancellationRequested)
+        {
+            // A newer search value superseded this request.
+        }
+    }
+
+    private async Task LoadUsersAsync(CancellationToken cancellationToken = default)
+    {
+        _loadCancellation?.Cancel();
+        _loadCancellation?.Dispose();
+        var currentLoad = CancellationTokenSource.CreateLinkedTokenSource(
+            _lifetimeCancellation.Token,
+            cancellationToken);
+        _loadCancellation = currentLoad;
+
+        _isLoading = true;
+        _errorMessage = null;
+
+        try
+        {
+            _page = await ApiClient.GetUsersAsync(
+                new GetUsersRequest
+                {
+                    Search = string.IsNullOrWhiteSpace(_search) ? null : _search.Trim(),
+                    PageNumber = _pageNumber,
+                    PageSize = PageSize
+                },
+                currentLoad.Token);
+
+            _pageNumber = _page.PageNumber;
+        }
+        catch (OperationCanceledException) when (currentLoad.IsCancellationRequested)
+        {
+            // Cancellation is expected when search or pagination supersedes a request.
+        }
+        catch (HttpRequestException exception)
+        {
+            Logger.LogWarning(
+                exception,
+                "User list request failed with HTTP status {StatusCode}.",
+                exception.StatusCode);
+            _errorMessage = GetErrorMessage(exception);
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or System.Text.Json.JsonException)
+        {
+            Logger.LogWarning(exception, "The user list API returned an invalid response.");
+            _errorMessage = "User information could not be loaded. Please try again.";
+        }
+        finally
+        {
+            if (ReferenceEquals(_loadCancellation, currentLoad))
+            {
+                _isLoading = false;
+            }
+        }
+    }
+
+    private async Task SetEnabledAsync(UserResponse user, bool isEnabled)
+    {
+        await RunOperationAsync(
+            user.Id,
+            cancellationToken => isEnabled
+                ? ApiClient.EnableUserAsync(user.Id, cancellationToken)
+                : ApiClient.DisableUserAsync(user.Id, cancellationToken));
+    }
+
+    private async Task AssignRoleAsync(UserResponse user)
+    {
+        if (string.IsNullOrWhiteSpace(_selectedRole)
+            || user.Roles.Contains(_selectedRole, StringComparer.OrdinalIgnoreCase)
+            || !ApplicationRoles.IsValid(_selectedRole))
+        {
+            return;
+        }
+
+        var selectedRole = _selectedRole;
+        await RunOperationAsync(
+            user.Id,
+            cancellationToken => ApiClient.AssignUserRoleAsync(
+                user.Id,
+                new AssignUserRoleRequest(selectedRole),
+                cancellationToken));
+
+        if (string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            CloseRolePanel();
+        }
+    }
+
+    private async Task RunOperationAsync(
+        Guid userId,
+        Func<CancellationToken, Task<UserResponse>> operation)
+    {
+        _isOperationRunning = true;
+        _errorMessage = null;
+
+        try
+        {
+            _ = await operation(_lifetimeCancellation.Token);
+            await LoadUsersAsync(_lifetimeCancellation.Token);
+        }
+        catch (OperationCanceledException) when (_lifetimeCancellation.IsCancellationRequested)
+        {
+            // Component disposal cancelled the operation.
+        }
+        catch (HttpRequestException exception)
+        {
+            Logger.LogWarning(
+                exception,
+                "User management operation failed for user {UserId} with HTTP status {StatusCode}.",
+                userId,
+                exception.StatusCode);
+            _errorMessage = GetErrorMessage(exception);
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or System.Text.Json.JsonException)
+        {
+            Logger.LogWarning(
+                exception,
+                "The user management API returned an invalid response for user {UserId}.",
+                userId);
+            _errorMessage = "The user could not be updated. Please try again.";
+        }
+        finally
+        {
+            _isOperationRunning = false;
+        }
+    }
+
+    private void ToggleRolePanel(UserResponse user)
+    {
+        if (_rolePanelUserId == user.Id)
+        {
+            CloseRolePanel();
+            return;
+        }
+
+        var assignableRoles = GetAssignableRoles(user);
+        _rolePanelUserId = user.Id;
+        _selectedRole = assignableRoles.FirstOrDefault();
+    }
+
+    private void CloseRolePanel()
+    {
+        _rolePanelUserId = null;
+        _selectedRole = null;
+    }
+
+    private static IReadOnlyList<string> GetAssignableRoles(UserResponse user) =>
+        ApplicationRoles.All
+            .Where(role => !user.Roles.Contains(role, StringComparer.OrdinalIgnoreCase))
+            .ToArray();
+
+    private Task PreviousPageAsync()
+    {
+        _pageNumber = Math.Max(1, _pageNumber - 1);
+        CloseRolePanel();
+        return LoadUsersAsync();
+    }
+
+    private Task NextPageAsync()
+    {
+        _pageNumber++;
+        CloseRolePanel();
+        return LoadUsersAsync();
+    }
+
+    private Task ReloadAsync() => LoadUsersAsync();
+
+    private static string GetErrorMessage(HttpRequestException exception) =>
+        exception.StatusCode switch
+        {
+            System.Net.HttpStatusCode.Unauthorized => "Your session is no longer authorized. Please sign in again.",
+            System.Net.HttpStatusCode.Forbidden => "Administrator access is required to manage users.",
+            _ => "The user request could not be completed. Please try again."
+        };
+
+    /// <inheritdoc />
+    public ValueTask DisposeAsync()
+    {
+        _lifetimeCancellation.Cancel();
+        _searchCancellation?.Cancel();
+        _loadCancellation?.Cancel();
+
+        _searchCancellation?.Dispose();
+        _loadCancellation?.Dispose();
+        _lifetimeCancellation.Dispose();
+
+        return ValueTask.CompletedTask;
+    }
+}
