@@ -40,6 +40,8 @@ using LearningPortal.Shared.Enrollments;
 using LearningPortal.Shared.UserManagement;
 using LearningPortal.Application.Learning;
 using LearningPortal.Shared.Learning;
+using LearningPortal.Application.Quizzes;
+using LearningPortal.Shared.Quizzes;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LearningPortal.Application;
@@ -88,6 +90,22 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetLessonPlayerQuery, Result<LessonPlayerResponse>>, GetLessonPlayerQueryHandler>();
         services.AddScoped<IQueryHandler<GetCourseProgressQuery, Result<CourseProgressResponse>>, GetCourseProgressQueryHandler>();
         services.AddScoped<IQueryHandler<GetContinueLearningDestinationQuery, Result<ContinueLearningDestinationResponse?>>, GetContinueLearningDestinationQueryHandler>();
+        services.AddScoped<QuizAdministrationHandler>();
+        services.AddScoped<ICommandHandler<CreateQuizCommand, Result<QuizAdministrationResponse>>>(p => p.GetRequiredService<QuizAdministrationHandler>());
+        services.AddScoped<ICommandHandler<UpdateQuizCommand, Result<QuizAdministrationResponse>>>(p => p.GetRequiredService<QuizAdministrationHandler>());
+        services.AddScoped<ICommandHandler<PublishQuizCommand, Result<QuizAdministrationResponse>>>(p => p.GetRequiredService<QuizAdministrationHandler>());
+        services.AddScoped<ICommandHandler<ArchiveQuizCommand, Result<QuizAdministrationResponse>>>(p => p.GetRequiredService<QuizAdministrationHandler>());
+        services.AddScoped<ICommandHandler<AddQuizQuestionCommand, Result<QuizAdministrationResponse>>>(p => p.GetRequiredService<QuizAdministrationHandler>());
+        services.AddScoped<ICommandHandler<UpdateQuizQuestionCommand, Result<QuizAdministrationResponse>>>(p => p.GetRequiredService<QuizAdministrationHandler>());
+        services.AddScoped<IQueryHandler<GetQuizAdministration, Result<QuizAdministrationResponse>>>(p => p.GetRequiredService<QuizAdministrationHandler>());
+        services.AddScoped<IQueryHandler<GetCourseQuizAdministration, Result<IReadOnlyList<QuizAdministrationResponse>>>>(p => p.GetRequiredService<QuizAdministrationHandler>());
+        services.AddScoped<QuizAttemptHandler>();
+        services.AddScoped<ICommandHandler<StartQuizAttempt, Result<StartQuizAttemptResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
+        services.AddScoped<ICommandHandler<SubmitQuizAttempt, Result<QuizAttemptResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
+        services.AddScoped<IQueryHandler<ResumeQuizAttempt, Result<QuizAttemptResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
+        services.AddScoped<IQueryHandler<GetQuiz, Result<QuizResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
+        services.AddScoped<IQueryHandler<GetQuizAttempt, Result<QuizAttemptResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
+        services.AddScoped<IQueryHandler<GetMyAttempts, Result<IReadOnlyList<QuizAttemptResponse>>>>(p => p.GetRequiredService<QuizAttemptHandler>());
 
         return services;
     }

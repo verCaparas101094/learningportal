@@ -5,6 +5,7 @@ namespace LearningPortal.Domain.Quizzes;
 /// <summary>Represents one ordered, automatically scored quiz question.</summary>
 public sealed class QuizQuestion : AuditableEntity
 {
+    private readonly List<QuizAnswerChoice> _answerChoices = [];
     private QuizQuestion() { }
     private QuizQuestion(Guid quizId, string text, QuestionType type, decimal points, int order, string? explanation)
     { QuizId = quizId; Text = text; QuestionType = type; Points = points; Order = order; Explanation = explanation; }
@@ -22,6 +23,8 @@ public sealed class QuizQuestion : AuditableEntity
     public string? Explanation { get; private set; }
     /// <summary>Gets whether the question appears in new attempts.</summary>
     public bool IsActive { get; private set; } = true;
+    /// <summary>Gets ordered answer choices.</summary>
+    public IReadOnlyCollection<QuizAnswerChoice> AnswerChoices => _answerChoices;
     /// <summary>Creates a valid active question.</summary>
     public static QuizQuestion Create(Guid quizId, string text, QuestionType questionType, decimal points, int order, string? explanation = null)
     { if (quizId == Guid.Empty || string.IsNullOrWhiteSpace(text) || points <= 0 || order < 1) throw new ArgumentException("Question values are invalid."); return new(quizId, text.Trim(), questionType, points, order, string.IsNullOrWhiteSpace(explanation) ? null : explanation.Trim()); }
@@ -34,6 +37,20 @@ public sealed class QuizQuestion : AuditableEntity
     public void Deactivate() => IsActive = false;
     /// <summary>Changes display order.</summary>
     public bool TryReorder(int order) { if (order < 1) return false; Order = order; return true; }
+    /// <summary>Adds an answer choice.</summary>
+    public bool TryAddAnswerChoice(QuizAnswerChoice choice)
+    {
+        ArgumentNullException.ThrowIfNull(choice);
+        if (choice.QuestionId != Id || _answerChoices.Any(x => x.Order == choice.Order)) return false;
+        _answerChoices.Add(choice);
+        return true;
+    }
+    /// <summary>Removes an answer choice.</summary>
+    public bool TryRemoveAnswerChoice(Guid choiceId)
+    {
+        var choice = _answerChoices.SingleOrDefault(x => x.Id == choiceId);
+        return choice is not null && _answerChoices.Remove(choice);
+    }
     /// <summary>Validates choices for the configured type.</summary>
     public bool HasValidAnswers(IReadOnlyCollection<QuizAnswerChoice> choices)
     { var correct = choices.Count(x => x.IsCorrect); return QuestionType switch { QuestionType.SingleChoice => choices.Count > 0 && correct == 1, QuestionType.MultipleChoice => choices.Count > 0 && correct >= 1, QuestionType.TrueFalse => choices.Count == 2 && correct == 1, _ => false }; }

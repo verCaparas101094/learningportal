@@ -6,6 +6,7 @@ using LearningPortal.Shared.Lessons;
 using LearningPortal.Shared.Enrollments;
 using LearningPortal.Shared.Learning;
 using LearningPortal.Shared.UserManagement;
+using LearningPortal.Shared.Quizzes;
 
 namespace LearningPortal.Blazor.Services;
 
@@ -283,6 +284,101 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
     {
         using var response = await httpClient.GetAsync($"api/learning/enrollments/{enrollmentId:D}/continue", cancellationToken);
         return await ReadResponseAsync<ContinueLearningDestinationResponse?>(response, cancellationToken);
+    }
+
+    /// <summary>Gets quizzes for course administration.</summary>
+    public async Task<IReadOnlyList<QuizAdministrationResponse>> GetCourseQuizzesAsync(
+        Guid courseId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"api/courses/{courseId:D}/quizzes", cancellationToken);
+        return await ReadResponseAsync<IReadOnlyList<QuizAdministrationResponse>>(response, cancellationToken);
+    }
+
+    /// <summary>Gets an editable quiz graph.</summary>
+    public async Task<QuizAdministrationResponse> GetQuizAdministrationAsync(
+        Guid quizId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"api/quizzes/{quizId:D}/administration", cancellationToken);
+        return await ReadResponseAsync<QuizAdministrationResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Creates a draft quiz.</summary>
+    public async Task<QuizAdministrationResponse> CreateQuizAsync(
+        Guid courseId, SaveQuizRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"api/courses/{courseId:D}/quizzes", request, cancellationToken);
+        return await ReadResponseAsync<QuizAdministrationResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Updates draft quiz details.</summary>
+    public Task<QuizAdministrationResponse> UpdateQuizAsync(
+        Guid quizId, SaveQuizRequest request, CancellationToken cancellationToken = default) =>
+        PutAsync<QuizAdministrationResponse>($"api/quizzes/{quizId:D}", request, cancellationToken);
+
+    /// <summary>Adds a validated question and its answer choices.</summary>
+    public async Task<QuizAdministrationResponse> AddQuizQuestionAsync(
+        Guid quizId, SaveQuizQuestionRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync($"api/quizzes/{quizId:D}/questions", request, cancellationToken);
+        return await ReadResponseAsync<QuizAdministrationResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Updates a draft question and its answer-choice graph.</summary>
+    public Task<QuizAdministrationResponse> UpdateQuizQuestionAsync(
+        Guid quizId,
+        Guid questionId,
+        SaveQuizQuestionRequest request,
+        CancellationToken cancellationToken = default) =>
+        PutAsync<QuizAdministrationResponse>(
+            $"api/quizzes/{quizId:D}/questions/{questionId:D}", request, cancellationToken);
+
+    /// <summary>Publishes a valid draft quiz.</summary>
+    public Task<QuizAdministrationResponse> PublishQuizAsync(Guid quizId, CancellationToken cancellationToken = default) =>
+        PutAsync<QuizAdministrationResponse>($"api/quizzes/{quizId:D}/publish", null, cancellationToken);
+
+    /// <summary>Archives a published quiz.</summary>
+    public Task<QuizAdministrationResponse> ArchiveQuizAsync(Guid quizId, CancellationToken cancellationToken = default) =>
+        PutAsync<QuizAdministrationResponse>($"api/quizzes/{quizId:D}/archive", null, cancellationToken);
+
+    /// <summary>Gets learner-safe quiz content without correctness flags.</summary>
+    public async Task<QuizResponse> GetQuizAsync(Guid quizId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"api/learning/quizzes/{quizId:D}", cancellationToken);
+        return await ReadResponseAsync<QuizResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Starts or resumes the single active attempt.</summary>
+    public async Task<StartQuizAttemptResponse> StartQuizAttemptAsync(
+        Guid quizId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsync($"api/learning/quizzes/{quizId:D}/attempts", null, cancellationToken);
+        return await ReadResponseAsync<StartQuizAttemptResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Submits learner selections for server scoring.</summary>
+    public async Task<QuizAttemptResponse> SubmitQuizAttemptAsync(
+        Guid attemptId, SubmitQuizAttemptRequest request, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.PostAsJsonAsync(
+            $"api/learning/quiz-attempts/{attemptId:D}/submit", request, cancellationToken);
+        return await ReadResponseAsync<QuizAttemptResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets an owned attempt or result.</summary>
+    public async Task<QuizAttemptResponse> GetQuizAttemptAsync(
+        Guid attemptId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync($"api/learning/quiz-attempts/{attemptId:D}", cancellationToken);
+        return await ReadResponseAsync<QuizAttemptResponse>(response, cancellationToken);
+    }
+
+    /// <summary>Gets the current learner's attempt history.</summary>
+    public async Task<IReadOnlyList<QuizAttemptResponse>> GetMyQuizAttemptsAsync(
+        Guid quizId, CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/learning/quizzes/{quizId:D}/attempts/me", cancellationToken);
+        return await ReadResponseAsync<IReadOnlyList<QuizAttemptResponse>>(response, cancellationToken);
     }
 
     private async Task<TResponse> PutAsync<TResponse>(

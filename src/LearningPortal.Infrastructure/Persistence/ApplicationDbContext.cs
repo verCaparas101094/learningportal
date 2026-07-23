@@ -35,6 +35,10 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<QuizQuestion> QuizQuestions => Set<QuizQuestion>();
     /// <summary>Gets quiz answer choices.</summary>
     public DbSet<QuizAnswerChoice> QuizAnswerChoices => Set<QuizAnswerChoice>();
+    /// <summary>Gets owned quiz attempts.</summary>
+    public DbSet<QuizAttempt> QuizAttempts => Set<QuizAttempt>();
+    /// <summary>Gets submitted answer snapshots.</summary>
+    public DbSet<QuizAttemptAnswer> QuizAttemptAnswers => Set<QuizAttemptAnswer>();
 
     /// <summary>Gets the persisted hashed refresh tokens.</summary>
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();

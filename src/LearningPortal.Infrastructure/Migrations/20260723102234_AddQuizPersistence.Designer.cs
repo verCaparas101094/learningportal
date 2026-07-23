@@ -4,6 +4,7 @@ using LearningPortal.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LearningPortal.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260723102234_AddQuizPersistence")]
+    partial class AddQuizPersistence
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -435,140 +438,6 @@ namespace LearningPortal.Infrastructure.Migrations
                     b.ToTable("QuizAnswerChoices", (string)null);
                 });
 
-            modelBuilder.Entity("LearningPortal.Domain.Quizzes.QuizAttempt", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AttemptNumber")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasPrecision(0)
-                        .HasColumnType("datetimeoffset(0)");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EnrollmentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("MaximumScore")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<bool>("Passed")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("Percentage")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5,2)");
-
-                    b.Property<Guid>("QuizId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<decimal>("Score")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<DateTimeOffset>("StartedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset?>("SubmittedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
-                        .HasPrecision(0)
-                        .HasColumnType("datetimeoffset(0)");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EnrollmentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("QuizId", "StudentId")
-                        .IsUnique()
-                        .HasDatabaseName("UX_QuizAttempts_Quiz_Student_Active")
-                        .HasFilter("[Status] = N'InProgress'");
-
-                    b.HasIndex("QuizId", "StudentId", "AttemptNumber")
-                        .IsUnique();
-
-                    b.ToTable("QuizAttempts", (string)null);
-                });
-
-            modelBuilder.Entity("LearningPortal.Domain.Quizzes.QuizAttemptAnswer", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AttemptId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ChoiceSnapshot")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Explanation")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("MaximumPoints")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<decimal>("PointsAwarded")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<Guid>("QuestionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("QuestionText")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<string>("QuestionType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("SelectedChoiceIds")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttemptId", "QuestionId")
-                        .IsUnique();
-
-                    b.ToTable("QuizAttemptAnswers", (string)null);
-                });
-
             modelBuilder.Entity("LearningPortal.Domain.Quizzes.QuizQuestion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -969,36 +838,6 @@ namespace LearningPortal.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("LearningPortal.Domain.Quizzes.QuizAttempt", b =>
-                {
-                    b.HasOne("LearningPortal.Domain.Enrollments.Enrollment", null)
-                        .WithMany()
-                        .HasForeignKey("EnrollmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LearningPortal.Domain.Quizzes.Quiz", null)
-                        .WithMany()
-                        .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LearningPortal.Infrastructure.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("LearningPortal.Domain.Quizzes.QuizAttemptAnswer", b =>
-                {
-                    b.HasOne("LearningPortal.Domain.Quizzes.QuizAttempt", null)
-                        .WithMany("Answers")
-                        .HasForeignKey("AttemptId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("LearningPortal.Domain.Quizzes.QuizQuestion", b =>
                 {
                     b.HasOne("LearningPortal.Domain.Quizzes.Quiz", null)
@@ -1071,11 +910,6 @@ namespace LearningPortal.Infrastructure.Migrations
             modelBuilder.Entity("LearningPortal.Domain.Quizzes.Quiz", b =>
                 {
                     b.Navigation("Questions");
-                });
-
-            modelBuilder.Entity("LearningPortal.Domain.Quizzes.QuizAttempt", b =>
-                {
-                    b.Navigation("Answers");
                 });
 
             modelBuilder.Entity("LearningPortal.Domain.Quizzes.QuizQuestion", b =>
