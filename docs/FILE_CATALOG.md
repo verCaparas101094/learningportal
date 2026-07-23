@@ -82,10 +82,10 @@ This project coordinates domain behavior through CQRS and exposes ports implemen
 This project contains replaceable external-system implementations.
 
 - `LearningPortal.Infrastructure.csproj` — references Application/Domain and owns EF Core, SQL Server, Identity, JWT, and health-check packages.
-- `DependencyInjection.cs` — composes SQL Server, Identity, JWT validation, repositories, unit of work, and database readiness checks.
+- `DependencyInjection.cs` — composes scoped and factory-created SQL Server contexts through one retry/interceptor configuration, plus Identity, JWT validation, repositories, unit of work, and database readiness checks.
 - `Identity/ApplicationUser.cs` — extends the Identity persistence model with portal-specific profile data and an explicit enabled-account state.
 - `Identity/JwtOptions.cs` — provides strongly typed, startup-validated token settings.
-- `Identity/IdentityService.cs` — implements non-disclosing credential verification, security-stamp validation, transactional token rotation, idempotent revocation, and replay containment.
+- `Identity/IdentityService.cs` — executes the complete refresh transaction through SQL Server's retry strategy and uses a factory-created context for concurrency replay recovery.
 - `Identity/RefreshToken.cs` — encapsulates hash-only refresh-token persistence, security-stamp binding, IP audit metadata, expiration, rotation, revocation, and rowversion state.
 - `Identity/IRefreshTokenProtector.cs` — abstracts secure opaque-token generation and one-way hashing for unit testing.
 - `Identity/RefreshTokenProtector.cs` — creates 512-bit tokens and SHA-256 hashes while ensuring raw values are never persisted.
@@ -166,3 +166,14 @@ This project verifies authentication behavior against real Identity services and
 - `LearningPortal.Infrastructure.Tests.csproj` — declares the .NET 10 xUnit test assembly and references the layers exercised by authentication tests.
 - `Authentication/AuthenticationTestContext.cs` — builds a deterministic Identity/EF test host with fake UTC time and client IP abstractions.
 - `Authentication/IdentityServiceTests.cs` — verifies login, lockout, hash-only storage, rotation, replay containment, expiry, idempotent revocation, duplicate refresh rejection, and JWT claims.
+
+## LearningPortal.Infrastructure.IntegrationTests
+
+This slower test project validates behavior that EF InMemory cannot represent by running the real SQL Server provider against an isolated container.
+
+- `LearningPortal.Infrastructure.IntegrationTests.csproj` — declares the categorized SQL Server Testcontainers test assembly separately from fast service tests.
+- `Authentication/SqlServerFactAttribute.cs` — marks Docker-backed tests as opt-in and reports them as skipped during ordinary test runs.
+- `Authentication/SqlServerAuthenticationFixture.cs` — starts an opt-in SQL Server container, applies migrations only to that isolated database, and builds production Infrastructure registrations.
+- `Authentication/RefreshRotationCoordinator.cs` — synchronizes two independent refresh requests after both have loaded the original token.
+- `Authentication/CoordinatedAccessTokenGenerator.cs` — inserts the test coordination barrier while delegating JWT creation to the production generator.
+- `Authentication/RefreshTokenRelationalTests.cs` — verifies relational transactions, independent-context concurrency, replay revocation, unique hashes, rowversion, and migration indexes.
