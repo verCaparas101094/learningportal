@@ -1,4 +1,5 @@
 @page "/ai-tutor"
+@attribute [Authorize]
 @rendermode InteractiveServer
 @implements IDisposable
 @inject LearningPortalApiClient ApiClient
@@ -40,6 +41,7 @@
                     </select>
                 </label>
                 <button class="button button-primary"
+                        data-testid="start-ai-tutor"
                         disabled="@(_busy || _selectedCourseId is null)"
                         @onclick="StartAsync">
                     New conversation
@@ -76,6 +78,7 @@
                             <StatusBadge Text="@_active.Status" />
                         </div>
                         <button class="button"
+                                data-testid="archive-conversation"
                                 disabled="@(_busy || _active.Status == "Archived")"
                                 @onclick="ArchiveAsync">
                             Archive
@@ -85,7 +88,8 @@
                     <div class="ai-tutor-messages">
                         @foreach (var message in _active.Messages.OrderBy(value => value.Sequence))
                         {
-                            <article class="@($"ai-tutor-message {message.Role.ToLowerInvariant()}")">
+                            <article class="@($"ai-tutor-message {message.Role.ToLowerInvariant()}")"
+                                     data-testid="@(message.Role == "Assistant" ? "ai-response" : null)">
                                 <strong>@(message.Role == "User" ? "You" : "Local AI Tutor")</strong>
                                 <p>@message.Content</p>
                             </article>
@@ -100,10 +104,13 @@
                     {
                         <label for="ai-question">Your question</label>
                         <textarea id="ai-question" rows="4" maxlength="2000"
+                                  data-testid="ai-question"
                                   @bind="_question"
+                                  @onkeyup="HandleQuestionKeyUpAsync"
                                   placeholder="Ask about the selected course material…"></textarea>
                         <div class="course-actions">
                             <button class="button button-primary"
+                                    data-testid="ai-send"
                                     disabled="@(_busy || string.IsNullOrWhiteSpace(_question))"
                                     @onclick="SendAsync">
                                 @(_busy ? "Thinking…" : "Send")
@@ -136,6 +143,17 @@
     private bool _loading = true;
     private bool _busy;
     private CancellationTokenSource? _sendCancellation;
+
+    private async Task HandleQuestionKeyUpAsync(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter"
+            && !args.ShiftKey
+            && !_busy
+            && !string.IsNullOrWhiteSpace(_question))
+        {
+            await SendAsync();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

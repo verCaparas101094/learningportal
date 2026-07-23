@@ -95,11 +95,14 @@ public static class PortalAuthenticationEndpoints
             "api/auth/register", request, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
+            var error = response.StatusCode == System.Net.HttpStatusCode.Conflict
+                ? "duplicate"
+                : "invalid";
             return Results.LocalRedirect(QueryHelpers.AddQueryString(
                 "/register",
                 new Dictionary<string, string?>
                 {
-                    ["error"] = "invalid",
+                    ["error"] = error,
                     ["returnUrl"] = returnUrl
                 }));
         }

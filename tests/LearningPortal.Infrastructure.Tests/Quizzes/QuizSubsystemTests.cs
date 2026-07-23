@@ -3,9 +3,13 @@ using LearningPortal.Domain.Quizzes;
 using LearningPortal.Infrastructure.Persistence;
 using LearningPortal.Infrastructure.Persistence.Repositories;
 using LearningPortal.Shared.Quizzes;
+using LearningPortal.Shared.Results;
 using LearningPortal.Blazor.Services;
 using LearningPortal.Application.Quizzes;
+using LearningPortal.Application;
+using LearningPortal.Application.Abstractions.Messaging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using Xunit;
@@ -123,6 +127,37 @@ public sealed class QuizSubsystemTests
         await client.SubmitQuizAttemptAsync(attemptId, new([]));
         Assert.Equal($"/api/learning/quiz-attempts/{attemptId:D}/submit", handler.Uri!.AbsolutePath);
         Assert.Equal(HttpMethod.Post, handler.Method);
+    }
+
+    [Fact]
+    public async Task ApiClient_UsesEnrollmentAuthorizedCourseQuizRoute()
+    {
+        var courseId = Guid.NewGuid();
+        var handler = new RecordingHandler(_ => Json<IReadOnlyList<QuizListItemResponse>>([]));
+        var client = new LearningPortalApiClient(
+            new HttpClient(handler) { BaseAddress = new("https://localhost/") });
+
+        await client.GetCourseQuizzesForLearnerAsync(courseId);
+
+        Assert.Equal(
+            $"/api/learning/courses/{courseId:D}/quizzes",
+            handler.Uri!.AbsolutePath);
+        Assert.Equal(HttpMethod.Get, handler.Method);
+    }
+
+    [Fact]
+    public void LearnerCourseQuizQueryHandler_IsRegisteredForMinimalApiInjection()
+    {
+        var services = new ServiceCollection();
+
+        services.AddApplication();
+
+        Assert.Contains(
+            services,
+            descriptor => descriptor.ServiceType == typeof(
+                IQueryHandler<
+                    GetCourseQuizzes,
+                    Result<IReadOnlyList<QuizListItemResponse>>>));
     }
 
     private static HttpResponseMessage Json<T>(T value) =>

@@ -110,6 +110,8 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<SubmitQuizAttempt, Result<QuizAttemptResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
         services.AddScoped<IQueryHandler<ResumeQuizAttempt, Result<QuizAttemptResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
         services.AddScoped<IQueryHandler<GetQuiz, Result<QuizResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
+        services.AddScoped<IQueryHandler<GetCourseQuizzes, Result<IReadOnlyList<QuizListItemResponse>>>>(
+            provider => provider.GetRequiredService<QuizAttemptHandler>());
         services.AddScoped<IQueryHandler<GetQuizAttempt, Result<QuizAttemptResponse>>>(p => p.GetRequiredService<QuizAttemptHandler>());
         services.AddScoped<IQueryHandler<GetMyAttempts, Result<IReadOnlyList<QuizAttemptResponse>>>>(p => p.GetRequiredService<QuizAttemptHandler>());
         services.AddScoped<InstructorEligibilityHandler>();

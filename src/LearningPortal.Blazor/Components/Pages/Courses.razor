@@ -1,4 +1,5 @@
 @page "/courses"
+@attribute [Authorize(Roles = ApplicationRoles.Administrator + "," + ApplicationRoles.Instructor)]
 @rendermode InteractiveServer
 @implements IAsyncDisposable
 @inject LearningPortalApiClient ApiClient
@@ -12,6 +13,7 @@
                 Description="Create, maintain, and manage the lifecycle of instructor-owned courses.">
         <Actions>
             <button class="button button-primary"
+                    data-testid="create-course"
                     type="button"
                     disabled="@_isMutating"
                     @onclick="OpenCreateForm">
@@ -133,9 +135,11 @@
                                     <td data-label="Actions">
                                         <div class="course-actions">
                                             <a class="button" href="@($"/courses/{course.Id:D}/lessons")">Lessons</a>
+                                            <a class="button" href="@($"/courses/{course.Id:D}/quizzes")">Quizzes</a>
                                             @if (IsDraft(course))
                                             {
                                                 <button type="button"
+                                                        data-testid="@($"publish-course-{course.Id:N}")"
                                                         disabled="@_isMutating"
                                                         @onclick="() => EditCourseAsync(course)">
                                                     Edit
@@ -206,6 +210,7 @@
             </header>
             <CourseForm Course="@_editingCourse"
                         ShowInstructorId="@(_isAdministrator && _editingCourse is null)"
+                        InstructorOptions="_instructors"
                         IsSubmitting="@_isMutating"
                         ErrorMessage="@_formError"
                         SubmitText="@(_editingCourse is null ? "Create course" : "Save changes")"
@@ -233,6 +238,7 @@
     private CancellationTokenSource? _searchCancellation;
     private CancellationTokenSource? _loadCancellation;
     private PagedCoursesResponse? _page;
+    private IReadOnlyList<UserResponse> _instructors = [];
     private CourseResponse? _editingCourse;
     private CourseListItemResponse? _confirmationCourse;
     private CourseOperation _confirmationOperation;
@@ -291,6 +297,27 @@
     {
         var authenticationState = await AuthenticationStateTask;
         _isAdministrator = authenticationState.User.IsInRole(ApplicationRoles.Administrator);
+        if (_isAdministrator)
+        {
+            try
+            {
+                var users = await ApiClient.GetUsersAsync(
+                    new GetUsersRequest { PageSize = 100 },
+                    _lifetimeCancellation.Token);
+                _instructors = users.Items
+                    .Where(user => user.IsEnabled
+                        && user.Roles.Contains(
+                            ApplicationRoles.Instructor,
+                            StringComparer.OrdinalIgnoreCase))
+                    .OrderBy(user => user.DisplayName)
+                    .ToArray();
+            }
+            catch (ApiProblemException exception)
+            {
+                LogApiFailure(exception, "Instructor list");
+                _errorMessage = GetFriendlyMessage(exception);
+            }
+        }
         await LoadCoursesAsync();
     }
 

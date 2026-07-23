@@ -2,7 +2,7 @@
 @inject IJSRuntime JavaScript
 <EditForm Model="Model" OnValidSubmit="OnSubmit">
     <DataAnnotationsValidator />
-    <label>Title <InputText @bind-Value="Model.Title" /><ValidationMessage For="() => Model.Title" /></label>
+    <label>Title <InputText @bind-Value="Model.Title" data-testid="lesson-title" /><ValidationMessage For="() => Model.Title" /></label>
     <label>Description <InputTextArea @bind-Value="Model.Description" /></label>
     <label>Lesson type
         <select value="@Model.LessonType" @onchange="ChangeTypeAsync">
@@ -26,7 +26,7 @@
         </label>
     }
     <button class="button" type="button" @onclick="OnPreview">Preview</button>
-    <button class="button button-primary" type="submit">Save lesson</button>
+    <button class="button button-primary" data-testid="lesson-save" type="submit">Save lesson</button>
     <button class="button" type="button" @onclick="OnCancel">Cancel</button>
 </EditForm>
 @code {

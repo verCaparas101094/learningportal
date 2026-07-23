@@ -19,9 +19,6 @@
                     <NavLink class="sidebar-link" href="/" Match="NavLinkMatch.All">
                         <span aria-hidden="true">⌂</span><span class="link-label">Dashboard</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/my-courses">
-                        <span aria-hidden="true">▤</span><span class="link-label">My Courses</span>
-                    </NavLink>
                     <NavLink class="sidebar-link" href="/catalog">
                         <span aria-hidden="true">□</span><span class="link-label">Catalog</span>
                     </NavLink>
@@ -30,18 +27,6 @@
                     </NavLink>
                     <NavLink class="sidebar-link" href="/my-instructor-eligibility">
                         <span aria-hidden="true">★</span><span class="link-label">Instructor Eligibility</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/certificates" style="display:none">
-                        <span aria-hidden="true">◇</span><span class="link-label">Certificates</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/achievements" style="display:none">
-                        <span aria-hidden="true">☆</span><span class="link-label">Achievements</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/calendar" style="display:none">
-                        <span aria-hidden="true">□</span><span class="link-label">Calendar</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/messages" style="display:none">
-                        <span aria-hidden="true">✉</span><span class="link-label">Messages</span>
                     </NavLink>
                     <NavLink class="sidebar-link" href="/ai-tutor">
                         <span aria-hidden="true">✦</span><span class="link-label">AI Tutor</span>
@@ -53,12 +38,6 @@
                 <NavigationSection Title="Instructor">
                     <NavLink class="sidebar-link" href="/courses">
                         <span aria-hidden="true">▤</span><span class="link-label">Courses</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/my-courses">
-                        <span aria-hidden="true">▤</span><span class="link-label">My Courses</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/analytics" style="display:none">
-                        <span aria-hidden="true">⌁</span><span class="link-label">Analytics</span>
                     </NavLink>
                 </NavigationSection>
             </AuthorizeView>
@@ -74,29 +53,11 @@
                     <NavLink class="sidebar-link" href="/courses">
                         <span aria-hidden="true">▤</span><span class="link-label">Courses</span>
                     </NavLink>
-                    <NavLink class="sidebar-link" href="/lessons" style="display:none">
-                        <span aria-hidden="true">≡</span><span class="link-label">Lessons</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/enrollments" style="display:none">
-                        <span aria-hidden="true">✓</span><span class="link-label">Enrollments</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/quizzes" style="display:none">
-                        <span aria-hidden="true">?</span><span class="link-label">Quizzes</span>
-                    </NavLink>
                     <NavLink class="sidebar-link" href="/admin/instructor-eligibility">
                         <span aria-hidden="true">★</span><span class="link-label">Instructor Eligibility</span>
                     </NavLink>
                     <NavLink class="sidebar-link" href="/admin/ai-tutor">
                         <span aria-hidden="true">AI</span><span class="link-label">AI Tutor Health</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/certificates" style="display:none">
-                        <span aria-hidden="true">◇</span><span class="link-label">Certificates</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/analytics" style="display:none">
-                        <span aria-hidden="true">⌁</span><span class="link-label">Analytics</span>
-                    </NavLink>
-                    <NavLink class="sidebar-link" href="/settings" style="display:none">
-                        <span aria-hidden="true">⚙</span><span class="link-label">Settings</span>
                     </NavLink>
                 </NavigationSection>
             </AuthorizeView>
@@ -132,21 +93,7 @@
                 <span aria-hidden="true">☰</span>
             </button>
 
-            <label class="global-search" style="visibility:hidden">
-                <span class="visually-hidden">Search the learning portal</span>
-                <span aria-hidden="true">⌕</span>
-                <input type="search" placeholder="Search courses, people, and resources" />
-            </label>
-
             <div class="topbar-actions">
-                <button class="icon-button" style="display:none" type="button" aria-label="Theme options" title="Theme options">
-                    <span aria-hidden="true">◐</span>
-                </button>
-                <button class="icon-button notification-button" style="display:none" type="button" aria-label="Notifications" title="Notifications">
-                    <span aria-hidden="true">♢</span>
-                    <span class="notification-indicator" aria-hidden="true"></span>
-                </button>
-
                 <AuthorizeView>
                     <Authorized Context="authorizationContext">
                         @{
@@ -160,6 +107,7 @@
                         }
                         <div class="account-menu-container" @onkeydown="HandleAccountMenuKey">
                         <button class="profile-button" type="button"
+                                data-testid="account-menu"
                                 aria-label="Open account menu" aria-haspopup="menu"
                                 aria-expanded="@_accountMenuOpen" @onclick="ToggleAccountMenu">
                             <span class="avatar">@GetInitials(displayName)</span>
@@ -185,7 +133,8 @@
                                 }
                                 <form method="post" action="/auth/logout">
                                     <AntiforgeryToken />
-                                    <button role="menuitem" type="submit">Sign out</button>
+                                    <button role="menuitem" data-testid="logout-button"
+                                            type="submit">Sign out</button>
                                 </form>
                             </div>
                         }
@@ -193,8 +142,10 @@
                     </Authorized>
                     <NotAuthorized>
                         <div class="guest-actions" aria-label="Guest account actions">
-                            <a class="button button-primary" href="@GuestSignInUrl">Sign in</a>
-                            <a class="button guest-register" href="@GuestRegisterUrl">Register</a>
+                            <a class="button button-primary" data-testid="guest-sign-in"
+                               href="@GuestSignInUrl">Sign in</a>
+                            <a class="button guest-register" data-testid="register-link"
+                               href="@GuestRegisterUrl">Register</a>
                         </div>
                     </NotAuthorized>
                 </AuthorizeView>
@@ -202,7 +153,18 @@
         </header>
 
         <main class="page-content">
-            @Body
+            <ErrorBoundary>
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent Context="exception">
+                    <section class="app-card" role="alert">
+                        <h1>Something went wrong</h1>
+                        <p>The page could not be displayed. Reload it to try again.</p>
+                        <a class="button button-primary" href="@CurrentLocalUrl">Reload page</a>
+                    </section>
+                </ErrorContent>
+            </ErrorBoundary>
         </main>
     </div>
 </div>

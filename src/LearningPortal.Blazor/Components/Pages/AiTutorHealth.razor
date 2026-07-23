@@ -1,4 +1,5 @@
 @page "/admin/ai-tutor"
+@attribute [Authorize(Roles = ApplicationRoles.Administrator)]
 @rendermode InteractiveServer
 @inject LearningPortalApiClient ApiClient
 

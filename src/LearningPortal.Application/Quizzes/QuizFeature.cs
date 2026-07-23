@@ -29,6 +29,8 @@ public sealed record ResumeQuizAttempt(Guid AttemptId) : IQuery<Result<QuizAttem
 public sealed record SubmitQuizAttempt(Guid AttemptId, SubmitQuizAttemptRequest Request)
     : ICommand<Result<QuizAttemptResponse>>;
 public sealed record GetQuiz(Guid QuizId) : IQuery<Result<QuizResponse>>;
+public sealed record GetCourseQuizzes(Guid CourseId)
+    : IQuery<Result<IReadOnlyList<QuizListItemResponse>>>;
 public sealed record GetQuizAttempt(Guid AttemptId) : IQuery<Result<QuizAttemptResponse>>;
 public sealed record GetMyAttempts(Guid QuizId) : IQuery<Result<IReadOnlyList<QuizAttemptResponse>>>;
 public sealed record GetQuizAdministration(Guid QuizId) : IQuery<Result<QuizAdministrationResponse>>;
@@ -340,6 +342,7 @@ public sealed class QuizAttemptHandler(
       ICommandHandler<SubmitQuizAttempt, Result<QuizAttemptResponse>>,
       IQueryHandler<ResumeQuizAttempt, Result<QuizAttemptResponse>>,
       IQueryHandler<GetQuiz, Result<QuizResponse>>,
+      IQueryHandler<GetCourseQuizzes, Result<IReadOnlyList<QuizListItemResponse>>>,
       IQueryHandler<GetQuizAttempt, Result<QuizAttemptResponse>>,
       IQueryHandler<GetMyAttempts, Result<IReadOnlyList<QuizAttemptResponse>>>
 {
@@ -413,6 +416,53 @@ public sealed class QuizAttemptHandler(
         return access.Error is null
             ? Result<QuizResponse>.Success(QuizMappings.ToLearner(access.Value!.Value.Quiz))
             : Result<QuizResponse>.Failure(access.Error);
+    }
+
+    public async Task<Result<IReadOnlyList<QuizListItemResponse>>> HandleAsync(
+        GetCourseQuizzes query,
+        CancellationToken ct = default)
+    {
+        if (!user.IsAuthenticated || user.UserId is not Guid studentId)
+        {
+            return Result<IReadOnlyList<QuizListItemResponse>>.Failure(
+                Errors.Authentication.Unauthorized());
+        }
+
+        var course = await courses.GetByIdReadOnlyAsync(query.CourseId, ct);
+        if (course?.Status != Domain.Courses.CourseStatus.Published)
+        {
+            return Result<IReadOnlyList<QuizListItemResponse>>.Failure(
+                Errors.Authorization.Forbidden());
+        }
+
+        var enrollment = await enrollments.GetByCourseAndStudentAsync(
+            query.CourseId,
+            studentId,
+            ct);
+        if (enrollment is null
+            || enrollment.Status is not (
+                EnrollmentStatus.Enrolled
+                or EnrollmentStatus.InProgress
+                or EnrollmentStatus.Completed))
+        {
+            return Result<IReadOnlyList<QuizListItemResponse>>.Failure(
+                Errors.Authorization.Forbidden());
+        }
+
+        var values = await quizzes.GetByCourseAsync(query.CourseId, ct);
+        return Result<IReadOnlyList<QuizListItemResponse>>.Success(
+            values
+                .Where(quiz => quiz.Status == QuizStatus.Published)
+                .Select(quiz => new QuizListItemResponse(
+                    quiz.Id,
+                    quiz.CourseId,
+                    quiz.LessonId,
+                    quiz.Title,
+                    quiz.Description,
+                    quiz.PassingPercentage,
+                    quiz.MaximumAttempts,
+                    quiz.IsRequiredForCourseCompletion))
+                .ToArray());
     }
 
     public async Task<Result<IReadOnlyList<QuizAttemptResponse>>> HandleAsync(GetMyAttempts query, CancellationToken ct = default)

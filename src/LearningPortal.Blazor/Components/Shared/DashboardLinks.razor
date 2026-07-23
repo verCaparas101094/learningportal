@@ -1,0 +1,34 @@
+<section class="dashboard-section" aria-labelledby="quick-links-heading">
+    <div class="section-heading">
+        <div>
+            <h2 id="quick-links-heading">Quick links</h2>
+            <p>Open a complete Learning Portal workflow.</p>
+        </div>
+    </div>
+    <div class="course-actions">
+        @if (IsAdministrator)
+        {
+            <a class="button" href="/users">Manage users</a>
+            <a class="button" href="/courses">Manage courses</a>
+            <a class="button" href="/admin/instructor-eligibility">Instructor eligibility</a>
+            <a class="button" href="/admin/ai-tutor">AI health</a>
+        }
+        else if (IsInstructor)
+        {
+            <a class="button" href="/courses">Manage courses</a>
+            <a class="button" href="/my-courses">My courses</a>
+        }
+        else
+        {
+            <a class="button button-primary" href="/my-learning">My Learning</a>
+            <a class="button" href="/catalog">Browse catalog</a>
+            <a class="button" href="/ai-tutor">AI Tutor</a>
+            <a class="button" href="/my-instructor-eligibility">Instructor eligibility</a>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter] public bool IsAdministrator { get; set; }
+    [Parameter] public bool IsInstructor { get; set; }
+}

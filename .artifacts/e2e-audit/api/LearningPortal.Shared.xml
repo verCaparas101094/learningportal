@@ -1,0 +1,744 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LearningPortal.Shared</name>
+    </assembly>
+    <members>
+        <member name="T:LearningPortal.Shared.Courses.CourseListItemResponse">
+            <summary>Represents one compact course-list item.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Courses.CourseListItemResponse.#ctor(System.Guid,System.String,System.String,System.String,System.String,System.String,System.Guid,System.DateTimeOffset,System.Nullable{System.Guid})">
+            <summary>Represents one compact course-list item.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Courses.CourseResponse">
+            <summary>Represents complete course-management data.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Courses.CourseResponse.#ctor(System.Guid,System.String,System.String,System.String,System.String,System.String,System.String,System.Guid,System.DateTimeOffset,System.Nullable{System.Guid},System.Nullable{System.DateTimeOffset},System.Nullable{System.Guid},System.String,System.Nullable{System.Guid})">
+            <summary>Represents complete course-management data.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Courses.CreateCourseRequest">
+            <summary>Models creation of a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Courses.CreateCourseRequest.#ctor(System.String,System.String,System.String,System.String,System.String,System.Nullable{System.Guid})">
+            <summary>Models creation of a Draft course.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Courses.GetCoursesRequest">
+            <summary>Models course search, status, and pagination values.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Courses.GetCoursesRequest.Search">
+            <summary>Gets the optional title, slug, or category search term.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Courses.GetCoursesRequest.Status">
+            <summary>Gets the optional Draft, Published, or Archived status.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Courses.GetCoursesRequest.PageNumber">
+            <summary>Gets the one-based page number.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Courses.GetCoursesRequest.PageSize">
+            <summary>Gets the page size.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Courses.PagedCoursesResponse">
+            <summary>Contains one filtered page of courses.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Courses.PagedCoursesResponse.#ctor(System.Collections.Generic.IReadOnlyCollection{LearningPortal.Shared.Courses.CourseListItemResponse},System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>Contains one filtered page of courses.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Courses.UpdateCourseRequest">
+            <summary>Models an optimistic-concurrency protected Draft course update.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Courses.UpdateCourseRequest.#ctor(System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>Models an optimistic-concurrency protected Draft course update.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.EnrollmentResponse">
+            <summary>Represents a complete enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.EnrollmentResponse.#ctor(System.Guid,System.Guid,System.Guid,System.String,System.DateTimeOffset,System.Nullable{System.DateTimeOffset},System.Nullable{System.DateTimeOffset},System.Nullable{System.DateTimeOffset},System.String)">
+            <summary>Represents a complete enrollment.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.EnrollmentListItemResponse">
+            <summary>Represents an enrollment list row.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.EnrollmentListItemResponse.#ctor(System.Guid,System.Guid,System.String,System.String,System.Guid,System.String,System.String,System.String,System.DateTimeOffset)">
+            <summary>Represents an enrollment list row.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.CourseCatalogItemResponse">
+            <summary>Represents a catalog course card.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.CourseCatalogItemResponse.#ctor(System.Guid,System.String,System.String,System.String,System.String,System.Int32,System.Int32,System.String,System.Nullable{System.Guid},System.Boolean,System.Boolean,System.Boolean)">
+            <summary>Represents a catalog course card.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.PublishedLessonSummaryResponse">
+            <summary>Represents a published lesson outline item.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.PublishedLessonSummaryResponse.#ctor(System.Guid,System.String,System.Int32,System.Int32,System.String)">
+            <summary>Represents a published lesson outline item.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.CourseDetailsResponse">
+            <summary>Represents published course details for an employee.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.CourseDetailsResponse.#ctor(System.Guid,System.String,System.String,System.String,System.String,System.String,System.String,System.Int32,System.Int32,System.Collections.Generic.IReadOnlyCollection{LearningPortal.Shared.Enrollments.PublishedLessonSummaryResponse},System.String,System.Nullable{System.Guid},System.Boolean,System.Boolean)">
+            <summary>Represents published course details for an employee.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.MyLearningItemResponse">
+            <summary>Represents one course in My Learning.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.MyLearningItemResponse.#ctor(System.Guid,System.Guid,System.String,System.String,System.String,System.String,System.DateTimeOffset,System.Int32,System.Int32,System.Boolean)">
+            <summary>Represents one course in My Learning.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.PagedCourseCatalogResponse">
+            <summary>Contains a page of catalog courses.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.PagedCourseCatalogResponse.#ctor(System.Collections.Generic.IReadOnlyCollection{LearningPortal.Shared.Enrollments.CourseCatalogItemResponse},System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>Contains a page of catalog courses.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.PagedMyLearningResponse">
+            <summary>Contains a page of employee enrollments.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.PagedMyLearningResponse.#ctor(System.Collections.Generic.IReadOnlyCollection{LearningPortal.Shared.Enrollments.MyLearningItemResponse},System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>Contains a page of employee enrollments.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.PagedEnrollmentsResponse">
+            <summary>Contains a page of course enrollments.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.PagedEnrollmentsResponse.#ctor(System.Collections.Generic.IReadOnlyCollection{LearningPortal.Shared.Enrollments.EnrollmentListItemResponse},System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>Contains a page of course enrollments.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.WithdrawEnrollmentRequest">
+            <summary>Supplies the expected enrollment concurrency value.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.WithdrawEnrollmentRequest.#ctor(System.String)">
+            <summary>Supplies the expected enrollment concurrency value.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.GetCatalogRequest">
+            <summary>Supplies common catalog filters.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.GetCatalogRequest.#ctor(System.String,System.String,System.Int32,System.Int32)">
+            <summary>Supplies common catalog filters.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Enrollments.GetEnrollmentsRequest">
+            <summary>Supplies common enrollment filters.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Enrollments.GetEnrollmentsRequest.#ctor(System.String,System.String,System.Int32,System.Int32)">
+            <summary>Supplies common enrollment filters.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Identity.AuthenticationResponse">
+            <summary>
+            Represents a successfully issued access and refresh token pair.
+            </summary>
+            <param name="AccessToken">The signed JWT access token.</param>
+            <param name="AccessTokenExpiresAtUtc">The access token expiry in UTC.</param>
+            <param name="RefreshToken">The opaque refresh token returned only to the caller.</param>
+            <param name="RefreshTokenExpiresAtUtc">The refresh token expiry in UTC.</param>
+        </member>
+        <member name="M:LearningPortal.Shared.Identity.AuthenticationResponse.#ctor(System.String,System.DateTimeOffset,System.String,System.DateTimeOffset)">
+            <summary>
+            Represents a successfully issued access and refresh token pair.
+            </summary>
+            <param name="AccessToken">The signed JWT access token.</param>
+            <param name="AccessTokenExpiresAtUtc">The access token expiry in UTC.</param>
+            <param name="RefreshToken">The opaque refresh token returned only to the caller.</param>
+            <param name="RefreshTokenExpiresAtUtc">The refresh token expiry in UTC.</param>
+        </member>
+        <member name="P:LearningPortal.Shared.Identity.AuthenticationResponse.AccessToken">
+            <summary>The signed JWT access token.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Identity.AuthenticationResponse.AccessTokenExpiresAtUtc">
+            <summary>The access token expiry in UTC.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Identity.AuthenticationResponse.RefreshToken">
+            <summary>The opaque refresh token returned only to the caller.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Identity.AuthenticationResponse.RefreshTokenExpiresAtUtc">
+            <summary>The refresh token expiry in UTC.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Identity.LoginRequest">
+            <summary>Represents credentials submitted to the token endpoint.</summary>
+            <param name="Email">The user's email address.</param>
+            <param name="Password">The user's password.</param>
+            <param name="RememberMe">Whether the browser session should persist.</param>
+        </member>
+        <member name="M:LearningPortal.Shared.Identity.LoginRequest.#ctor(System.String,System.String,System.Boolean)">
+            <summary>Represents credentials submitted to the token endpoint.</summary>
+            <param name="Email">The user's email address.</param>
+            <param name="Password">The user's password.</param>
+            <param name="RememberMe">Whether the browser session should persist.</param>
+        </member>
+        <member name="P:LearningPortal.Shared.Identity.LoginRequest.Email">
+            <summary>The user's email address.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Identity.LoginRequest.Password">
+            <summary>The user's password.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Identity.LoginRequest.RememberMe">
+            <summary>Whether the browser session should persist.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Identity.RefreshTokenRequest">
+            <summary>
+            Represents a request to rotate an active refresh token.
+            </summary>
+            <param name="RefreshToken">The raw refresh token previously issued to the caller.</param>
+        </member>
+        <member name="M:LearningPortal.Shared.Identity.RefreshTokenRequest.#ctor(System.String)">
+            <summary>
+            Represents a request to rotate an active refresh token.
+            </summary>
+            <param name="RefreshToken">The raw refresh token previously issued to the caller.</param>
+        </member>
+        <member name="P:LearningPortal.Shared.Identity.RefreshTokenRequest.RefreshToken">
+            <summary>The raw refresh token previously issued to the caller.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Identity.RegisterRequest">
+            <summary>Supplies public self-registration values without role selection.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Identity.RegisterRequest.#ctor(System.String,System.String,System.String,System.String,System.String)">
+            <summary>Supplies public self-registration values without role selection.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Identity.CurrentUserResponse">
+            <summary>Returns the safe authenticated-user profile.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Identity.CurrentUserResponse.#ctor(System.Guid,System.String,System.String,System.Collections.Generic.IReadOnlyCollection{System.String},System.Boolean)">
+            <summary>Returns the safe authenticated-user profile.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Identity.RevokeTokenRequest">
+            <summary>
+            Represents a request to revoke a refresh token.
+            </summary>
+            <param name="RefreshToken">The raw refresh token to revoke.</param>
+        </member>
+        <member name="M:LearningPortal.Shared.Identity.RevokeTokenRequest.#ctor(System.String)">
+            <summary>
+            Represents a request to revoke a refresh token.
+            </summary>
+            <param name="RefreshToken">The raw refresh token to revoke.</param>
+        </member>
+        <member name="P:LearningPortal.Shared.Identity.RevokeTokenRequest.RefreshToken">
+            <summary>The raw refresh token to revoke.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Learning.LessonProgressResponse">
+            <summary>Represents learner progress for one published lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Learning.LessonProgressResponse.#ctor(System.Guid,System.String,System.Nullable{System.DateTimeOffset},System.Nullable{System.DateTimeOffset},System.Nullable{System.DateTimeOffset},System.String)">
+            <summary>Represents learner progress for one published lesson.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Learning.LearningLessonOutlineItemResponse">
+            <summary>Represents a learner-safe lesson outline row.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Learning.LearningLessonOutlineItemResponse.#ctor(System.Guid,System.String,System.Int32,System.Int32,System.String,System.String,System.Boolean)">
+            <summary>Represents a learner-safe lesson outline row.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Learning.CourseProgressResponse">
+            <summary>Represents aggregate progress for an enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Learning.CourseProgressResponse.#ctor(System.Guid,System.String,System.Int32,System.Int32,System.Int32,System.Boolean)">
+            <summary>Represents aggregate progress for an enrollment.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Learning.ContinueLearningDestinationResponse">
+            <summary>Represents the next learner lesson destination, when one exists.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Learning.ContinueLearningDestinationResponse.#ctor(System.Guid,System.String,System.Guid,System.String)">
+            <summary>Represents the next learner lesson destination, when one exists.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Learning.LessonPlayerResponse">
+            <summary>Contains learner content, navigation, outline, and progress.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Learning.LessonPlayerResponse.#ctor(System.Guid,System.Guid,System.String,System.String,System.Guid,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.Collections.Generic.IReadOnlyCollection{LearningPortal.Shared.Learning.LearningLessonOutlineItemResponse},System.Nullable{System.Guid},System.Nullable{System.Guid},LearningPortal.Shared.Learning.CourseProgressResponse)">
+            <summary>Contains learner content, navigation, outline, and progress.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Learning.CompleteLessonResponse">
+            <summary>Contains the post-completion learner state.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Learning.CompleteLessonResponse.#ctor(LearningPortal.Shared.Learning.LessonProgressResponse,LearningPortal.Shared.Learning.CourseProgressResponse,System.Nullable{System.Guid})">
+            <summary>Contains the post-completion learner state.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Lessons.CreateLessonRequest">
+            <summary>Contains fields required to create a lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Lessons.CreateLessonRequest.#ctor(System.String,System.String,System.Int32,System.Int32,System.String,System.String,System.String)">
+            <summary>Contains fields required to create a lesson.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Lessons.GetLessonsRequest">
+            <summary>Contains lesson search and paging values.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Lessons.GetLessonsRequest.Search">
+            <summary>Gets or sets the search term.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Lessons.GetLessonsRequest.PageNumber">
+            <summary>Gets or sets the one-based page number.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Lessons.GetLessonsRequest.PageSize">
+            <summary>Gets or sets the page size.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Lessons.LessonContentPreviewRequest">
+            <summary>Contains transient lesson content to validate and preview.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Lessons.LessonContentPreviewRequest.#ctor(System.String,System.String,System.String)">
+            <summary>Contains transient lesson content to validate and preview.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Lessons.LessonContentPreviewResponse">
+            <summary>Contains server-validated safe lesson preview data.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Lessons.LessonContentPreviewResponse.#ctor(System.String,System.String,System.String,System.String,System.String,System.Boolean)">
+            <summary>Contains server-validated safe lesson preview data.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Lessons.LessonListItemResponse">
+            <summary>Represents a lesson list row.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Lessons.LessonListItemResponse.#ctor(System.Guid,System.Guid,System.String,System.Int32,System.Int32,System.String,System.String,System.String)">
+            <summary>Represents a lesson list row.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Lessons.LessonResponse">
+            <summary>Represents complete lesson management details and safe preview data.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Lessons.LessonResponse.#ctor(System.Guid,System.Guid,System.String,System.String,System.Int32,System.Int32,System.String,System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String,System.DateTimeOffset,System.Nullable{System.DateTimeOffset},System.String)">
+            <summary>Represents complete lesson management details and safe preview data.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Lessons.MoveLessonRequest">
+            <summary>Contains an adjacent target order and concurrency token.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Lessons.MoveLessonRequest.#ctor(System.Int32,System.String)">
+            <summary>Contains an adjacent target order and concurrency token.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Lessons.PagedLessonsResponse">
+            <summary>Represents one page of lessons.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Lessons.PagedLessonsResponse.#ctor(System.Collections.Generic.IReadOnlyList{LearningPortal.Shared.Lessons.LessonListItemResponse},System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>Represents one page of lessons.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Lessons.UpdateLessonRequest">
+            <summary>Contains fields required to update a Draft lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Lessons.UpdateLessonRequest.#ctor(System.String,System.String,System.Int32,System.Int32,System.String,System.String,System.String,System.String)">
+            <summary>Contains fields required to update a Draft lesson.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Error">
+            <summary>
+            Represents an immutable, transport-independent application error.
+            </summary>
+            <param name="Code">The stable, machine-readable error code.</param>
+            <param name="Message">The safe, human-readable error message.</param>
+            <param name="ErrorType">The category of the error.</param>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Error.#ctor(System.String,System.String,LearningPortal.Shared.Results.ErrorType)">
+            <summary>
+            Represents an immutable, transport-independent application error.
+            </summary>
+            <param name="Code">The stable, machine-readable error code.</param>
+            <param name="Message">The safe, human-readable error message.</param>
+            <param name="ErrorType">The category of the error.</param>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Error.Code">
+            <summary>The stable, machine-readable error code.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Error.Message">
+            <summary>The safe, human-readable error message.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Error.ErrorType">
+            <summary>The category of the error.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Errors">
+            <summary>
+            Provides reusable, consistently coded application errors.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Errors.Validation">
+            <summary>
+            Provides reusable validation errors.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Validation.Failed(System.String)">
+            <summary>
+            Creates an error containing one or more validation failure messages.
+            </summary>
+            <param name="message">The safe, aggregated validation message.</param>
+            <returns>A validation failure error.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Validation.Required(System.String)">
+            <summary>
+            Creates an error indicating that a required field has no value.
+            </summary>
+            <param name="field">The field name used in the error code and message.</param>
+            <returns>A validation error for the required field.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Validation.Invalid(System.String)">
+            <summary>
+            Creates an error indicating that a field value is invalid.
+            </summary>
+            <param name="field">The field name used in the error code and message.</param>
+            <returns>A validation error for the invalid field.</returns>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Errors.Common">
+            <summary>
+            Provides reusable errors shared across application features.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Common.NotFound(System.String,System.Object)">
+            <summary>
+            Creates an error indicating that an entity could not be found.
+            </summary>
+            <param name="entity">The entity type or display name.</param>
+            <param name="id">The requested entity identifier.</param>
+            <returns>A not-found error for the requested entity.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Common.Duplicate(System.String)">
+            <summary>
+            Creates an error indicating that an entity already exists.
+            </summary>
+            <param name="entity">The entity type or display name.</param>
+            <returns>A conflict error for the duplicate entity.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Common.Failure(System.String,System.String)">
+            <summary>
+            Creates an expected operation failure.
+            </summary>
+            <param name="code">The stable, machine-readable error code.</param>
+            <param name="message">The safe, human-readable error message.</param>
+            <returns>An expected failure error.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Common.Unexpected">
+            <summary>
+            Creates an unexpected technical failure without exposing implementation details.
+            </summary>
+            <returns>An unexpected failure error.</returns>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Errors.Authentication">
+            <summary>
+            Provides reusable authentication errors.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Authentication.Unauthorized">
+            <summary>
+            Creates an error indicating that authentication is required or has failed.
+            </summary>
+            <returns>An unauthorized error.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Authentication.InvalidCredentials">
+            <summary>
+            Creates an error for invalid credentials without identifying which credential failed.
+            </summary>
+            <returns>An invalid-credentials error.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Authentication.InvalidRefreshToken">
+            <summary>
+            Creates an error for a refresh token that is unknown or malformed.
+            </summary>
+            <returns>An invalid refresh-token error.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Authentication.RefreshTokenExpired">
+            <summary>
+            Creates an error for an expired refresh token.
+            </summary>
+            <returns>An expired refresh-token error.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Authentication.RefreshTokenRevoked">
+            <summary>
+            Creates an error for an explicitly revoked refresh token.
+            </summary>
+            <returns>A revoked refresh-token error.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Authentication.RefreshTokenReused">
+            <summary>
+            Creates an error when a rotated refresh token is presented again.
+            </summary>
+            <returns>A refresh-token replay error.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Authentication.UserLocked">
+            <summary>
+            Creates an error for a user currently locked by ASP.NET Identity.
+            </summary>
+            <returns>A locked-user error.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Authentication.UserUnavailable">
+            <summary>
+            Creates an error for a disabled or otherwise unavailable user.
+            </summary>
+            <returns>An unavailable-user error.</returns>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Errors.Authorization">
+            <summary>
+            Provides reusable authorization errors.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Authorization.Forbidden">
+            <summary>
+            Creates an error indicating that the caller lacks permission for an operation.
+            </summary>
+            <returns>A forbidden error.</returns>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Errors.UserManagement">
+            <summary>
+            Provides reusable administrator user-management errors.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.UserManagement.UserNotFound(System.Guid)">
+            <summary>Creates an error for an unknown user identifier.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.UserManagement.InvalidRole">
+            <summary>Creates an error for a role outside the application allowlist.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.UserManagement.UpdateFailed">
+            <summary>Creates a safe failure for an Identity user update that could not be completed.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.UserManagement.RoleAssignmentFailed">
+            <summary>Creates a safe failure for an Identity role assignment that could not be completed.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Errors.CourseManagement">
+            <summary>Provides course-management errors.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.CourseManagement.NotFound(System.Guid)">
+            <summary>Creates an error for an unknown course.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.CourseManagement.DuplicateSlug">
+            <summary>Creates an error for a duplicate normalized slug.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.CourseManagement.InvalidInstructor">
+            <summary>Creates an error for an invalid assigned instructor.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.CourseManagement.InvalidState(System.String)">
+            <summary>Creates an error for an invalid lifecycle operation.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.CourseManagement.ConcurrencyConflict">
+            <summary>Creates an optimistic-concurrency conflict.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Errors.LessonManagement">
+            <summary>Provides lesson-management errors.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.LessonManagement.NotFound(System.Guid)">
+            <summary>Creates a missing lesson error.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.LessonManagement.DuplicateOrder">
+            <summary>Creates a duplicate order error.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.LessonManagement.InvalidState(System.String)">
+            <summary>Creates an invalid lifecycle error.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.LessonManagement.InvalidOrder">
+            <summary>Creates an invalid order error.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.LessonManagement.ConcurrencyConflict">
+            <summary>Creates a concurrency conflict error.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.LessonManagement.InvalidContent(System.String)">
+            <summary>Creates a lesson content validation error.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Errors.Enrollment">
+            <summary>Provides enrollment errors.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Enrollment.NotFound(System.Guid)">
+            <summary>Creates a missing enrollment error.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Enrollment.Duplicate">
+            <summary>Creates a duplicate active enrollment error.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Enrollment.CourseNotPublished">
+            <summary>Creates an unpublished-course error.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Enrollment.InvalidState">
+            <summary>Creates an invalid transition error.</summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Errors.Enrollment.ConcurrencyConflict">
+            <summary>Creates an optimistic concurrency conflict.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.ErrorType">
+            <summary>
+            Defines transport-independent categories for application errors.
+            </summary>
+        </member>
+        <member name="F:LearningPortal.Shared.Results.ErrorType.Validation">
+            <summary>Indicates that one or more input values are invalid.</summary>
+        </member>
+        <member name="F:LearningPortal.Shared.Results.ErrorType.NotFound">
+            <summary>Indicates that a requested resource does not exist.</summary>
+        </member>
+        <member name="F:LearningPortal.Shared.Results.ErrorType.Conflict">
+            <summary>Indicates that the operation conflicts with existing state.</summary>
+        </member>
+        <member name="F:LearningPortal.Shared.Results.ErrorType.Unauthorized">
+            <summary>Indicates that authentication is required or has failed.</summary>
+        </member>
+        <member name="F:LearningPortal.Shared.Results.ErrorType.Forbidden">
+            <summary>Indicates that the authenticated caller is not permitted to perform the operation.</summary>
+        </member>
+        <member name="F:LearningPortal.Shared.Results.ErrorType.Failure">
+            <summary>Indicates an expected application or business operation failure.</summary>
+        </member>
+        <member name="F:LearningPortal.Shared.Results.ErrorType.Unexpected">
+            <summary>Indicates an unexpected technical failure.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Result">
+            <summary>
+            Represents the immutable outcome of an operation that does not return a value.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Result.IsSuccess">
+            <summary>
+            Gets a value indicating whether the operation succeeded.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Result.IsFailure">
+            <summary>
+            Gets a value indicating whether the operation failed.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Result.Error">
+            <summary>
+            Gets the operation error when the operation failed; otherwise, <see langword="null"/>.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Result.Success">
+            <summary>
+            Creates a successful result.
+            </summary>
+            <returns>A successful result.</returns>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Result.Failure(LearningPortal.Shared.Results.Error)">
+            <summary>
+            Creates a failed result containing the specified error.
+            </summary>
+            <param name="error">The error that caused the operation to fail.</param>
+            <returns>A failed result.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="error"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="T:LearningPortal.Shared.Results.Result`1">
+            <summary>
+            Represents the immutable outcome of an operation that returns a value on success.
+            </summary>
+            <typeparam name="T">The type of the successful value.</typeparam>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Result`1.Value">
+            <summary>
+            Gets the successful operation value.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown when accessed on a failed result.</exception>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Result`1.Error">
+            <summary>
+            Gets the operation error when the operation failed; otherwise, <see langword="null"/>.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Result`1.IsSuccess">
+            <summary>
+            Gets a value indicating whether the operation succeeded.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Shared.Results.Result`1.IsFailure">
+            <summary>
+            Gets a value indicating whether the operation failed.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Result`1.Success(`0)">
+            <summary>
+            Creates a successful result containing the specified value.
+            </summary>
+            <param name="value">The successful operation value.</param>
+            <returns>A successful result containing <paramref name="value"/>.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="M:LearningPortal.Shared.Results.Result`1.Failure(LearningPortal.Shared.Results.Error)">
+            <summary>
+            Creates a failed result containing the specified error.
+            </summary>
+            <param name="error">The error that caused the operation to fail.</param>
+            <returns>A failed result.</returns>
+            <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="error"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="T:LearningPortal.Shared.UserManagement.AssignUserRoleRequest">
+            <summary>
+            Models an additive application-role assignment.
+            </summary>
+            <param name="Role">The application role to assign.</param>
+        </member>
+        <member name="M:LearningPortal.Shared.UserManagement.AssignUserRoleRequest.#ctor(System.String)">
+            <summary>
+            Models an additive application-role assignment.
+            </summary>
+            <param name="Role">The application role to assign.</param>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.AssignUserRoleRequest.Role">
+            <summary>The application role to assign.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.UserManagement.GetUsersRequest">
+            <summary>
+            Models user search and pagination query-string values.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.GetUsersRequest.Search">
+            <summary>Gets an optional email or display-name search term.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.GetUsersRequest.PageNumber">
+            <summary>Gets the one-based page number.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.GetUsersRequest.PageSize">
+            <summary>Gets the number of users requested per page.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.UserManagement.PagedUsersResponse">
+            <summary>
+            Contains one page of administrator-safe user projections.
+            </summary>
+            <param name="Items">The users in the requested page.</param>
+            <param name="PageNumber">The one-based page number.</param>
+            <param name="PageSize">The requested page size.</param>
+            <param name="TotalCount">The total matching user count.</param>
+            <param name="TotalPages">The total number of available pages.</param>
+        </member>
+        <member name="M:LearningPortal.Shared.UserManagement.PagedUsersResponse.#ctor(System.Collections.Generic.IReadOnlyCollection{LearningPortal.Shared.UserManagement.UserResponse},System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Contains one page of administrator-safe user projections.
+            </summary>
+            <param name="Items">The users in the requested page.</param>
+            <param name="PageNumber">The one-based page number.</param>
+            <param name="PageSize">The requested page size.</param>
+            <param name="TotalCount">The total matching user count.</param>
+            <param name="TotalPages">The total number of available pages.</param>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.PagedUsersResponse.Items">
+            <summary>The users in the requested page.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.PagedUsersResponse.PageNumber">
+            <summary>The one-based page number.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.PagedUsersResponse.PageSize">
+            <summary>The requested page size.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.PagedUsersResponse.TotalCount">
+            <summary>The total matching user count.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.PagedUsersResponse.TotalPages">
+            <summary>The total number of available pages.</summary>
+        </member>
+        <member name="T:LearningPortal.Shared.UserManagement.UserResponse">
+            <summary>
+            Represents the administrator-safe projection of an Identity user.
+            </summary>
+            <param name="Id">The user identifier.</param>
+            <param name="Email">The user's email address.</param>
+            <param name="DisplayName">The user's display name.</param>
+            <param name="IsEnabled">Whether the user may authenticate.</param>
+            <param name="Roles">The user's distinct assigned roles.</param>
+        </member>
+        <member name="M:LearningPortal.Shared.UserManagement.UserResponse.#ctor(System.Guid,System.String,System.String,System.Boolean,System.Collections.Generic.IReadOnlyCollection{System.String})">
+            <summary>
+            Represents the administrator-safe projection of an Identity user.
+            </summary>
+            <param name="Id">The user identifier.</param>
+            <param name="Email">The user's email address.</param>
+            <param name="DisplayName">The user's display name.</param>
+            <param name="IsEnabled">Whether the user may authenticate.</param>
+            <param name="Roles">The user's distinct assigned roles.</param>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.UserResponse.Id">
+            <summary>The user identifier.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.UserResponse.Email">
+            <summary>The user's email address.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.UserResponse.DisplayName">
+            <summary>The user's display name.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.UserResponse.IsEnabled">
+            <summary>Whether the user may authenticate.</summary>
+        </member>
+        <member name="P:LearningPortal.Shared.UserManagement.UserResponse.Roles">
+            <summary>The user's distinct assigned roles.</summary>
+        </member>
+    </members>
+</doc>

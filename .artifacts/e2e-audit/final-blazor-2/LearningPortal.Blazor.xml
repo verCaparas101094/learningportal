@@ -1,0 +1,517 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LearningPortal.Blazor</name>
+    </assembly>
+    <members>
+        <member name="T:LearningPortal.Blazor.DependencyInjection">
+            <summary>Registers services owned by the Blazor presentation host.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.DependencyInjection.AddBlazorPresentation(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>Adds Razor components, component authorization, the API client, and host health checks.</summary>
+        </member>
+        <member name="T:LearningPortal.Blazor.Models.ApiHealthResponse">
+            <summary>Represents the API health response displayed by the portal shell.</summary>
+            <param name="Status">The aggregate API health status.</param>
+        </member>
+        <member name="M:LearningPortal.Blazor.Models.ApiHealthResponse.#ctor(System.String)">
+            <summary>Represents the API health response displayed by the portal shell.</summary>
+            <param name="Status">The aggregate API health status.</param>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.ApiHealthResponse.Status">
+            <summary>The aggregate API health status.</summary>
+        </member>
+        <member name="T:LearningPortal.Blazor.Models.CourseFormModel">
+            <summary>Contains validated course form values.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.CourseFormModel.Title">
+            <summary>Gets or sets the title.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.CourseFormModel.Slug">
+            <summary>Gets or sets the slug candidate.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.CourseFormModel.Description">
+            <summary>Gets or sets the description.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.CourseFormModel.Category">
+            <summary>Gets or sets the category.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.CourseFormModel.ThumbnailUrl">
+            <summary>Gets or sets the optional thumbnail URL.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.CourseFormModel.InstructorId">
+            <summary>Gets or sets the administrator-selected instructor.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.CourseFormModel.RowVersion">
+            <summary>Gets or sets the concurrency value for editing.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Models.CourseFormModel.FromCourse(LearningPortal.Shared.Courses.CourseResponse)">
+            <summary>Creates form values from a course response.</summary>
+        </member>
+        <member name="T:LearningPortal.Blazor.Models.LessonFormModel">
+            <summary>Contains editable lesson form values.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.LessonFormModel.Title">
+            <summary>Gets or sets the title.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.LessonFormModel.Description">
+            <summary>Gets or sets the description.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.LessonFormModel.MarkdownContent">
+            <summary>Gets or sets article Markdown source.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.LessonFormModel.ExternalUrl">
+            <summary>Gets or sets an external content URL.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.LessonFormModel.Order">
+            <summary>Gets or sets the order.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.LessonFormModel.EstimatedMinutes">
+            <summary>Gets or sets the estimated duration.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.LessonFormModel.LessonType">
+            <summary>Gets or sets the lesson type.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Models.LessonFormModel.RowVersion">
+            <summary>Gets or sets the concurrency value.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Models.LessonFormModel.Validate(System.ComponentModel.DataAnnotations.ValidationContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Blazor.Services.ApiProblemException">
+            <summary>Represents a safe RFC 7807 API failure.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.ApiProblemException.#ctor(System.Net.HttpStatusCode,System.String,System.String)">
+            <summary>Represents a safe RFC 7807 API failure.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Services.ApiProblemException.ErrorCode">
+            <summary>Gets the stable API error code when supplied.</summary>
+        </member>
+        <member name="T:LearningPortal.Blazor.Services.AuthenticationNavigation">
+            <summary>
+            Builds safe local navigation URLs for authentication and authorization outcomes.
+            </summary>
+        </member>
+        <member name="F:LearningPortal.Blazor.Services.AuthenticationNavigation.SignInRoute">
+            <summary>Gets the existing interactive sign-in route.</summary>
+        </member>
+        <member name="F:LearningPortal.Blazor.Services.AuthenticationNavigation.RegisterRoute">
+            <summary>Gets the existing interactive registration route.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.AuthenticationNavigation.BuildAccessDeniedUrl(System.Boolean,System.String)">
+            <summary>Builds the access-denied route for the current authentication state.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.AuthenticationNavigation.BuildSignInUrl(System.String)">
+            <summary>Builds a sign-in URL that returns to a validated local portal path.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.AuthenticationNavigation.BuildRegisterUrl(System.String)">
+            <summary>Builds a registration URL that returns to a validated local portal path.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.AuthenticationNavigation.ResolveCurrentReturnUrl(System.String,System.String)">
+            <summary>
+            Resolves the best local return target for the current page, including an
+            original target carried by the unauthenticated access-denied page.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.AuthenticationNavigation.NormalizeLocalReturnUrl(System.String)">
+            <summary>
+            Normalizes a return target to a local root-relative path to prevent open redirects.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Blazor.Services.CurrentBearerTokenHandler">
+            <summary>
+            Forwards the current request's JWT bearer token to Learning Portal API requests.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.CurrentBearerTokenHandler.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)">
+            <summary>
+            Forwards the current request's JWT bearer token to Learning Portal API requests.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.CurrentBearerTokenHandler.SendAsync(System.Net.Http.HttpRequestMessage,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Blazor.Services.LearningPortalApiClient">
+            <summary>Provides typed, asynchronous access to the Learning Portal API.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.#ctor(System.Net.Http.HttpClient)">
+            <summary>Provides typed, asynchronous access to the Learning Portal API.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetHealthAsync(System.Threading.CancellationToken)">
+            <summary>Gets the API liveness state.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetUsersAsync(LearningPortal.Shared.UserManagement.GetUsersRequest,System.Threading.CancellationToken)">
+            <summary>Gets one filtered, paginated page of administrator-safe users.</summary>
+            <param name="request">The search and pagination values.</param>
+            <param name="cancellationToken">Cancels the request.</param>
+            <returns>The matching page of users.</returns>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.EnableUserAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Enables one user account.</summary>
+            <param name="userId">The user identifier.</param>
+            <param name="cancellationToken">Cancels the request.</param>
+            <returns>The updated user.</returns>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.DisableUserAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Disables one user account.</summary>
+            <param name="userId">The user identifier.</param>
+            <param name="cancellationToken">Cancels the request.</param>
+            <returns>The updated user.</returns>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.AssignUserRoleAsync(System.Guid,LearningPortal.Shared.UserManagement.AssignUserRoleRequest,System.Threading.CancellationToken)">
+            <summary>Adds one valid application role to a user.</summary>
+            <param name="userId">The user identifier.</param>
+            <param name="request">The role assignment.</param>
+            <param name="cancellationToken">Cancels the request.</param>
+            <returns>The updated user.</returns>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetCoursesAsync(LearningPortal.Shared.Courses.GetCoursesRequest,System.Threading.CancellationToken)">
+            <summary>Gets one filtered course page.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetCourseByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets one course by identifier.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.CreateCourseAsync(LearningPortal.Shared.Courses.CreateCourseRequest,System.Threading.CancellationToken)">
+            <summary>Creates a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.UpdateCourseAsync(System.Guid,LearningPortal.Shared.Courses.UpdateCourseRequest,System.Threading.CancellationToken)">
+            <summary>Updates a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.PublishCourseAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Publishes a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.ArchiveCourseAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Archives a Published course.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.DeleteCourseAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Deletes a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetLessonsAsync(System.Guid,LearningPortal.Shared.Lessons.GetLessonsRequest,System.Threading.CancellationToken)">
+            <summary>Gets a filtered lesson page for a course.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetLessonAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets one lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.CreateLessonAsync(System.Guid,LearningPortal.Shared.Lessons.CreateLessonRequest,System.Threading.CancellationToken)">
+            <summary>Creates a lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.UpdateLessonAsync(System.Guid,LearningPortal.Shared.Lessons.UpdateLessonRequest,System.Threading.CancellationToken)">
+            <summary>Updates a Draft lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.PublishLessonAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Publishes a lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.MoveLessonAsync(System.Guid,LearningPortal.Shared.Lessons.MoveLessonRequest,System.Threading.CancellationToken)">
+            <summary>Moves a Draft lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.DeleteLessonAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Deletes a Draft lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.PreviewLessonAsync(LearningPortal.Shared.Lessons.LessonContentPreviewRequest,System.Threading.CancellationToken)">
+            <summary>Builds a non-persisted safe lesson preview.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetCatalogAsync(LearningPortal.Shared.Enrollments.GetCatalogRequest,System.Threading.CancellationToken)">
+            <summary>Gets the published employee course catalog.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetCatalogCourseAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Gets published course details.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.EnrollAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Enrolls the current employee in a course.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.WithdrawAsync(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>Withdraws an enrollment using optimistic concurrency.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetMyEnrollmentsAsync(LearningPortal.Shared.Enrollments.GetEnrollmentsRequest,System.Threading.CancellationToken)">
+            <summary>Gets the current employee's enrollments.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetEnrollmentAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets an authorized enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetCourseEnrollmentsAsync(System.Guid,LearningPortal.Shared.Enrollments.GetEnrollmentsRequest,System.Threading.CancellationToken)">
+            <summary>Gets an authorized course enrollment page.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetLessonPlayerAsync(System.String,System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets learner-safe lesson player data.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.AccessLessonAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Records learner access to a lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.CompleteLessonAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Completes a lesson idempotently.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetContinueLearningAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Resolves the learner's next appropriate lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetCourseQuizzesAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets quizzes for course administration.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetQuizAdministrationAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets an editable quiz graph.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.CreateQuizAsync(System.Guid,LearningPortal.Shared.Quizzes.SaveQuizRequest,System.Threading.CancellationToken)">
+            <summary>Creates a draft quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.UpdateQuizAsync(System.Guid,LearningPortal.Shared.Quizzes.SaveQuizRequest,System.Threading.CancellationToken)">
+            <summary>Updates draft quiz details.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.AddQuizQuestionAsync(System.Guid,LearningPortal.Shared.Quizzes.SaveQuizQuestionRequest,System.Threading.CancellationToken)">
+            <summary>Adds a validated question and its answer choices.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.UpdateQuizQuestionAsync(System.Guid,System.Guid,LearningPortal.Shared.Quizzes.SaveQuizQuestionRequest,System.Threading.CancellationToken)">
+            <summary>Updates a draft question and its answer-choice graph.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.PublishQuizAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Publishes a valid draft quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.ArchiveQuizAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Archives a published quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetQuizAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets learner-safe quiz content without correctness flags.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.StartQuizAttemptAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Starts or resumes the single active attempt.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.SubmitQuizAttemptAsync(System.Guid,LearningPortal.Shared.Quizzes.SubmitQuizAttemptRequest,System.Threading.CancellationToken)">
+            <summary>Submits learner selections for server scoring.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetQuizAttemptAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets an owned attempt or result.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetMyQuizAttemptsAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets the current learner's attempt history.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetMyInstructorEligibilityAsync(System.Threading.CancellationToken)">
+            <summary>Gets the signed-in user's skill qualifications.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetUserInstructorEligibilityAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets administrator-visible eligibility for a user.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetSkillsAsync(System.Threading.CancellationToken)">
+            <summary>Gets active skills.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetEligibleInstructorsAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets enabled eligible instructors for one skill.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.RecalculateInstructorEligibilityAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Recalculates a user's qualifications from submitted attempts.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.AssignCourseInstructorAsync(System.Guid,LearningPortal.Shared.InstructorEligibility.AssignCourseInstructorRequest,System.Threading.CancellationToken)">
+            <summary>Assigns an eligible instructor to a matching course skill.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.StartAiTutorConversationAsync(LearningPortal.Shared.AiTutor.StartAiTutorConversationRequest,System.Threading.CancellationToken)">
+            <summary>Starts a learner-owned AI Tutor conversation.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetCourseQuizzesForLearnerAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets published quizzes visible to the current enrolled learner.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetMyAiTutorConversationsAsync(System.Threading.CancellationToken)">
+            <summary>Gets the signed-in learner's AI Tutor conversations.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetAiTutorConversationAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets one learner-owned AI Tutor conversation.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.SendAiTutorMessageAsync(System.Guid,LearningPortal.Shared.AiTutor.SendAiTutorMessageRequest,System.Threading.CancellationToken)">
+            <summary>Sends a question to the local AI Tutor.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.ArchiveAiTutorConversationAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Archives a learner-owned AI Tutor conversation.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetOllamaHealthAsync(System.Threading.CancellationToken)">
+            <summary>Gets administrator-visible local Ollama health.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.LearningPortalApiClient.GetCurrentUserAsync(System.Threading.CancellationToken)">
+            <summary>Gets the safe profile for the authenticated user.</summary>
+        </member>
+        <member name="T:LearningPortal.Blazor.Services.PortalAuthenticationEndpoints">
+            <summary>Maps the browser-facing cookie bridge to the existing authentication API.</summary>
+        </member>
+        <member name="F:LearningPortal.Blazor.Services.PortalAuthenticationEndpoints.ApiClientName">
+            <summary>Gets the named client used only for anonymous authentication calls.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.PortalAuthenticationEndpoints.MapPortalAuthenticationEndpoints(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>Maps browser sign-in using the existing API login operation.</summary>
+        </member>
+        <member name="T:LearningPortal.Blazor.Services.PortalCookieAuthenticationEvents">
+            <summary>Restores browser sessions by rotating expiring API access tokens.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.PortalCookieAuthenticationEvents.#ctor(LearningPortal.Blazor.Services.PortalSessionRefreshCoordinator)">
+            <summary>Restores browser sessions by rotating expiring API access tokens.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.PortalCookieAuthenticationEvents.RedirectToLogin(Microsoft.AspNetCore.Authentication.RedirectContext{Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions})">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.PortalCookieAuthenticationEvents.RedirectToAccessDenied(Microsoft.AspNetCore.Authentication.RedirectContext{Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions})">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.PortalCookieAuthenticationEvents.ValidatePrincipal(Microsoft.AspNetCore.Authentication.Cookies.CookieValidatePrincipalContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Blazor.Services.PortalSessionRefreshCoordinator">
+            <summary>Coalesces concurrent browser refresh-token rotations.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.PortalSessionRefreshCoordinator.#ctor(System.Net.Http.IHttpClientFactory)">
+            <summary>Coalesces concurrent browser refresh-token rotations.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Services.PortalSessionRefreshCoordinator.RefreshAsync(System.String)">
+            <summary>Refreshes one browser session without rotating the same token concurrently.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Courses.CourseStatusBadge.Status">
+            <summary>Gets or sets the course status.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Courses.CourseForm.Course">
+            <summary>Gets or sets the course being edited.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Courses.CourseForm.ShowInstructorId">
+            <summary>Gets or sets whether administrators may select ownership.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Courses.CourseForm.InstructorOptions">
+            <summary>Gets or sets the active instructors available during course creation.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Courses.CourseForm.IsSubmitting">
+            <summary>Gets or sets whether submission is processing.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Courses.CourseForm.ErrorMessage">
+            <summary>Gets or sets the API error message.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Courses.CourseForm.SubmitText">
+            <summary>Gets or sets the submit button text.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Courses.CourseForm.OnSubmit">
+            <summary>Gets or sets the successful form callback.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Courses.CourseForm.OnCancel">
+            <summary>Gets or sets the cancellation callback.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Components.Courses.CourseForm.OnParametersSet">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Pages.AccessDenied.Reason">
+            <summary>Gets or sets the non-sensitive redirect reason.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Pages.AccessDenied.ReturnUrl">
+            <summary>Gets or sets the original local page requested by the guest.</summary>
+        </member>
+        <member name="M:LearningPortal.Blazor.Components.Pages.Courses.OnInitializedAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Blazor.Components.Pages.Courses.DisposeAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Blazor.Components.Pages.Users.OnInitializedAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Blazor.Components.Pages.Users.DisposeAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Blazor.Components.RedirectToAccessDenied.OnInitializedAsync">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.AuthenticatedContent.Roles">
+            <summary>Gets or sets an optional comma-delimited list of allowed roles.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.AuthenticatedContent.ChildContent">
+            <summary>Gets or sets the content rendered for an authorized user.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.AppCard.AdditionalClass">
+            <summary>Gets or sets optional additional CSS classes.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.AppCard.ChildContent">
+            <summary>Gets or sets the content displayed inside the card.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.ConfirmDialog.IsOpen">
+            <summary>Gets or sets whether the dialog is visible.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.ConfirmDialog.Title">
+            <summary>Gets or sets the dialog title.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.ConfirmDialog.Message">
+            <summary>Gets or sets the confirmation message.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.ConfirmDialog.ConfirmText">
+            <summary>Gets or sets the confirmation button text.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.ConfirmDialog.IsDestructive">
+            <summary>Gets or sets whether the action is destructive.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.ConfirmDialog.IsBusy">
+            <summary>Gets or sets whether the action is processing.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.ConfirmDialog.OnConfirm">
+            <summary>Gets or sets the confirmation callback.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.ConfirmDialog.OnCancel">
+            <summary>Gets or sets the cancellation callback.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.EmptyState.Icon">
+            <summary>Gets or sets the decorative symbol.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.EmptyState.Title">
+            <summary>Gets or sets the empty-state heading.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.EmptyState.Description">
+            <summary>Gets or sets the empty-state explanation.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.EmptyState.Action">
+            <summary>Gets or sets an optional recovery action.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.LoadingState.Message">
+            <summary>Gets or sets the accessible loading message.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.PageHeader.Eyebrow">
+            <summary>Gets or sets optional context shown above the title.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.PageHeader.Title">
+            <summary>Gets or sets the page title.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.PageHeader.Description">
+            <summary>Gets or sets supporting page text.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.PageHeader.Actions">
+            <summary>Gets or sets optional page-level actions.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.PaginationControls.PageNumber">
+            <summary>Gets or sets the current page.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.PaginationControls.TotalPages">
+            <summary>Gets or sets the total pages.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.PaginationControls.Disabled">
+            <summary>Gets or sets whether navigation is disabled.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.PaginationControls.AriaLabel">
+            <summary>Gets or sets the accessible navigation label.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.PaginationControls.PageChanged">
+            <summary>Gets or sets the page-change callback.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.StatCard.Icon">
+            <summary>Gets or sets the concise icon or symbol.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.StatCard.Label">
+            <summary>Gets or sets the metric label.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.StatCard.Value">
+            <summary>Gets or sets the primary metric value.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.StatCard.Detail">
+            <summary>Gets or sets optional supporting text.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.StatusBadge.Text">
+            <summary>Gets or sets the text displayed by the badge.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Shared.StatusBadge.Tone">
+            <summary>Gets or sets the semantic tone: neutral, primary, success, warning, or danger.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Layout.NavigationSection.Title">
+            <summary>Gets or sets the navigation group title.</summary>
+        </member>
+        <member name="P:LearningPortal.Blazor.Components.Layout.NavigationSection.ChildContent">
+            <summary>Gets or sets the navigation links rendered in the group.</summary>
+        </member>
+        <member name="T:Program">
+            <summary>Provides a public entry point for integration-test hosting.</summary>
+        </member>
+    </members>
+</doc>

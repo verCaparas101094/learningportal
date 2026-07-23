@@ -24,6 +24,7 @@ public static class QuizEndpoints
 
         var learner = endpoints.MapGroup("/api/learning").RequireAuthorization();
         learner.MapGet("/quizzes/{quizId:guid}", GetQuizAsync);
+        learner.MapGet("/courses/{courseId:guid}/quizzes", GetCourseQuizzesAsync);
         learner.MapPost("/quizzes/{quizId:guid}/attempts", StartAsync);
         learner.MapGet("/quizzes/{quizId:guid}/attempts/me", GetMyAttemptsAsync);
         learner.MapGet("/quiz-attempts/{attemptId:guid}", GetAttemptAsync);
@@ -76,6 +77,12 @@ public static class QuizEndpoints
     private static async Task<IResult> GetQuizAsync(
         Guid quizId, IQueryHandler<GetQuiz, Result<QuizResponse>> handler, CancellationToken ct) =>
         (await handler.HandleAsync(new(quizId), ct)).ToHttpResult();
+
+    private static async Task<IResult> GetCourseQuizzesAsync(
+        Guid courseId,
+        IQueryHandler<GetCourseQuizzes, Result<IReadOnlyList<QuizListItemResponse>>> handler,
+        CancellationToken ct) =>
+        (await handler.HandleAsync(new(courseId), ct)).ToHttpResult();
 
     private static async Task<IResult> StartAsync(
         Guid quizId, ICommandDispatcher dispatcher, CancellationToken ct) =>

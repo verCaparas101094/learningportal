@@ -1,4 +1,5 @@
 @page "/my-learning"
+@attribute [Authorize]
 @rendermode InteractiveServer
 @inject LearningPortalApiClient ApiClient
 @inject NavigationManager Navigation
@@ -32,7 +33,7 @@ else
                         <a class="button" href="@($"/catalog/{item.CourseSlug}")">View details</a>
                         @if (item.CanContinue)
                         {
-                            <button class="button button-primary" disabled="@_mutating" @onclick="() => ContinueAsync(item.EnrollmentId)">Continue learning</button>
+                            <button class="button button-primary" data-testid="continue-course" disabled="@_mutating" @onclick="() => ContinueAsync(item.EnrollmentId)">Continue learning</button>
                             <button class="button button-danger" @onclick="() => OpenWithdraw(item.EnrollmentId)">Withdraw</button>
                         }
                     </div>

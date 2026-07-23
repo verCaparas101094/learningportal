@@ -442,6 +442,19 @@ public sealed class LearningPortalApiClient(HttpClient httpClient)
             response, cancellationToken);
     }
 
+    /// <summary>Gets published quizzes visible to the current enrolled learner.</summary>
+    public async Task<IReadOnlyList<QuizListItemResponse>> GetCourseQuizzesForLearnerAsync(
+        Guid courseId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient.GetAsync(
+            $"api/learning/courses/{courseId:D}/quizzes",
+            cancellationToken);
+        return await ReadResponseAsync<IReadOnlyList<QuizListItemResponse>>(
+            response,
+            cancellationToken);
+    }
+
     /// <summary>Gets the signed-in learner's AI Tutor conversations.</summary>
     public async Task<IReadOnlyList<AiTutorConversationListItemResponse>>
         GetMyAiTutorConversationsAsync(CancellationToken cancellationToken = default)

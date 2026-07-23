@@ -12,8 +12,8 @@
         @if (IsUnauthenticated)
         {
             <div class="access-actions">
-                <a class="button button-primary" href="@SignInUrl">Sign in</a>
-                <a class="button" href="@RegisterUrl">Register</a>
+                <a class="button button-primary" data-testid="access-sign-in" href="@SignInUrl">Sign in</a>
+                <a class="button" data-testid="register-link" href="@RegisterUrl">Register</a>
                 <a class="button" href="/">Return to home</a>
             </div>
         }

@@ -8,6 +8,25 @@ public sealed class PortalCookieAuthenticationEvents(
     PortalSessionRefreshCoordinator refreshCoordinator) : CookieAuthenticationEvents
 {
     /// <inheritdoc />
+    public override Task RedirectToLogin(RedirectContext<CookieAuthenticationOptions> context)
+    {
+        var returnUrl = $"{context.Request.PathBase}{context.Request.Path}{context.Request.QueryString}";
+        context.Response.Redirect(
+            AuthenticationNavigation.BuildAccessDeniedUrl(
+                isAuthenticated: false,
+                returnUrl));
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public override Task RedirectToAccessDenied(
+        RedirectContext<CookieAuthenticationOptions> context)
+    {
+        context.Response.Redirect("/access-denied?reason=forbidden");
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
     public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
     {
         var expiresText = context.Properties.GetTokenValue("access_token_expires_at");

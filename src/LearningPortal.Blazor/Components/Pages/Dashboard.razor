@@ -1,113 +1,200 @@
 @page "/"
 @page "/dashboard"
 @rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject LearningPortalApiClient ApiClient
 
 <PageTitle>Dashboard | Learning Portal</PageTitle>
 
 <AuthorizeView>
-<Authorized>
-<PageHeader Eyebrow="Learning workspace"
-            Title="Welcome back, Alex"
-            Description="Continue your learning journey and keep your goals moving forward." />
+    <Authorized Context="authorizationContext">
+        <PageHeader Eyebrow="Learning workspace"
+                    Title="@($"Welcome, {DisplayName(authorizationContext.User)}")"
+                    Description="@DashboardDescription(authorizationContext.User)" />
 
-<AppCard AdditionalClass="continue-card">
-    <div class="continue-art" aria-hidden="true">
-        <span>UX</span>
-    </div>
-    <div class="continue-copy">
-        <StatusBadge Text="In progress" Tone="primary" />
-        <p class="continue-eyebrow">Continue learning</p>
-        <h2>Product Design Fundamentals</h2>
-        <p>Module 6 of 10 · Designing accessible user flows</p>
-        <div class="progress-row">
-            <div class="progress-track" aria-label="Course progress: 64 percent">
-                <span style="width: 64%"></span>
-            </div>
-            <strong>64%</strong>
-        </div>
-        <a class="button button-primary" href="/my-courses">Resume course <span aria-hidden="true">→</span></a>
-    </div>
-</AppCard>
-
-<section class="dashboard-section" aria-labelledby="overview-heading">
-    <div class="section-heading">
-        <div>
-            <h2 id="overview-heading">Your overview</h2>
-            <p>A quick look at your current learning activity.</p>
-        </div>
-    </div>
-    <div class="stat-grid">
-        <StatCard Icon="▤" Label="Courses in progress" Value="5" Detail="2 due this week" />
-        <StatCard Icon="✓" Label="Courses completed" Value="18" Detail="+3 this quarter" />
-        <StatCard Icon="◇" Label="Certificates earned" Value="12" Detail="Latest: UX Foundations" />
-        <StatCard Icon="☆" Label="Learning streak" Value="14 days" Detail="Personal best" />
-    </div>
-</section>
-
-<section class="dashboard-section" aria-labelledby="courses-heading">
-    <div class="section-heading">
-        <div>
-            <h2 id="courses-heading">Explore courses</h2>
-            <p>Recommended learning based on your interests.</p>
-        </div>
-        <a href="/my-courses">View all courses <span aria-hidden="true">→</span></a>
-    </div>
-
-    <div class="course-grid">
-        @foreach (var course in Courses)
+        @if (_loading)
         {
-            <AppCard AdditionalClass="course-card">
-                <div class="course-cover @course.CoverClass">
-                    <span>@course.Abbreviation</span>
-                    <StatusBadge Text="@course.Level" />
-                </div>
-                <div class="course-body">
-                    <p class="course-category">@course.Category</p>
-                    <h3>@course.Title</h3>
-                    <p class="course-meta">@course.Modules modules · @course.Duration</p>
-                    <div class="course-progress">
-                        <div class="progress-track" aria-label="@($"{course.Progress} percent complete")">
-                            <span style="@($"width: {course.Progress}%")"></span>
-                        </div>
-                        <small>@course.Progress%</small>
+            <LoadingState Message="Loading your dashboard…" />
+        }
+        else if (_error is not null)
+        {
+            <div class="feedback error" role="alert">
+                <span>@_error</span>
+                <button class="button" type="button" @onclick="LoadAsync">Try again</button>
+            </div>
+        }
+        else if (authorizationContext.User.IsInRole(ApplicationRoles.Administrator))
+        {
+            <section class="dashboard-section" aria-labelledby="admin-overview-heading">
+                <div class="section-heading">
+                    <div>
+                        <h2 id="admin-overview-heading">Portal overview</h2>
+                        <p>Live totals from the Learning Portal API.</p>
                     </div>
                 </div>
-            </AppCard>
+                <div class="stat-grid">
+                    <StatCard Icon="U" Label="Users" Value="@_userCount.ToString()" Detail="Registered accounts" />
+                    <StatCard Icon="P" Label="Published courses" Value="@_publishedCourseCount.ToString()" Detail="Visible in the catalog" />
+                    <StatCard Icon="D" Label="Draft courses" Value="@_draftCourseCount.ToString()" Detail="Still being prepared" />
+                </div>
+            </section>
+            <DashboardLinks IsAdministrator="true" />
         }
-    </div>
-</section>
-</Authorized>
-<NotAuthorized>
-    <PageHeader Eyebrow="Enterprise learning"
-                Title="Build skills with Learning Portal"
-                Description="Learn from published courses, track progress, take assessments, and get course-grounded help from the local AI Tutor." />
-    <AppCard>
-        <h2>Start learning</h2>
-        <p>Sign in with your enterprise account or create a learner account.</p>
-        <div class="course-actions">
-            <a class="button button-primary" href="/login?returnUrl=%2F">Sign in</a>
-            <a class="button" href="/register?returnUrl=%2Fcatalog">Register</a>
-        </div>
-    </AppCard>
-</NotAuthorized>
+        else if (authorizationContext.User.IsInRole(ApplicationRoles.Instructor))
+        {
+            <section class="dashboard-section" aria-labelledby="instructor-overview-heading">
+                <div class="section-heading">
+                    <div>
+                        <h2 id="instructor-overview-heading">Course workspace</h2>
+                        <p>Courses available for you to manage.</p>
+                    </div>
+                </div>
+                <div class="stat-grid">
+                    <StatCard Icon="C" Label="Courses" Value="@_managedCourseCount.ToString()" Detail="Across all lifecycle states" />
+                    <StatCard Icon="P" Label="Published" Value="@_publishedCourseCount.ToString()" Detail="Available to learners" />
+                    <StatCard Icon="D" Label="Drafts" Value="@_draftCourseCount.ToString()" Detail="Awaiting publication" />
+                </div>
+            </section>
+            <DashboardLinks IsInstructor="true" />
+        }
+        else
+        {
+            <section class="dashboard-section" aria-labelledby="learner-overview-heading">
+                <div class="section-heading">
+                    <div>
+                        <h2 id="learner-overview-heading">Your learning</h2>
+                        <p>Current enrollment totals from your account.</p>
+                    </div>
+                </div>
+                <div class="stat-grid">
+                    <StatCard Icon="A" Label="Active courses" Value="@_activeEnrollmentCount.ToString()" Detail="Ready to continue" />
+                    <StatCard Icon="C" Label="Completed courses" Value="@_completedEnrollmentCount.ToString()" Detail="Learning completed" />
+                    <StatCard Icon="W" Label="Withdrawn courses" Value="@_withdrawnEnrollmentCount.ToString()" Detail="No longer active" />
+                </div>
+            </section>
+
+            @if (_nextEnrollment is not null)
+            {
+                <AppCard AdditionalClass="continue-card">
+                    <div class="continue-copy">
+                        <StatusBadge Text="@_nextEnrollment.Status" Tone="primary" />
+                        <p class="continue-eyebrow">Continue learning</p>
+                        <h2>@_nextEnrollment.CourseTitle</h2>
+                        <p>@_nextEnrollment.PublishedLessonCount published lessons · @_nextEnrollment.EstimatedMinutes minutes</p>
+                        <a class="button button-primary"
+                           data-testid="continue-course"
+                           href="@($"/my-learning?course={Uri.EscapeDataString(_nextEnrollment.CourseTitle)}")">
+                            Open My Learning
+                        </a>
+                    </div>
+                </AppCard>
+            }
+            else
+            {
+                <EmptyState Icon="L"
+                            Title="No active courses"
+                            Description="Browse the catalog to start learning." />
+            }
+            <DashboardLinks />
+        }
+    </Authorized>
+    <NotAuthorized>
+        <PageHeader Eyebrow="Enterprise learning"
+                    Title="Build skills with Learning Portal"
+                    Description="Learn from published courses, track progress, take assessments, and get course-grounded help from the local AI Tutor." />
+        <AppCard>
+            <h2>Start learning</h2>
+            <p>Sign in with your enterprise account or create a learner account.</p>
+            <div class="course-actions">
+                <a class="button button-primary" data-testid="landing-sign-in" href="/login?returnUrl=%2F">Sign in</a>
+                <a class="button" data-testid="register-link" href="/register?returnUrl=%2Fcatalog">Register</a>
+            </div>
+        </AppCard>
+    </NotAuthorized>
 </AuthorizeView>
 
 @code {
-    private static readonly CourseSample[] Courses =
-    [
-        new("LD", "Leadership", "Leading High-Performing Teams", "Intermediate", 8, "4h 20m", 72, "cover-blue"),
-        new("DA", "Data", "Data Literacy for Everyone", "Beginner", 10, "5h 15m", 35, "cover-violet"),
-        new("CS", "Security", "Cybersecurity Essentials", "Required", 6, "2h 40m", 88, "cover-teal"),
-        new("CM", "Communication", "Presenting with Confidence", "Popular", 7, "3h 10m", 20, "cover-orange")
-    ];
+    private bool _loading;
+    private string? _error;
+    private int _userCount;
+    private int _managedCourseCount;
+    private int _publishedCourseCount;
+    private int _draftCourseCount;
+    private int _activeEnrollmentCount;
+    private int _completedEnrollmentCount;
+    private int _withdrawnEnrollmentCount;
+    private MyLearningItemResponse? _nextEnrollment;
 
-    private sealed record CourseSample(
-        string Abbreviation,
-        string Category,
-        string Title,
-        string Level,
-        int Modules,
-        string Duration,
-        int Progress,
-        string CoverClass);
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = state.User;
+            if (user.IsInRole(ApplicationRoles.Administrator))
+            {
+                var users = await ApiClient.GetUsersAsync(new() { PageSize = 1 });
+                _userCount = users.TotalCount;
+                await LoadCourseTotalsAsync();
+            }
+            else if (user.IsInRole(ApplicationRoles.Instructor))
+            {
+                await LoadCourseTotalsAsync();
+            }
+            else
+            {
+                var enrollments = await ApiClient.GetMyEnrollmentsAsync(new(PageSize: 100));
+                _activeEnrollmentCount = enrollments.Items.Count(item =>
+                    item.Status is "Active" or "Enrolled");
+                _completedEnrollmentCount = enrollments.Items.Count(item =>
+                    item.Status == "Completed");
+                _withdrawnEnrollmentCount = enrollments.Items.Count(item =>
+                    item.Status == "Withdrawn");
+                _nextEnrollment = enrollments.Items.FirstOrDefault(item => item.CanContinue);
+            }
+        }
+        catch (ApiProblemException exception)
+        {
+            _error = exception.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadCourseTotalsAsync()
+    {
+        var all = await ApiClient.GetCoursesAsync(new() { PageSize = 1 });
+        var published = await ApiClient.GetCoursesAsync(
+            new() { Status = "Published", PageSize = 1 });
+        var drafts = await ApiClient.GetCoursesAsync(
+            new() { Status = "Draft", PageSize = 1 });
+        _managedCourseCount = all.TotalCount;
+        _publishedCourseCount = published.TotalCount;
+        _draftCourseCount = drafts.TotalCount;
+    }
+
+    private static string DisplayName(ClaimsPrincipal user) =>
+        user.FindFirstValue(ApplicationClaimTypes.DisplayName)
+        ?? user.Identity?.Name
+        ?? "learner";
+
+    private static string DashboardDescription(ClaimsPrincipal user) =>
+        user.IsInRole(ApplicationRoles.Administrator)
+            ? "Monitor the portal and open administrator workflows."
+            : user.IsInRole(ApplicationRoles.Instructor)
+                ? "Manage course content and learner-ready material."
+                : "Continue active learning and discover new courses.";
 }

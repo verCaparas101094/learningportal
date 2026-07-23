@@ -1,4 +1,5 @@
 @page "/courses/{CourseId:guid}/quizzes"
+@attribute [Authorize(Roles = ApplicationRoles.Administrator + "," + ApplicationRoles.Instructor)]
 @rendermode InteractiveServer
 @inject LearningPortalApiClient ApiClient
 
@@ -8,13 +9,13 @@
     @if (_error is not null) { <div class="feedback error" role="alert">@_error</div> }
     <section class="app-card">
         <h2>@(_editing is null ? "Create quiz" : "Edit quiz")</h2>
-        <label>Title <input @bind="_title" /></label>
+        <label>Title <input data-testid="quiz-title" @bind="_title" /></label>
         <label>Description <textarea @bind="_description"></textarea></label>
         <label>Passing percentage <input type="number" min="1" max="100" @bind="_passing" /></label>
         <label>Maximum attempts <input type="number" min="1" @bind="_maximumAttempts" /></label>
         <label><input type="checkbox" @bind="_required" /> Required for completion</label>
         <label><input type="checkbox" @bind="_instructorAssessment" /> Qualifying instructor assessment</label>
-        <button class="button button-primary" @onclick="SaveQuizAsync">Save draft</button>
+        <button class="button button-primary" data-testid="quiz-save" @onclick="SaveQuizAsync">Save draft</button>
     </section>
     @foreach (var quiz in _quizzes)
     {
@@ -25,7 +26,7 @@
             @if (quiz.Status == "Draft")
             {
                 <button @onclick="() => SelectQuestionEditor(quiz)">Add question</button>
-                <button @onclick="() => PublishAsync(quiz.Id)">Publish</button>
+                <button data-testid="@($"publish-quiz-{quiz.Id:N}")" @onclick="() => PublishAsync(quiz.Id)">Publish</button>
                 @foreach (var question in quiz.Questions)
                 {
                     <button @onclick="() => EditQuestion(quiz, question)">Edit Q@question.Order</button>

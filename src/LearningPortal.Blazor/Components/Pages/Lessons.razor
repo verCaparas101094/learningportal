@@ -1,4 +1,5 @@
 @page "/courses/{CourseId:guid}/lessons"
+@attribute [Authorize(Roles = ApplicationRoles.Administrator + "," + ApplicationRoles.Instructor)]
 @rendermode InteractiveServer
 @using LearningPortal.Blazor.Models
 @using LearningPortal.Blazor.Components.Lessons
@@ -7,7 +8,8 @@
 <PageTitle>Lessons | Learning Portal</PageTitle>
 <AuthenticatedContent Roles="Administrator,Instructor">
     <PageHeader Eyebrow="Course management" Title="@(_course?.Title ?? "Lessons")" Description="Manage ordered course lessons.">
-        <Actions><button class="button button-primary" @onclick="OpenCreate">Create lesson</button></Actions>
+        <Actions><button class="button button-primary" data-testid="create-lesson"
+                         @onclick="OpenCreate">Create lesson</button></Actions>
     </PageHeader>
     <div>
         <input type="search" value="@_search" @onchange="SearchChanged" placeholder="Search lessons" />
@@ -55,7 +57,8 @@
                     @if (lesson.Status == "Draft")
                     {
                         <button @onclick="() => EditAsync(lesson.Id)">Edit</button>
-                        <button @onclick="() => Confirm(lesson, false)">Publish</button>
+                        <button data-testid="@($"publish-lesson-{lesson.Id:N}")"
+                                @onclick="() => Confirm(lesson, false)">Publish</button>
                         <button @onclick="() => Confirm(lesson, true)">Delete</button>
                         <button disabled="@(lesson.Order <= 1)" @onclick="() => MoveAsync(lesson, lesson.Order - 1)">Move up</button>
                         <button @onclick="() => MoveAsync(lesson, lesson.Order + 1)">Move down</button>

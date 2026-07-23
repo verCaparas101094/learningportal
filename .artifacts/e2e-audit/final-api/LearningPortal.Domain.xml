@@ -1,0 +1,1069 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LearningPortal.Domain</name>
+    </assembly>
+    <members>
+        <member name="T:LearningPortal.Domain.AiTutor.AiTutorConversation">
+            <summary>Represents a learner-owned course tutor conversation.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorConversation.StudentId">
+            <summary>Gets the learner owner.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorConversation.CourseId">
+            <summary>Gets the course scope.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorConversation.LessonId">
+            <summary>Gets the optional lesson scope.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorConversation.Title">
+            <summary>Gets the visible title.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorConversation.Status">
+            <summary>Gets lifecycle status.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorConversation.LastMessageAtUtc">
+            <summary>Gets last activity time.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorConversation.Messages">
+            <summary>Gets ordered visible messages.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.AiTutor.AiTutorConversation.Start(System.Guid,System.Guid,System.Nullable{System.Guid},System.String,System.DateTimeOffset)">
+            <summary>Starts an active conversation.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.AiTutor.AiTutorConversation.TryAddExchange(System.String,System.String,System.DateTimeOffset)">
+            <summary>Adds a complete user/reply pair atomically to the aggregate.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.AiTutor.AiTutorConversation.TryArchive">
+            <summary>Archives idempotently.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.AiTutor.AiTutorConversationStatus">
+            <summary>Defines the lifecycle of an AI Tutor conversation.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.AiTutor.AiTutorConversationStatus.Active">
+            <summary>The conversation accepts new learner messages.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.AiTutor.AiTutorConversationStatus.Archived">
+            <summary>The conversation is retained as read-only history.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.AiTutor.AiTutorMessage">
+            <summary>Represents one ordered visible tutor message.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorMessage.ConversationId">
+            <summary>Gets the conversation.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorMessage.Role">
+            <summary>Gets the visible author role.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorMessage.Content">
+            <summary>Gets message content.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorMessage.CreatedAtUtc">
+            <summary>Gets creation time.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.AiTutor.AiTutorMessage.Sequence">
+            <summary>Gets stable order.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.AiTutor.AiTutorMessageRole">
+            <summary>Defines persisted, user-visible AI Tutor message authors.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.AiTutor.AiTutorMessageRole.User">
+            <summary>The learner authored the message.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.AiTutor.AiTutorMessageRole.Assistant">
+            <summary>The local AI Tutor authored the message.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Common.AuditableEntity">
+            <summary>
+            Provides audit metadata and optimistic concurrency state for a domain entity.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.AuditableEntity.CreatedAtUtc">
+            <summary>
+            Gets the UTC timestamp at which the entity was created.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.AuditableEntity.CreatedBy">
+            <summary>
+            Gets the identifier of the user who created the entity, when available.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.AuditableEntity.UpdatedAtUtc">
+            <summary>
+            Gets the UTC timestamp of the most recent update.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.AuditableEntity.UpdatedBy">
+            <summary>
+            Gets the identifier of the user who most recently updated the entity, when available.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.AuditableEntity.RowVersion">
+            <summary>
+            Gets the SQL Server rowversion used for optimistic concurrency checks.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Common.Entity">
+            <summary>
+            Provides strongly typed identity for persisted domain entities.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.Entity.Id">
+            <summary>
+            Gets the entity identifier.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.Entity.DomainEvents">
+            <summary>
+            Gets a read-only view of domain events raised by this entity.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Common.Entity.AddDomainEvent(LearningPortal.Domain.Common.Events.IDomainEvent)">
+            <summary>
+            Adds a domain event raised by this entity.
+            </summary>
+            <param name="domainEvent">The domain event to add.</param>
+            <exception cref="T:System.ArgumentNullException">
+            Thrown when <paramref name="domainEvent"/> is <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:LearningPortal.Domain.Common.Entity.RemoveDomainEvent(LearningPortal.Domain.Common.Events.IDomainEvent)">
+            <summary>
+            Removes a domain event from this entity when it is present.
+            </summary>
+            <param name="domainEvent">The domain event to remove.</param>
+            <returns><see langword="true"/> when the event was removed; otherwise, <see langword="false"/>.</returns>
+            <exception cref="T:System.ArgumentNullException">
+            Thrown when <paramref name="domainEvent"/> is <see langword="null"/>.
+            </exception>
+        </member>
+        <member name="M:LearningPortal.Domain.Common.Entity.ClearDomainEvents">
+            <summary>
+            Removes all accumulated domain events from this entity.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Common.Events.DomainEvent">
+            <summary>
+            Provides immutable identity and occurrence metadata for a domain event.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Common.Events.DomainEvent.#ctor">
+            <summary>
+            Initializes a new domain event with a time-ordered identifier and current UTC timestamp.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.Events.DomainEvent.EventId">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Domain.Common.Events.DomainEvent.OccurredOnUtc">
+            <inheritdoc />
+        </member>
+        <member name="T:LearningPortal.Domain.Common.Events.IDomainEvent">
+            <summary>
+            Identifies an immutable fact that occurred within the domain model.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.Events.IDomainEvent.EventId">
+            <summary>
+            Gets the unique event identifier.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.Events.IDomainEvent.OccurredOnUtc">
+            <summary>
+            Gets the UTC timestamp at which the event occurred.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Common.ISoftDelete">
+            <summary>
+            Identifies an entity whose deletion is represented as retained audit state.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.ISoftDelete.IsDeleted">
+            <summary>
+            Gets a value indicating whether the entity has been deleted.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.ISoftDelete.DeletedAtUtc">
+            <summary>
+            Gets the UTC timestamp at which the entity was deleted.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Common.ISoftDelete.DeletedBy">
+            <summary>
+            Gets the identifier of the user who deleted the entity, when available.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Courses.Course">
+            <summary>Represents the course aggregate.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.Title">
+            <summary>Gets the title.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.Slug">
+            <summary>Gets the normalized unique slug.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.Description">
+            <summary>Gets the description.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.Category">
+            <summary>Gets the category.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.ThumbnailUrl">
+            <summary>Gets the optional thumbnail URL.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.Status">
+            <summary>Gets the lifecycle status.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.InstructorId">
+            <summary>Gets the assigned instructor identifier.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.SkillId">
+            <summary>Gets the stable skill identifier used for instructor qualification.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.IsDeleted">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.DeletedAtUtc">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Course.DeletedBy">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Course.Create(System.String,System.String,System.String,System.String,System.String,System.Guid)">
+            <summary>Creates a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Course.TryUpdate(System.String,System.String,System.String,System.String,System.String)">
+            <summary>Updates editable Draft course details.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Course.TryPublish">
+            <summary>Publishes a Draft course and treats an already Published course as success.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Course.TryArchive">
+            <summary>Archives a Published course and treats an already Archived course as success.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Course.TrySetSkill(System.Guid)">
+            <summary>Associates the course with a stable skill.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Course.TryAssignInstructor(System.Guid)">
+            <summary>Assigns an eligible instructor.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Course.TryDelete">
+            <summary>Prepares a Draft course for repository deletion.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Courses.CourseStatus">
+            <summary>Defines the supported course lifecycle states.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Courses.CourseStatus.Draft">
+            <summary>The course is editable and not publicly available.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Courses.CourseStatus.Published">
+            <summary>The course is published and no longer editable.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Courses.CourseStatus.Archived">
+            <summary>The previously published course is archived.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Courses.Events.CourseArchivedDomainEvent">
+            <summary>Represents archival of a course.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Events.CourseArchivedDomainEvent.#ctor(System.Guid)">
+            <summary>Represents archival of a course.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Courses.Events.CourseCreatedDomainEvent">
+            <summary>
+            Represents the domain fact that a course was created.
+            </summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Events.CourseCreatedDomainEvent.#ctor(System.Guid,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:LearningPortal.Domain.Courses.Events.CourseCreatedDomainEvent"/> class.
+            </summary>
+            <param name="courseId">The identifier of the created course.</param>
+            <param name="title">The normalized title of the created course.</param>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Events.CourseCreatedDomainEvent.CourseId">
+            <summary>
+            Gets the identifier of the created course.
+            </summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Courses.Events.CourseCreatedDomainEvent.Title">
+            <summary>
+            Gets the normalized title of the created course.
+            </summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Courses.Events.CourseDeletedDomainEvent">
+            <summary>Represents deletion of a Draft course.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Events.CourseDeletedDomainEvent.#ctor(System.Guid)">
+            <summary>Represents deletion of a Draft course.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Courses.Events.CoursePublishedDomainEvent">
+            <summary>Represents publication of a course.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Events.CoursePublishedDomainEvent.#ctor(System.Guid)">
+            <summary>Represents publication of a course.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Courses.Exceptions.CourseConcurrencyException">
+            <summary>Represents a course optimistic-concurrency conflict.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Exceptions.CourseConcurrencyException.#ctor(System.Exception)">
+            <summary>Initializes the exception.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Courses.Exceptions.DuplicateCourseSlugException">
+            <summary>Represents a database-enforced duplicate course slug.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.Exceptions.DuplicateCourseSlugException.#ctor(System.Exception)">
+            <summary>Initializes the exception.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Courses.SlugNormalizer">
+            <summary>Normalizes course slugs to lowercase kebab-case.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Courses.SlugNormalizer.Normalize(System.String)">
+            <summary>Normalizes a candidate slug.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Enrollments.Enrollment">
+            <summary>Represents one student's enrollment in a course.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Enrollments.Enrollment.CourseId">
+            <summary>Gets the course identifier.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Enrollments.Enrollment.StudentId">
+            <summary>Gets the student identifier.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Enrollments.Enrollment.Status">
+            <summary>Gets the lifecycle status.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Enrollments.Enrollment.EnrolledAtUtc">
+            <summary>Gets the enrollment timestamp.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Enrollments.Enrollment.StartedAtUtc">
+            <summary>Gets the first-start timestamp.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Enrollments.Enrollment.CompletedAtUtc">
+            <summary>Gets the completion timestamp.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Enrollments.Enrollment.WithdrawnAtUtc">
+            <summary>Gets the withdrawal timestamp.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Enrollments.Enrollment.Create(System.Guid,System.Guid,System.DateTimeOffset)">
+            <summary>Creates an enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Enrollments.Enrollment.TryStart(System.DateTimeOffset)">
+            <summary>Starts an enrolled course.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Enrollments.Enrollment.TryComplete(System.DateTimeOffset)">
+            <summary>Completes an enrolled or in-progress course.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Enrollments.Enrollment.TryWithdraw(System.DateTimeOffset)">
+            <summary>Withdraws an enrolled or in-progress course.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Enrollments.EnrollmentStatus">
+            <summary>Defines the enrollment lifecycle.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Enrollments.EnrollmentStatus.Enrolled">
+            <summary>The student is enrolled but has not started.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Enrollments.EnrollmentStatus.InProgress">
+            <summary>The student has started the course.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Enrollments.EnrollmentStatus.Completed">
+            <summary>The student completed the course.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Enrollments.EnrollmentStatus.Withdrawn">
+            <summary>The student withdrew from the course.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Enrollments.Exceptions.DuplicateActiveEnrollmentException">
+            <summary>Represents a duplicate active enrollment constraint violation.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Enrollments.Exceptions.DuplicateActiveEnrollmentException.#ctor(System.Exception)">
+            <summary>Represents a duplicate active enrollment constraint violation.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Enrollments.Exceptions.EnrollmentConcurrencyException">
+            <summary>Represents an optimistic enrollment concurrency conflict.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Enrollments.Exceptions.EnrollmentConcurrencyException.#ctor(System.Exception)">
+            <summary>Represents an optimistic enrollment concurrency conflict.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Learning.LessonProgress">
+            <summary>Tracks one student's progress through one lesson in an enrollment.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Learning.LessonProgress.EnrollmentId">
+            <summary>Gets the owning enrollment.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Learning.LessonProgress.LessonId">
+            <summary>Gets the lesson being tracked.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Learning.LessonProgress.StudentId">
+            <summary>Gets the learner.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Learning.LessonProgress.Status">
+            <summary>Gets the current progress state.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Learning.LessonProgress.StartedAtUtc">
+            <summary>Gets when access first began.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Learning.LessonProgress.CompletedAtUtc">
+            <summary>Gets when completion occurred.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Learning.LessonProgress.LastAccessedAtUtc">
+            <summary>Gets the most recent access time.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Learning.LessonProgress.Start(System.Guid,System.Guid,System.Guid,System.DateTimeOffset)">
+            <summary>Creates initially in-progress learner progress.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Learning.LessonProgress.Access(System.DateTimeOffset)">
+            <summary>Records access without regressing completed progress.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Learning.LessonProgress.Complete(System.DateTimeOffset)">
+            <summary>Completes progress idempotently.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Learning.LessonProgressStatus">
+            <summary>Defines learner progress through a published lesson.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Learning.LessonProgressStatus.NotStarted">
+            <summary>Lesson has not yet been opened.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Learning.LessonProgressStatus.InProgress">
+            <summary>Lesson has been opened but not completed.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Learning.LessonProgressStatus.Completed">
+            <summary>Lesson has been completed.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Lessons.Exceptions.DuplicateLessonOrderException">
+            <summary>Represents a duplicate active lesson order within a course.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Lessons.Exceptions.DuplicateLessonOrderException.#ctor(System.Exception)">
+            <summary>Represents a duplicate active lesson order within a course.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Lessons.Exceptions.LessonConcurrencyException">
+            <summary>Represents an optimistic-concurrency conflict for a lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Lessons.Exceptions.LessonConcurrencyException.#ctor(System.Exception)">
+            <summary>Represents an optimistic-concurrency conflict for a lesson.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Lessons.Lesson">
+            <summary>Represents one ordered course lesson.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.CourseId">
+            <summary>Gets the owning course identifier.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.Title">
+            <summary>Gets the title.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.Description">
+            <summary>Gets the description.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.Order">
+            <summary>Gets the course-relative order.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.EstimatedMinutes">
+            <summary>Gets the estimated duration.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.LessonType">
+            <summary>Gets the content type.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.MarkdownContent">
+            <summary>Gets Markdown source for an article.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.ExternalUrl">
+            <summary>Gets the normalized external source URL.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.VideoProvider">
+            <summary>Gets the server-derived video provider.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.Status">
+            <summary>Gets the lifecycle status.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.IsDeleted">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.DeletedAtUtc">
+            <inheritdoc />
+        </member>
+        <member name="P:LearningPortal.Domain.Lessons.Lesson.DeletedBy">
+            <inheritdoc />
+        </member>
+        <member name="M:LearningPortal.Domain.Lessons.Lesson.Create(System.Guid,System.String,System.String,System.Int32,System.Int32,LearningPortal.Domain.Lessons.LessonType,System.String,System.String,LearningPortal.Domain.Lessons.VideoProvider)">
+            <summary>Creates a valid Draft lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Lessons.Lesson.TryUpdate(System.String,System.String,System.Int32,System.Int32,LearningPortal.Domain.Lessons.LessonType,System.String,System.String,LearningPortal.Domain.Lessons.VideoProvider)">
+            <summary>Updates editable Draft lesson details.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Lessons.Lesson.TryPublish">
+            <summary>Publishes a complete Draft lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Lessons.Lesson.TryDelete">
+            <summary>Prepares a Draft lesson for soft deletion.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Lessons.LessonStatus">
+            <summary>Defines lesson lifecycle states.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.LessonStatus.Draft">
+            <summary>Editable draft.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.LessonStatus.Published">
+            <summary>Published read-only lesson.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Lessons.LessonType">
+            <summary>Defines supported lesson content types.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.LessonType.Article">
+            <summary>Article lesson.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.LessonType.Video">
+            <summary>Video lesson.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.LessonType.Pdf">
+            <summary>External PDF lesson.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.LessonType.ExternalLink">
+            <summary>External resource lesson.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Lessons.VideoProvider">
+            <summary>Defines supported video playback providers.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.VideoProvider.None">
+            <summary>No video provider.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.VideoProvider.YouTube">
+            <summary>YouTube video.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.VideoProvider.Vimeo">
+            <summary>Vimeo video.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.VideoProvider.MicrosoftStream">
+            <summary>Microsoft Stream or SharePoint video.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Lessons.VideoProvider.DirectMp4">
+            <summary>Direct HTTPS MP4 video.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Quizzes.QuestionType">
+            <summary>Defines supported automatically scored quiz question types.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Quizzes.QuestionType.SingleChoice">
+            <summary>Requires one selected answer.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Quizzes.QuestionType.MultipleChoice">
+            <summary>Requires an exact selected answer set.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Quizzes.QuestionType.TrueFalse">
+            <summary>Requires one of two true/false answers.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Quizzes.Quiz">
+            <summary>Represents a course assessment authored before publication.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.CourseId">
+            <summary>Gets the owning course.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.LessonId">
+            <summary>Gets the optional associated lesson.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.Title">
+            <summary>Gets the quiz title.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.Description">
+            <summary>Gets the learner instructions.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.PassingPercentage">
+            <summary>Gets the passing threshold.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.MaximumAttempts">
+            <summary>Gets the optional attempt limit.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.IsRequiredForCourseCompletion">
+            <summary>Gets whether passing blocks course completion.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.IsInstructorAssessment">
+            <summary>Gets whether this quiz can qualify instructors.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.SkillId">
+            <summary>Gets the skill qualified by this assessment.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.Status">
+            <summary>Gets the lifecycle state.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.Quiz.Questions">
+            <summary>Gets ordered quiz questions.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.Quiz.Create(System.Guid,System.Nullable{System.Guid},System.String,System.String,System.Decimal,System.Nullable{System.Int32},System.Boolean)">
+            <summary>Creates a draft quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.Quiz.TryUpdate(System.String,System.String,System.Decimal,System.Nullable{System.Int32},System.Boolean)">
+            <summary>Updates a draft quiz's details.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.Quiz.TryAddQuestion(LearningPortal.Domain.Quizzes.QuizQuestion)">
+            <summary>Adds a question while the quiz is a Draft.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.Quiz.TryRemoveQuestion(System.Guid)">
+            <summary>Removes a question while the quiz is a Draft.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.Quiz.TryPublish">
+            <summary>Publishes a valid draft quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.Quiz.TryArchive">
+            <summary>Archives a published quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.Quiz.TryConfigureInstructorAssessment(System.Boolean,System.Nullable{System.Guid})">
+            <summary>Configures a draft as an instructor assessment for one skill.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Quizzes.QuizAnswerChoice">
+            <summary>Represents one answer choice authored for a quiz question.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAnswerChoice.QuestionId">
+            <summary>Gets the owning question.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAnswerChoice.Text">
+            <summary>Gets the choice text.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAnswerChoice.IsCorrect">
+            <summary>Gets whether the choice is correct.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAnswerChoice.Order">
+            <summary>Gets display order.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizAnswerChoice.Create(System.Guid,System.String,System.Boolean,System.Int32)">
+            <summary>Creates a validated answer choice.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizAnswerChoice.TryUpdate(System.String,System.Boolean)">
+            <summary>Updates editable choice values.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizAnswerChoice.TryReorder(System.Int32)">
+            <summary>Changes display order.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Quizzes.QuizAttempt">
+            <summary>Represents one owned, server-scored quiz attempt.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.QuizId">
+            <summary>Gets the quiz.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.EnrollmentId">
+            <summary>Gets the enrollment.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.StudentId">
+            <summary>Gets the learner.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.AttemptNumber">
+            <summary>Gets the one-based attempt number.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.Status">
+            <summary>Gets lifecycle state.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.StartedAtUtc">
+            <summary>Gets start time.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.SubmittedAtUtc">
+            <summary>Gets submission time.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.Score">
+            <summary>Gets awarded points.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.MaximumScore">
+            <summary>Gets available points.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.Percentage">
+            <summary>Gets percentage score.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.Passed">
+            <summary>Gets whether the passing threshold was met.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttempt.Answers">
+            <summary>Gets immutable submitted answer snapshots.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizAttempt.Start(System.Guid,System.Guid,System.Guid,System.Int32,System.DateTimeOffset)">
+            <summary>Starts an owned attempt.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizAttempt.TrySubmit(System.Collections.Generic.IEnumerable{LearningPortal.Domain.Quizzes.QuizAttemptAnswer},System.Decimal,System.DateTimeOffset)">
+            <summary>Finalizes the attempt idempotently.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Quizzes.QuizAttemptAnswer">
+            <summary>Preserves one submitted answer and its server scoring snapshot.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.AttemptId">
+            <summary>Gets the owning attempt identifier.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.QuestionId">
+            <summary>Gets the source question identifier.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.QuestionText">
+            <summary>Gets the submitted question text snapshot.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.QuestionType">
+            <summary>Gets the submitted question type snapshot.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.SelectedChoiceIds">
+            <summary>Gets the selected answer identifiers as JSON.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.ChoiceSnapshot">
+            <summary>Gets the answer-choice snapshot as JSON.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.IsCorrect">
+            <summary>Gets whether the exact answer was correct.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.PointsAwarded">
+            <summary>Gets awarded points.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.MaximumPoints">
+            <summary>Gets available points.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.Explanation">
+            <summary>Gets the feedback snapshot.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizAttemptAnswer.Create(System.Guid,LearningPortal.Domain.Quizzes.QuizQuestion,System.Collections.Generic.IReadOnlyCollection{System.Guid})">
+            <summary>Creates a server-scored immutable answer snapshot.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Quizzes.QuizAttemptStatus">
+            <summary>Defines the quiz-attempt lifecycle.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Quizzes.QuizAttemptStatus.InProgress">
+            <summary>The learner may still submit answers.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Quizzes.QuizAttemptStatus.Submitted">
+            <summary>The server scored and finalized the attempt.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Quizzes.QuizQuestion">
+            <summary>Represents one ordered, automatically scored quiz question.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizQuestion.QuizId">
+            <summary>Gets the owning quiz.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizQuestion.Text">
+            <summary>Gets the question text.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizQuestion.QuestionType">
+            <summary>Gets the scoring type.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizQuestion.Points">
+            <summary>Gets the available score.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizQuestion.Order">
+            <summary>Gets stable display order.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizQuestion.Explanation">
+            <summary>Gets optional learner feedback.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizQuestion.IsActive">
+            <summary>Gets whether the question appears in new attempts.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Quizzes.QuizQuestion.AnswerChoices">
+            <summary>Gets ordered answer choices.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizQuestion.Create(System.Guid,System.String,LearningPortal.Domain.Quizzes.QuestionType,System.Decimal,System.Int32,System.String)">
+            <summary>Creates a valid active question.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizQuestion.TryUpdate(System.String,LearningPortal.Domain.Quizzes.QuestionType,System.Decimal,System.String)">
+            <summary>Updates editable question details.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizQuestion.Activate">
+            <summary>Activates the question.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizQuestion.Deactivate">
+            <summary>Deactivates the question.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizQuestion.TryReorder(System.Int32)">
+            <summary>Changes display order.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizQuestion.TryAddAnswerChoice(LearningPortal.Domain.Quizzes.QuizAnswerChoice)">
+            <summary>Adds an answer choice.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizQuestion.TryRemoveAnswerChoice(System.Guid)">
+            <summary>Removes an answer choice.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Quizzes.QuizQuestion.HasValidAnswers(System.Collections.Generic.IReadOnlyCollection{LearningPortal.Domain.Quizzes.QuizAnswerChoice})">
+            <summary>Validates choices for the configured type.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Quizzes.QuizStatus">
+            <summary>Defines the quiz lifecycle.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Quizzes.QuizStatus.Draft">
+            <summary>Quiz is editable and unavailable to learners.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Quizzes.QuizStatus.Published">
+            <summary>Quiz is available to eligible learners.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Quizzes.QuizStatus.Archived">
+            <summary>Quiz is retained but unavailable for new attempts.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.IAiTutorConversationRepository">
+            <summary>Provides tutor conversation persistence.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IAiTutorConversationRepository.GetAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>Gets a conversation graph.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IAiTutorConversationRepository.GetByStudentAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Lists learner conversations.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IAiTutorConversationRepository.AddAsync(LearningPortal.Domain.AiTutor.AiTutorConversation,System.Threading.CancellationToken)">
+            <summary>Adds a conversation.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.ICourseRepository">
+            <summary>Defines persistence operations required by course management.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ICourseRepository.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Returns a tracked course by identifier.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ICourseRepository.GetByIdReadOnlyAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Returns an untracked course by identifier.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ICourseRepository.GetPublishedBySlugAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Returns an untracked published course by slug.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ICourseRepository.GetByIdsReadOnlyAsync(System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <summary>Returns untracked courses matching identifiers.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ICourseRepository.GetPageAsync(System.String,System.Nullable{LearningPortal.Domain.Courses.CourseStatus},System.Nullable{System.Guid},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>Returns a filtered course page and total matching count.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ICourseRepository.SlugExistsAsync(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>Determines whether a non-deleted course owns a normalized slug.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ICourseRepository.AddAsync(LearningPortal.Domain.Courses.Course,System.Threading.CancellationToken)">
+            <summary>Adds a course.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ICourseRepository.Remove(LearningPortal.Domain.Courses.Course)">
+            <summary>Marks a course for soft deletion.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ICourseRepository.SetOriginalRowVersion(LearningPortal.Domain.Courses.Course,System.Byte[])">
+            <summary>Sets the client-provided original rowversion used for concurrency checks.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.IEnrollmentRepository">
+            <summary>Defines enrollment persistence operations.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IEnrollmentRepository.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a tracked enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IEnrollmentRepository.GetByIdReadOnlyAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets an untracked enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IEnrollmentRepository.GetByCourseAndStudentAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a student's enrollment for a course.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IEnrollmentRepository.GetStudentPageAsync(System.Guid,System.Nullable{LearningPortal.Domain.Enrollments.EnrollmentStatus},System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>Gets a filtered student enrollment page.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IEnrollmentRepository.GetCoursePageAsync(System.Guid,System.Nullable{LearningPortal.Domain.Enrollments.EnrollmentStatus},System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>Gets a filtered course enrollment page.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IEnrollmentRepository.GetActiveCourseIdsAsync(System.Guid,System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <summary>Gets active enrollment course identifiers for a student.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IEnrollmentRepository.GetActiveByStudentAndCoursesAsync(System.Guid,System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <summary>Gets active enrollments for selected courses.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IEnrollmentRepository.AddAsync(LearningPortal.Domain.Enrollments.Enrollment,System.Threading.CancellationToken)">
+            <summary>Adds an enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IEnrollmentRepository.SetOriginalRowVersion(LearningPortal.Domain.Enrollments.Enrollment,System.Byte[])">
+            <summary>Sets the expected concurrency token.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.IInstructorEligibilityRepository">
+            <summary>Provides instructor eligibility persistence operations.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IInstructorEligibilityRepository.GetAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets tracked eligibility for one user and skill.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IInstructorEligibilityRepository.GetByUserAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Lists a user's eligibility read-only.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IInstructorEligibilityRepository.GetEligibleBySkillAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Lists eligible records for a skill read-only.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IInstructorEligibilityRepository.IsEligibleAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Checks current eligibility.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IInstructorEligibilityRepository.GetBestAttemptAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets the user's best submitted qualifying attempt for a skill.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IInstructorEligibilityRepository.AddAsync(LearningPortal.Domain.Skills.InstructorEligibility,System.Threading.CancellationToken)">
+            <summary>Adds eligibility.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.ILessonProgressRepository">
+            <summary>Provides persistence operations needed by learner progress.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonProgressRepository.GetByEnrollmentAndLessonAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets tracked progress for an enrollment lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonProgressRepository.GetByEnrollmentAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets read-only progress records for an enrollment.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonProgressRepository.AddAsync(LearningPortal.Domain.Learning.LessonProgress,System.Threading.CancellationToken)">
+            <summary>Adds a new progress record.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonProgressRepository.SetOriginalRowVersion(LearningPortal.Domain.Learning.LessonProgress,System.Byte[])">
+            <summary>Sets the concurrency original value.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.ILessonRepository">
+            <summary>Defines lesson-management persistence operations.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a tracked lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.GetByIdReadOnlyAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a read-only lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.GetPublishedByCourseAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets published lessons for a course in display order.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.GetPublishedByCoursesAsync(System.Collections.Generic.IReadOnlyCollection{System.Guid},System.Threading.CancellationToken)">
+            <summary>Gets published lessons for selected courses.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.GetPageAsync(System.Nullable{System.Guid},System.String,System.Int32,System.Int32,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>Gets a filtered page.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.OrderExistsAsync(System.Guid,System.Int32,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>Checks active course order uniqueness.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.AddAsync(LearningPortal.Domain.Lessons.Lesson,System.Threading.CancellationToken)">
+            <summary>Adds a lesson.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.Remove(LearningPortal.Domain.Lessons.Lesson)">
+            <summary>Removes a lesson through soft delete.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.SetOriginalRowVersion(LearningPortal.Domain.Lessons.Lesson,System.Byte[])">
+            <summary>Sets the client concurrency value.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ILessonRepository.MoveAsync(System.Guid,System.Int32,System.Byte[],System.Threading.CancellationToken)">
+            <summary>Atomically swaps a lesson with a target order.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.LessonMoveResult">
+            <summary>Describes an atomic lesson reorder result.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Repositories.LessonMoveResult.Moved">
+            <summary>Move completed.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Repositories.LessonMoveResult.NotFound">
+            <summary>Lesson was missing.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Repositories.LessonMoveResult.InvalidOrder">
+            <summary>Target order was invalid.</summary>
+        </member>
+        <member name="F:LearningPortal.Domain.Repositories.LessonMoveResult.ConcurrencyConflict">
+            <summary>Lesson changed concurrently.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.IQuizAttemptRepository">
+            <summary>Provides owned quiz-attempt persistence operations.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizAttemptRepository.GetByIdAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>Gets an attempt and answer snapshots.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizAttemptRepository.GetActiveAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets the student's active attempt for a quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizAttemptRepository.GetByQuizAndStudentAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a student's quiz attempts.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizAttemptRepository.CountAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets the number of started attempts.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizAttemptRepository.HasPassedAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>Checks whether an enrollment passed a quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizAttemptRepository.AddAsync(LearningPortal.Domain.Quizzes.QuizAttempt,System.Threading.CancellationToken)">
+            <summary>Adds an attempt.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.IQuizRepository">
+            <summary>Provides quiz persistence operations.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizRepository.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a tracked quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizRepository.GetByIdReadOnlyAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a read-only quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizRepository.GetGraphAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets a quiz and ordered authoring graph.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizRepository.GetByCourseAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets read-only course quizzes.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizRepository.GetRequiredPublishedByCourseAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Gets required published quizzes for course completion.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizRepository.ExistsAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>Checks quiz existence.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizRepository.AddAsync(LearningPortal.Domain.Quizzes.Quiz,System.Threading.CancellationToken)">
+            <summary>Adds a quiz.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IQuizRepository.SetOriginalRowVersion(LearningPortal.Domain.Quizzes.Quiz,System.Byte[])">
+            <summary>Sets optimistic concurrency state.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.IRepository`1">
+            <summary>Defines asynchronous persistence operations for an aggregate.</summary>
+            <typeparam name="TEntity">The aggregate entity type.</typeparam>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IRepository`1.ListAsync(System.Threading.CancellationToken)">
+            <summary>Returns all entities without tracking.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IRepository`1.AddAsync(`0,System.Threading.CancellationToken)">
+            <summary>Adds an entity to the current unit of work.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.ISkillRepository">
+            <summary>Provides skill persistence operations.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ISkillRepository.GetByIdAsync(System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>Gets an active skill by identifier.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ISkillRepository.GetBySlugAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Gets a skill by normalized slug.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ISkillRepository.GetByNameAsync(System.String,System.Threading.CancellationToken)">
+            <summary>Gets a skill by its preserved display name.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ISkillRepository.GetActiveAsync(System.Threading.CancellationToken)">
+            <summary>Lists active skills.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.ISkillRepository.AddAsync(LearningPortal.Domain.Skills.Skill,System.Threading.CancellationToken)">
+            <summary>Adds a skill.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Repositories.IUnitOfWork">
+            <summary>Coordinates atomic persistence of aggregate changes.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Repositories.IUnitOfWork.SaveChangesAsync(System.Threading.CancellationToken)">
+            <summary>Persists all pending changes.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Skills.InstructorEligibility">
+            <summary>Records a user's highest earned qualification for one skill.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.InstructorEligibility.UserId">
+            <summary>Gets the qualified user.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.InstructorEligibility.SkillId">
+            <summary>Gets the qualified skill.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.InstructorEligibility.QualifyingQuizId">
+            <summary>Gets the quiz that produced the best score.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.InstructorEligibility.BestPercentage">
+            <summary>Gets the highest qualifying percentage.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.InstructorEligibility.QualifiedAtUtc">
+            <summary>Gets when qualification was first earned.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.InstructorEligibility.IsEligible">
+            <summary>Gets whether the qualification remains active.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Skills.InstructorEligibility.Create(System.Guid,System.Guid,System.Guid,System.Decimal,System.DateTimeOffset)">
+            <summary>Creates a qualification from a qualifying submitted result.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Skills.InstructorEligibility.TryUpdateBest(System.Guid,System.Decimal)">
+            <summary>Updates only when a higher qualifying result is supplied.</summary>
+        </member>
+        <member name="T:LearningPortal.Domain.Skills.Skill">
+            <summary>Represents a stable learning and instructor-qualification skill.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.Skill.Name">
+            <summary>Gets the display name.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.Skill.Slug">
+            <summary>Gets the normalized stable code.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.Skill.Description">
+            <summary>Gets the optional description.</summary>
+        </member>
+        <member name="P:LearningPortal.Domain.Skills.Skill.IsActive">
+            <summary>Gets whether the skill may be used for new qualifications.</summary>
+        </member>
+        <member name="M:LearningPortal.Domain.Skills.Skill.Create(System.String,System.String)">
+            <summary>Creates an active skill.</summary>
+        </member>
+    </members>
+</doc>

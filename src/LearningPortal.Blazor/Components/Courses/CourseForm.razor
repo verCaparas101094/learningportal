@@ -8,7 +8,7 @@
     <div class="form-grid">
         <label>
             <span>Title</span>
-            <InputText @bind-Value="_model.Title" autocomplete="off" />
+            <InputText @bind-Value="_model.Title" data-testid="course-title" autocomplete="off" />
             <ValidationMessage For="() => _model.Title" />
         </label>
 
@@ -39,8 +39,14 @@
         @if (ShowInstructorId)
         {
             <label class="full-width">
-                <span>Instructor ID</span>
-                <InputText @bind-Value="_instructorId" autocomplete="off" />
+                <span>Instructor</span>
+                <select @bind="_instructorId">
+                    <option value="">Select an active instructor</option>
+                    @foreach (var instructor in InstructorOptions)
+                    {
+                        <option value="@instructor.Id">@instructor.DisplayName (@instructor.Email)</option>
+                    }
+                </select>
                 @if (!string.IsNullOrWhiteSpace(_instructorError))
                 {
                     <span class="field-error">@_instructorError</span>
@@ -62,6 +68,7 @@
             Cancel
         </button>
         <button class="button button-primary"
+                data-testid="course-save"
                 type="submit"
                 disabled="@IsSubmitting">
             @(IsSubmitting ? "Saving…" : SubmitText)
@@ -82,6 +89,10 @@
     /// <summary>Gets or sets whether administrators may select ownership.</summary>
     [Parameter]
     public bool ShowInstructorId { get; set; }
+
+    /// <summary>Gets or sets the active instructors available during course creation.</summary>
+    [Parameter]
+    public IReadOnlyList<UserResponse> InstructorOptions { get; set; } = [];
 
     /// <summary>Gets or sets whether submission is processing.</summary>
     [Parameter]

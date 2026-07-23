@@ -1,4 +1,5 @@
 @page "/learn/{CourseSlug}/lessons/{LessonId:guid}"
+@attribute [Authorize]
 @rendermode InteractiveServer
 @inject LearningPortalApiClient ApiClient
 @inject NavigationManager Navigation
@@ -18,11 +19,36 @@ else if (_player is not null)
             else if (_player.LessonType == "Pdf" && _player.SourceUrl is not null) { <LessonPdfViewer SourceUrl="@_player.SourceUrl" /> }
             else if (_player.SourceUrl is not null) { <a class="button button-primary" href="@_player.SourceUrl" target="_blank" rel="noopener noreferrer">Open external resource</a> }
             <div class="course-actions">
-                <a class="button" href="@($"/ai-tutor?courseId={_player.CourseId:D}&lessonId={_player.LessonId:D}")">Ask about this lesson</a>
+                <a class="button" data-testid="start-ai-tutor"
+                   href="@($"/ai-tutor?courseId={_player.CourseId:D}&lessonId={_player.LessonId:D}")">Ask about this lesson</a>
                 @if (_player.PreviousLessonId is Guid previous) { <a class="button" href="@($"/learn/{CourseSlug}/lessons/{previous}")">Previous</a> }
-                <button class="button button-primary" disabled="@_completing" @onclick="CompleteAsync">Mark complete</button>
-                @if (_player.NextLessonId is Guid next) { <a class="button" href="@($"/learn/{CourseSlug}/lessons/{next}")">Next</a> }
+                <button class="button button-primary" data-testid="complete-lesson"
+                        disabled="@_completing" @onclick="CompleteAsync">Mark complete</button>
+                @if (_player.NextLessonId is Guid next) { <a class="button" data-testid="next-lesson" href="@($"/learn/{CourseSlug}/lessons/{next}")">Next</a> }
             </div>
+            @if (_quizzes.Count > 0)
+            {
+                <section aria-labelledby="course-assessments-heading">
+                    <h2 id="course-assessments-heading">Course assessments</h2>
+                    @foreach (var quiz in _quizzes)
+                    {
+                        <div class="course-actions">
+                            <span>
+                                <strong>@quiz.Title</strong>
+                                @if (quiz.IsRequired)
+                                {
+                                    <StatusBadge Text="Required" Tone="primary" />
+                                }
+                            </span>
+                            <a class="button button-primary"
+                               data-testid="start-quiz"
+                               href="@($"/learn/{CourseSlug}/quizzes/{quiz.Id:D}")">
+                                Open quiz
+                            </a>
+                        </div>
+                    }
+                </section>
+            }
         </section>
     </div>
 }
@@ -30,11 +56,20 @@ else if (_player is not null)
 @code {
     [Parameter] public string CourseSlug { get; set; } = string.Empty;
     [Parameter] public Guid LessonId { get; set; }
-    private LessonPlayerResponse? _player; private string? _error; private bool _loading = true; private bool _completing;
+    private LessonPlayerResponse? _player;
+    private IReadOnlyList<QuizListItemResponse> _quizzes = [];
+    private string? _error;
+    private bool _loading = true;
+    private bool _completing;
     protected override async Task OnParametersSetAsync()
     {
         _loading = true; _error = null;
-        try { _player = await ApiClient.GetLessonPlayerAsync(CourseSlug, LessonId); await ApiClient.AccessLessonAsync(_player.EnrollmentId, LessonId); }
+        try
+        {
+            _player = await ApiClient.GetLessonPlayerAsync(CourseSlug, LessonId);
+            await ApiClient.AccessLessonAsync(_player.EnrollmentId, LessonId);
+            _quizzes = await ApiClient.GetCourseQuizzesForLearnerAsync(_player.CourseId);
+        }
         catch (ApiProblemException exception) { _error = exception.Message; }
         finally { _loading = false; }
     }

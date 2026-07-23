@@ -21,13 +21,14 @@
             <input type="hidden" name="returnUrl" value="@SafeReturnUrl" />
             <label>
                 Email
-                <input name="email" type="email" autocomplete="username" required autofocus />
+                <input name="email" type="email" autocomplete="username"
+                       data-testid="login-email" required autofocus />
             </label>
             <label>
                 Password
                 <span class="password-field">
                     <input name="password" type="@(_showPassword ? "text" : "password")"
-                           autocomplete="current-password" required />
+                           autocomplete="current-password" data-testid="login-password" required />
                     <button type="button" class="button" @onclick="TogglePassword">
                         @(_showPassword ? "Hide" : "Show")
                     </button>
@@ -37,11 +38,11 @@
                 <input name="rememberMe" type="checkbox" value="true" />
                 Keep me signed in
             </label>
-            <button class="button button-primary" type="submit">Sign in</button>
+            <button class="button button-primary" data-testid="login-submit" type="submit">Sign in</button>
         </form>
 
         <p class="authentication-footer">
-            Need an account? <a href="@RegisterUrl">Registration information</a>
+            Need an account? <a data-testid="register-link" href="@RegisterUrl">Register</a>
         </p>
     </AppCard>
 </div>

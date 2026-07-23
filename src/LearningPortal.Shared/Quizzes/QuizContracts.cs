@@ -20,6 +20,15 @@ public sealed record QuizResponse(
     bool IsRequired,
     string Status,
     IReadOnlyList<QuizQuestionResponse> Questions);
+public sealed record QuizListItemResponse(
+    Guid Id,
+    Guid CourseId,
+    Guid? LessonId,
+    string Title,
+    string Description,
+    decimal PassingPercentage,
+    int? MaximumAttempts,
+    bool IsRequired);
 public sealed record QuizAdminChoiceResponse(Guid Id, string Text, bool IsCorrect, int Order);
 public sealed record QuizAdminQuestionResponse(
     Guid Id,

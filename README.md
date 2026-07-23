@@ -1,5 +1,8 @@
 # LearningPortal
 
+Browser workflow setup and the full manual acceptance checklist are documented
+in [docs/END_TO_END_TESTING.md](docs/END_TO_END_TESTING.md).
+
 Enterprise Learning Portal foundation built on .NET 10, ASP.NET Core Minimal APIs, Blazor Web App, EF Core, SQL Server, and ASP.NET Identity.
 
 ## Architecture
